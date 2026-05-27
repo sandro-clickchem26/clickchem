@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MateriaPrima {
+  id                  String   @id @default(cuid())
+  nome_comercial      String
+  nome_quimico        String
+  numero_cas          String?
+  inci_name           String?
+  categoria           String
+  subcategoria        String
+  aparencia           String?
+  ph_solucao          String?
+  densidade           String?
+  solubilidade_agua   String?
+  faixa_uso_tipica    String?
+  funcao_principal    String
+  sinergias           String   @default("[]")
+  incompatibilidades  String   @default("[]")
+  ph_estabilidade     String?
+  restricoes_anvisa   String?
+  restricoes_reach    String?
+  nivel_toxicidade    String   @default("medio")
+  biodegradabilidade  String?
+  origem              String   @default("petroleo")
+  certificacoes       String   @default("[]")
+  fornecedores        String   @default("[]")
+  custo_min           Float?
+  custo_max           Float?
+  disponibilidade     String   @default("media")
+  aplicacoes_tipicas  String   @default("[]")
+  notas_tecnicas      String?
+  adicionada_usuario  Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Formulacao {
+  id                  String   @id @default(cuid())
+  userId              String?
+  nome                String
+  descricao           String?
+  segmento            String
+  status              String   @default("rascunho")
+  composicao          String   @default("{}")
+  analise_critica     String   @default("{}")
+  processo_fabricacao String?
+  controle_qualidade  String?
+  riscos_tecnicos     String?
+  custo_estimado      Float?
+  score_sustentab     Int?
+  notas               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model HistoricoConversa {
+  id            String   @id @default(cuid())
+  formulacaoId  String?
+  role          String
+  content       String
+  metadata      String?
+  createdAt     DateTime @default(now())
+}
+
+model FormulaProprietaria {
+  id                String   @id @default(cuid())
+  nome_interno      String
+  segmento          String
+  aplicacao         String
+  composicao        String   @default("[]")
+  ph_final          String?
+  viscosidade       String?
+  processo          String?
+  performance_chave String?
+  tags              String?
+  ativa             Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  senha     String
+  nome      String
+  role      String   @default("tester")
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

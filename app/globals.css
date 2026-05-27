@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg-primary: #0A1628;
+  --color-bg-secondary: #1B3A6B;
+  --color-accent: #2563EB;
+  --color-gold: #D4A017;
+  --color-gold-light: #F0C040;
+  --color-success: #10B981;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+  --color-text-secondary: #94A3B8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  background-color: #0A1628;
+  color: #ffffff;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+code, pre {
+  font-family: var(--font-mono), 'Courier New', monospace;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0A1628; }
+::-webkit-scrollbar-thumb { background: #1B3A6B; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2563EB; }
+
+@keyframes spin-molecule {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(212, 160, 23, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(212, 160, 23, 0.8); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-spin-molecule { animation: spin-molecule 2s linear infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-fade-in-up { animation: fadeInUp 0.4s ease-out; }
+
+*:focus-visible {
+  outline: 2px solid #D4A017;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
