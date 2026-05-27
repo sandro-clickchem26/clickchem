@@ -1,6 +1,5 @@
 'use client'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 
 interface Props {
@@ -12,13 +11,13 @@ export function MobileHeader({ menuOpen, onToggle }: Props) {
   return (
     <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-[#0d1f3c] border-b border-[#1B3A6B]/60 flex items-center justify-between px-4 h-14">
       <Link href="/" className="flex items-center gap-2.5">
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src="/logo.png"
           alt="Click Chem"
           width={36}
           height={36}
           className="rounded-full object-cover"
-          priority
         />
         <span className="text-base font-bold text-white">Click Chem</span>
       </Link>

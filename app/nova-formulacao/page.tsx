@@ -186,10 +186,22 @@ export default function NovaFormulacao() {
   async function refinar(instrucoes: string) {
     setLoading(true)
     try {
+      const isAutorizacao = instrucoes === 'usuario_autoriza_composicao_sem_referencia'
+      const payload: Record<string, unknown> = {
+        ...form,
+        materias_proibidas: mpProib,
+        materias_obrigatorias: mpObrig,
+        formulacao_anterior: resultado,
+      }
+      if (isAutorizacao) {
+        payload.usuario_autoriza_composicao_sem_referencia = true
+      } else {
+        payload.refinamento = instrucoes
+      }
       const res = await fetch('/api/formulacao', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, materias_proibidas: mpProib, materias_obrigatorias: mpObrig, refinamento: instrucoes, formulacao_anterior: resultado }),
+        body: JSON.stringify(payload),
       })
       setResultado(await res.json())
     } catch (err) {
@@ -211,6 +223,13 @@ export default function NovaFormulacao() {
     </div>
   )
 
+  if (loading) return (
+    <div>
+      {titulo}
+      <MoleculeLoader message="Gerando formulação com análise crítica..." />
+    </div>
+  )
+
   if (resultado) return (
     <div>
       {titulo}
@@ -222,13 +241,6 @@ export default function NovaFormulacao() {
         ← Nova formulação
       </button>
       <FormulacaoResult data={resultado} onSalvar={salvar} onRelatorio={gerarPDF} onRefinar={refinar} />
-    </div>
-  )
-
-  if (loading) return (
-    <div>
-      {titulo}
-      <MoleculeLoader message="Gerando formulação com análise crítica..." />
     </div>
   )
 

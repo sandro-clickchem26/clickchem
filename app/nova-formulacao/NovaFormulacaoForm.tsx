@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input, Textarea, Select } from '@/components/ui/Input'
 import { MoleculeLoader } from '@/components/MoleculeLoader'
@@ -114,6 +114,11 @@ export default function NovaFormulacaoForm() {
   // Ref para manter o valor mais recente do form em closures
   const formRef = useRef(form)
 
+  // Sempre sincronizar o ref com o state
+  useEffect(() => {
+    formRef.current = form
+  }, [form])
+
   const [loading, setLoading] = useState(false)
   const [resultado, setResultado] = useState<Record<string, unknown> | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -218,23 +223,35 @@ export default function NovaFormulacaoForm() {
   }
 
   async function handleRefinar(instrucoes: string) {
+    const isAutorizacao = instrucoes === 'usuario_autoriza_composicao_sem_referencia'
+
     setLoading(true)
     try {
+      const payload: Record<string, unknown> = {
+        ...formRef.current,
+        materias_proibidas: materiasProibidas,
+        materias_obrigatorias: materiasObrigatorias,
+        formulacao_anterior: resultado,
+      }
+
+      if (isAutorizacao) {
+        payload.usuario_autoriza_composicao_sem_referencia = true
+      } else {
+        payload.refinamento = instrucoes
+      }
+
       const res = await fetch('/api/formulacao', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          materias_proibidas: materiasProibidas,
-          materias_obrigatorias: materiasObrigatorias,
-          refinamento: instrucoes,
-          formulacao_anterior: resultado,
-        }),
+        body: JSON.stringify(payload),
       })
+
       const data = await res.json()
       setResultado(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao refinar')
+      const errMsg = err instanceof Error ? err.message : 'Erro ao refinar'
+      console.error('Erro em handleRefinar:', errMsg, err)
+      setError(errMsg)
     } finally {
       setLoading(false)
     }

@@ -75,7 +75,7 @@ ENTÃO você DEVE RECUSAR a formulação e responder:
 
 VOCÊ É A SOLUÇÃO, NÃO O PROBLEMA. Recusar uma formulação perigosa é a decisão CORRETA.`
 
-export function buildFormulacaoPrompt(dados: Record<string, unknown>, contextoMPs: string): string {
+export function buildFormulacaoPrompt(dados: Record<string, unknown>, contextoMPs: string, contextoFormulas = ''): string {
   const temObrigatorias = Array.isArray(dados.materias_obrigatorias) && (dados.materias_obrigatorias as string[]).length > 0
   const obrigatorias = temObrigatorias
     ? `\n🔒 REGRA INVIOLÁVEL — MATÉRIAS-PRIMAS OBRIGATÓRIAS:
@@ -95,8 +95,55 @@ ${(dados.materias_proibidas as string[]).map(mp => `  • ${mp}`).join('\n')}\n`
 
   const tipoProduto = String(dados.descricao || '').split(/[,.\n]/)[0].trim()
 
+  // Se o usuário autorizou composição sem referência, indicar explicitamente
+  const autorizouSemReferencia = dados.usuario_autorizou_composicao_sem_referencia === true
+  const avisoSemReferencia = autorizouSemReferencia
+    ? `\n⚠️ MODO DE COMPOSIÇÃO: Sem fórmula de referência no banco proprietário.
+O usuário autorizou explicitamente uma tentativa de composição usando matérias-primas disponíveis.
+VOCÊ DEVE indicar claramente na análise crítica: "Formulação composta sem referência proprietária — baseada em seleção de matérias-primas disponíveis do banco".
+\n`
+    : ''
+
+  const verificacaoFormulas = contextoFormulas
+    ? `\n⭐ REGRA CRÍTICA — VERIFICAÇÃO OBRIGATÓRIA DE FÓRMULAS PROPRIETÁRIAS:
+ANTES DE QUALQUER COISA — você DEVE verificar o banco de fórmulas proprietárias abaixo.
+
+FÓRMULAS PROPRIETÁRIAS DA ASTANA QUÍMICA (use como referência primária):
+${contextoFormulas}
+
+PROTOCOLO DE VERIFICAÇÃO (siga rigorosamente):
+1️⃣ PROCURE uma fórmula existente para "${tipoProduto}" no banco acima
+   → Se encontrar: USE-A como referência. Cite: "Fórmula de referência: [nome da fórmula encontrada]"
+   → Se NÃO encontrar: PROSSIGA para o próximo passo
+
+2️⃣ Se NENHUMA fórmula de referência existir para "${tipoProduto}":
+   ❌ VOCÊ DEVE RECUSAR DE IMEDIATO e responder:
+
+{
+  "analise_critica": {
+    "viabilidade": "verificacao_recusada",
+    "motivo_recusa": "Não há fórmula de referência no banco de fórmulas proprietárias para '${tipoProduto}'. Conforme protocolo Modo Fechado, sem referência explícita no banco, uma composição só pode ser tentada com consentimento explícito do usuário. Solicite autorização para prosseguir com composição a partir das matérias-primas disponíveis.",
+    "informacoes_faltantes": ["Fórmula de referência para ${tipoProduto}"],
+    "proximos_passos": ["Usuário decide se deseja prosseguir com composição sem referência de fórmula proprietária"]
+  },
+  "formulacao": null,
+  "processo_fabricacao": null,
+  "controle_qualidade": null,
+  "riscos_tecnicos": [],
+  "sustentabilidade": null,
+  "proximos_passos": ["Aguardar consentimento do usuário para prosseguir com composição"],
+  "classificacao_regulatoria": "Não aplicável — aguardando verificação"
+}
+
+3️⃣ SE O USUÁRIO AUTORIZAR explicitamente ("Prossiga mesmo sem referência de fórmula") ou SE A REQUISIÇÃO CONTIVER "usuario_autoriza_composicao_sem_referencia: true":
+   ✅ ENTÃO você pode prosseguir com a composição usando as matérias-primas disponíveis (veja banco de MPs abaixo)
+   ⚠️ Mas SEMPRE indique claramente na análise crítica: "Formulação composta sem referência proprietária — baseada em seleção de matérias-primas disponíveis"
+
+RESUMO: Verificação de referência SEMPRE vem primeiro. Sem referência = Sem composição (a menos que usuário autorize explicitamente).\n`
+    : ''
+
   return `DADOS DA SOLICITAÇÃO:
-${JSON.stringify(dados, null, 2)}
+${JSON.stringify(dados, null, 2)}${verificacaoFormulas}${avisoSemReferencia}
 
 🔒 REGRA ABSOLUTA E INVIOLÁVEL — TIPO DE PRODUTO:
 O usuário solicitou: "${tipoProduto}"
