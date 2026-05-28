@@ -192,11 +192,22 @@ export default function NovaFormulacaoForm() {
           materias_obrigatorias: materiasObrigatorias,
         }),
       })
+      const raw = await res.text()
       if (!res.ok) {
-        const errData = await res.json()
-        throw new Error(errData.error || 'Erro ao gerar formulação')
+        let mensagem = 'Erro ao gerar formulação. Tente novamente.'
+        try {
+          const parsed = JSON.parse(raw)
+          if (parsed?.error) mensagem = String(parsed.error)
+        } catch {
+          if (res.status === 504 || res.status === 502)
+            mensagem = 'A geração demorou demais. Tente novamente em instantes.'
+          else if (res.status >= 500)
+            mensagem = 'Erro temporário no servidor. Tente novamente.'
+        }
+        throw new Error(mensagem)
       }
-      const data = await res.json()
+      let data: Record<string, unknown>
+      try { data = JSON.parse(raw) } catch { throw new Error('Resposta incompleta do servidor. Tente novamente.') }
       setResultado(data)
       try { localStorage.removeItem(STORAGE_KEY) } catch {}
     } catch (err) {
