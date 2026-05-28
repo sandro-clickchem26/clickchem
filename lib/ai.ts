@@ -219,11 +219,36 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const descricao = String(dados.descricao || '')
   const proibidas = Array.isArray(dados.materias_proibidas) ? (dados.materias_proibidas as string[]) : []
   const userObrigatorias = Array.isArray(dados.materias_obrigatorias) ? (dados.materias_obrigatorias as string[]) : []
+  const usuarioAutorizaComposicaoSemReferencia = dados.usuario_autoriza_composicao_sem_referencia === true
 
   const [contexto, proprietaryResult] = await Promise.all([
     buildMPContext(segmento, proibidas),
     buildProprietaryContext(segmento, descricao),
   ])
+
+  // VERIFICAÇÃO OBRIGATÓRIA DE REFERÊNCIA (Modo Fechado)
+  // Sem fórmula de referência no banco proprietário E sem autorização explícita: RECUSAR
+  const temMatchForte = proprietaryResult.mandatoryMPs.length > 0
+
+  if (!temMatchForte && !usuarioAutorizaComposicaoSemReferencia) {
+    return {
+      analise_critica: {
+        viabilidade: 'verificacao_recusada',
+        motivo_recusa: `Não há fórmula de referência no banco de fórmulas proprietárias para "${descricao}". Conforme protocolo Modo Fechado, uma composição só pode ser tentada com consentimento explícito do usuário. Para prosseguir, forneça a autorização: usuario_autoriza_composicao_sem_referencia: true`,
+        informacoes_faltantes: [`Fórmula de referência para ${descricao}`],
+        pontos_de_atencao: ['Não há fórmula de referência compatível no banco'],
+        hipoteses_a_validar: [],
+        abordagem_quimica: '',
+      },
+      formulacao: null,
+      processo_fabricacao: null,
+      controle_qualidade: null,
+      riscos_tecnicos: [],
+      sustentabilidade: null,
+      proximos_passos: ['Usuário decide se deseja prosseguir com composição sem referência de fórmula'],
+      classificacao_regulatoria: 'Não aplicável — aguardando verificação',
+    }
+  }
 
   // Quando há match forte no banco proprietário e o usuário não especificou MPs obrigatórias,
   // injeta as MPs da fórmula aprovada como obrigatórias no prompt — ativa a regra INVIOLÁVEL
