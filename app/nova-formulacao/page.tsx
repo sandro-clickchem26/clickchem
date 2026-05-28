@@ -146,9 +146,30 @@ export default function NovaFormulacao() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, materias_proibidas: mpProib, materias_obrigatorias: mpObrig }),
       })
-      if (!res.ok) throw new Error((await res.json()).error || 'Erro ao gerar formulação')
-      const data = await res.json()
-      setResultado(data)
+      // Lê o corpo como texto primeiro (funciona mesmo se não for JSON)
+      const raw = await res.text()
+      if (!res.ok) {
+        // Tenta extrair mensagem de erro JSON; se falhar, usa mensagem amigável
+        let mensagem = 'Erro ao gerar formulação. Tente novamente.'
+        try {
+          const parsed = JSON.parse(raw)
+          if (parsed?.error) mensagem = String(parsed.error)
+        } catch {
+          // Resposta não é JSON — provavelmente timeout do servidor (504) ou erro de gateway
+          if (res.status === 504 || res.status === 502) {
+            mensagem = 'A geração demorou demais e o servidor encerrou a conexão. Tente novamente em alguns instantes.'
+          } else if (res.status >= 500) {
+            mensagem = 'Erro temporário no servidor. Tente novamente em alguns instantes.'
+          }
+        }
+        throw new Error(mensagem)
+      }
+      // Resposta OK: parseia como JSON com fallback amigável
+      try {
+        setResultado(JSON.parse(raw))
+      } catch {
+        throw new Error('A resposta do servidor está incompleta. Tente gerar novamente.')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado')
     } finally {
@@ -206,7 +227,27 @@ export default function NovaFormulacao() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      setResultado(await res.json())
+      // Lê o corpo como texto primeiro (funciona mesmo se não for JSON)
+      const raw = await res.text()
+      if (!res.ok) {
+        let mensagem = 'Erro ao refinar formulação. Tente novamente.'
+        try {
+          const parsed = JSON.parse(raw)
+          if (parsed?.error) mensagem = String(parsed.error)
+        } catch {
+          if (res.status === 504 || res.status === 502) {
+            mensagem = 'A geração demorou demais e o servidor encerrou a conexão. Tente novamente em alguns instantes.'
+          } else if (res.status >= 500) {
+            mensagem = 'Erro temporário no servidor. Tente novamente em alguns instantes.'
+          }
+        }
+        throw new Error(mensagem)
+      }
+      try {
+        setResultado(JSON.parse(raw))
+      } catch {
+        throw new Error('A resposta do servidor está incompleta. Tente novamente.')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao refinar')
     } finally {
