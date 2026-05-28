@@ -32,7 +32,7 @@ interface FormulaDB extends FormulaPreview {
   composicao: { materia_prima: string; percentual: number; funcao: string }[]
 }
 
-type Aba = 'importar' | 'manual' | 'cadastradas'
+type Aba = 'importar' | 'manual' | 'cadastradas' | 'documentos'
 
 // ─── LOGIN ──────────────────────────────────────────────────────────────────
 function Login({ onLogin }: { onLogin: (pin: string) => void }) {
@@ -814,6 +814,224 @@ function ListaCadastradas({ pin, formulas, onAtualizar }: { pin: string; formula
   )
 }
 
+// ─── DOCS CIENTÍFICOS ────────────────────────────────────────────────────────
+interface DocCientifico {
+  id: string; titulo: string; autores?: string; ano?: number; fonte?: string
+  segmento: string; tags: string; resumo?: string; arquivo_nome?: string
+  ativo: boolean; createdAt: string
+}
+
+function DocsCientificos({ pin }: { pin: string }) {
+  const [docs, setDocs] = useState<DocCientifico[]>([])
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
+  const [sucesso, setSucesso] = useState<string | null>(null)
+  const [dragging, setDragging] = useState(false)
+  const [arquivo, setArquivo] = useState<File | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [form, setForm] = useState({
+    titulo: '', autores: '', ano: '', fonte: '', segmento: SEGMENTOS[0], tags: '', resumo: '',
+  })
+
+  const carregar = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/documentos', { headers: { 'x-admin-pin': pin } })
+      const data = await res.json()
+      setDocs(data.documentos || [])
+    } catch { /* ignore */ }
+    finally { setLoading(false) }
+  }, [pin])
+
+  useEffect(() => { carregar() }, [carregar])
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault(); setDragging(false)
+    const f = e.dataTransfer.files[0]
+    if (f) setArquivo(f)
+  }
+
+  async function enviar() {
+    if (!arquivo) { setErro('Selecione um arquivo'); return }
+    if (!form.titulo.trim()) { setErro('Título é obrigatório'); return }
+    setUploading(true); setErro(null); setSucesso(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', arquivo)
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v))
+      const res = await fetch('/api/admin/documentos/upload', {
+        method: 'POST', headers: { 'x-admin-pin': pin }, body: fd,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setSucesso(`"${form.titulo}" importado com sucesso!`)
+      setArquivo(null)
+      setForm({ titulo: '', autores: '', ano: '', fonte: '', segmento: SEGMENTOS[0], tags: '', resumo: '' })
+      carregar()
+    } catch (e) { setErro(e instanceof Error ? e.message : 'Erro ao enviar') }
+    finally { setUploading(false) }
+  }
+
+  async function toggleAtivo(id: string, ativo: boolean) {
+    await fetch('/api/admin/documentos', {
+      method: 'PATCH', headers: { 'x-admin-pin': pin, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ativo: !ativo }),
+    })
+    carregar()
+  }
+
+  async function excluir(id: string) {
+    if (!confirm('Excluir este documento?')) return
+    await fetch('/api/admin/documentos', {
+      method: 'DELETE', headers: { 'x-admin-pin': pin, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    carregar()
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Upload */}
+      <div>
+        <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <Upload size={14} className="text-blue-400" /> Adicionar Documento
+        </h3>
+
+        {/* Drop zone */}
+        <div
+          onDragOver={e => { e.preventDefault(); setDragging(true) }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+          onClick={() => inputRef.current?.click()}
+          className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all mb-4 ${dragging ? 'border-blue-400 bg-blue-500/10' : arquivo ? 'border-green-500/50 bg-green-500/5' : 'border-white/15 hover:border-white/30'}`}
+        >
+          <input ref={inputRef} type="file" accept=".pdf,.docx,.doc" className="hidden"
+            onChange={e => { if (e.target.files?.[0]) setArquivo(e.target.files[0]); e.target.value = '' }} />
+          {arquivo ? (
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle2 size={16} className="text-green-400" />
+              <span className="text-sm text-green-300">{arquivo.name}</span>
+              <button onClick={e => { e.stopPropagation(); setArquivo(null) }} className="text-gray-500 hover:text-red-400">
+                <X size={14} />
+              </button>
+            </div>
+          ) : (
+            <>
+              <FileText size={24} className="mx-auto mb-2 text-gray-600" />
+              <p className="text-sm text-gray-400">Arraste ou clique para selecionar</p>
+              <p className="text-xs text-gray-600 mt-1">PDF ou Word (.docx) — máx. 10MB</p>
+            </>
+          )}
+        </div>
+
+        {/* Metadados */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Título <span className="text-red-400">*</span></label>
+            <input value={form.titulo} onChange={e => setForm(p => ({ ...p, titulo: e.target.value }))}
+              placeholder="Ex: Biossolventes Terpênicos em Limpeza Industrial"
+              className="w-full bg-[#0A1628] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Segmento <span className="text-red-400">*</span></label>
+            <select value={form.segmento} onChange={e => setForm(p => ({ ...p, segmento: e.target.value }))}
+              className="w-full bg-[#0A1628] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+              {SEGMENTOS.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-gray-400 block mb-1">Autores</label>
+            <input value={form.autores} onChange={e => setForm(p => ({ ...p, autores: e.target.value }))}
+              placeholder="Ex: Silva, J. A.; Costa, M. B."
+              className="w-full bg-[#0A1628] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Ano</label>
+              <input type="number" value={form.ano} onChange={e => setForm(p => ({ ...p, ano: e.target.value }))}
+                placeholder="2024"
+                className="w-full bg-[#0A1628] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">Fonte</label>
+              <input value={form.fonte} onChange={e => setForm(p => ({ ...p, fonte: e.target.value }))}
+                placeholder="Journal / ABNT..."
+                className="w-full bg-[#0A1628] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500" />
+            </div>
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-xs text-gray-400 block mb-1">Tags (separadas por vírgula)</label>
+            <input value={form.tags} onChange={e => setForm(p => ({ ...p, tags: e.target.value }))}
+              placeholder="d-limoneno, biossolvente, terpeno, biodegradável"
+              className="w-full bg-[#0A1628] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500" />
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-xs text-gray-400 block mb-1">Resumo / Principais achados</label>
+            <textarea value={form.resumo} onChange={e => setForm(p => ({ ...p, resumo: e.target.value }))}
+              rows={3} placeholder="Descreva os principais achados e relevância para formulação..."
+              className="w-full bg-[#0A1628] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500 resize-none" />
+          </div>
+        </div>
+
+        {erro && <p className="text-red-400 text-xs mb-3 flex items-center gap-1"><AlertCircle size={12} />{erro}</p>}
+        {sucesso && <p className="text-green-400 text-xs mb-3 flex items-center gap-1"><CheckCircle2 size={12} />{sucesso}</p>}
+
+        <button onClick={enviar} disabled={uploading || !arquivo}
+          className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2">
+          {uploading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processando...</> : <><Upload size={14} /> Importar Documento</>}
+        </button>
+      </div>
+
+      {/* Lista */}
+      <div>
+        <h3 className="text-sm font-semibold text-white mb-3">
+          Documentos Cadastrados ({docs.filter(d => d.ativo).length} ativos)
+        </h3>
+        {loading ? (
+          <div className="text-center py-8 text-gray-500 text-sm">Carregando...</div>
+        ) : docs.length === 0 ? (
+          <div className="text-center py-8 text-gray-600 text-sm">Nenhum documento cadastrado ainda.</div>
+        ) : (
+          <div className="space-y-2">
+            {docs.map(doc => {
+              const tags = (() => { try { return JSON.parse(doc.tags) as string[] } catch { return [] } })()
+              return (
+                <div key={doc.id} className={`border rounded-xl px-4 py-3 transition-all ${doc.ativo ? 'border-blue-500/20 bg-blue-500/5' : 'border-white/5 opacity-50'}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-white truncate">{doc.titulo}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {[doc.autores, doc.ano, doc.fonte].filter(Boolean).join(' · ')}
+                        {doc.arquivo_nome && <span className="ml-2 text-gray-600">📎 {doc.arquivo_nome}</span>}
+                      </p>
+                      <p className="text-xs text-blue-400/70 mt-0.5">{doc.segmento}</p>
+                      {tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {tags.map((t, i) => <span key={i} className="text-xs px-1.5 py-0.5 bg-white/5 rounded text-gray-400">{t}</span>)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button onClick={() => toggleAtivo(doc.id, doc.ativo)}
+                        className={`text-xs flex items-center gap-1 transition-colors ${doc.ativo ? 'text-green-400 hover:text-yellow-400' : 'text-gray-500 hover:text-green-400'}`}>
+                        {doc.ativo ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                      </button>
+                      <button onClick={() => excluir(doc.id)} className="text-gray-600 hover:text-red-400 transition-colors">
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── PÁGINA PRINCIPAL ────────────────────────────────────────────────────────
 export default function AdminPage() {
   const [pin, setPin] = useState('')
@@ -869,7 +1087,8 @@ export default function AdminPage() {
         {([
           { id: 'importar', label: 'Importar Arquivo', icon: Upload },
           { id: 'manual', label: 'Cadastrar Manual', icon: Plus },
-          { id: 'cadastradas', label: `Cadastradas (${formulas.length})`, icon: FileText },
+          { id: 'cadastradas', label: `Formulações (${formulas.length})`, icon: FileText },
+          { id: 'documentos', label: 'Docs. Científicos', icon: FlaskConical },
         ] as { id: Aba; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -908,6 +1127,7 @@ export default function AdminPage() {
         {aba === 'importar' && <ImportarArquivo pin={pin} onImportou={() => { carregar(pin); setAba('cadastradas') }} />}
         {aba === 'manual' && <CadastroManual pin={pin} onSalvou={() => { carregar(pin); setAba('cadastradas') }} />}
         {aba === 'cadastradas' && <ListaCadastradas pin={pin} formulas={formulas} onAtualizar={() => carregar(pin)} />}
+        {aba === 'documentos' && <DocsCientificos pin={pin} />}
       </div>
     </div>
   )

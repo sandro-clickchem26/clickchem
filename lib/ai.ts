@@ -214,15 +214,50 @@ ${linhas}\n`
   }
 }
 
+async function buildDocumentosContext(segmento: string, descricao = ''): Promise<string> {
+  try {
+    const docs = await prisma.documentoCientifico.findMany({ where: { ativo: true } })
+    if (docs.length === 0) return ''
+
+    const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    const palavras = norm(descricao).split(/\s+/).filter(w => w.length > 3)
+
+    const comScore = docs.map(doc => {
+      let score = 0
+      const textoDoc = norm(`${doc.segmento} ${doc.titulo} ${doc.tags} ${doc.resumo || ''}`)
+      if (norm(doc.segmento).includes(norm(segmento)) || norm(segmento).includes(norm(doc.segmento))) score += 3
+      for (const kw of palavras) { if (textoDoc.includes(kw)) score += 1 }
+      try {
+        const tags = JSON.parse(doc.tags) as string[]
+        for (const tag of tags) { if (norm(descricao).includes(norm(tag))) score += 2 }
+      } catch { /* ignore */ }
+      return { doc, score }
+    }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 3)
+
+    if (comScore.length === 0) return ''
+
+    const linhas = comScore.map(({ doc }) => {
+      const trecho = doc.conteudo.slice(0, 1500).replace(/\s+/g, ' ').trim()
+      const ref = [doc.autores, doc.ano, doc.fonte].filter(Boolean).join(', ')
+      return `📄 "${doc.titulo}"${ref ? ` (${ref})` : ''}\n${trecho}`
+    }).join('\n\n---\n\n')
+
+    return `\n📚 DOCUMENTAÇÃO CIENTÍFICA RELEVANTE (banco interno Astana Química — use como embasamento técnico):\n${linhas}\n`
+  } catch {
+    return ''
+  }
+}
+
 export async function gerarFormulacao(dados: Record<string, unknown>) {
   const segmento = String(dados.segmento || '')
   const descricao = String(dados.descricao || '')
   const proibidas = Array.isArray(dados.materias_proibidas) ? (dados.materias_proibidas as string[]) : []
   const userObrigatorias = Array.isArray(dados.materias_obrigatorias) ? (dados.materias_obrigatorias as string[]) : []
 
-  const [contexto, proprietaryResult] = await Promise.all([
+  const [contexto, proprietaryResult, docsContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
     buildProprietaryContext(segmento, descricao),
+    buildDocumentosContext(segmento, descricao),
   ])
 
   // Quando há match forte no banco proprietário e o usuário não especificou MPs obrigatórias,
@@ -233,7 +268,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     dadosFinais.materias_obrigatorias = proprietaryResult.mandatoryMPs
   }
 
-  const prompt = buildFormulacaoPrompt(dadosFinais, contexto + proprietaryResult.context)
+  const prompt = buildFormulacaoPrompt(dadosFinais, contexto + proprietaryResult.context + docsContext)
 
   const message = await getClient().messages.create({
     model: getModel(),
