@@ -3,6 +3,8 @@ import * as XLSX from 'xlsx'
 import Anthropic from '@anthropic-ai/sdk'
 import { jsonrepair } from 'jsonrepair'
 
+export const maxDuration = 60
+
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 function checkAdmin(req: NextRequest) {

@@ -116,17 +116,19 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
         headers: { 'x-admin-pin': pin },
         body: fd,
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      if (data.aviso) setAviso(data.aviso)
+      const raw = await res.text()
+      let data: Record<string, unknown> = {}
+      try { data = JSON.parse(raw) } catch { throw new Error(`Erro no servidor: ${raw.slice(0, 120)}`) }
+      if (!res.ok) throw new Error(String(data.error || 'Erro ao processar arquivo'))
+      if (data.aviso) setAviso(String(data.aviso))
 
-      const formulas: FormulaPreview[] = (data.formulas || []).map((f: Omit<FormulaPreview, 'segmento'>) => ({
+      const formulas: FormulaPreview[] = ((data.formulas as Omit<FormulaPreview, 'segmento'>[]) || []).map((f) => ({
         ...f,
         segmento: SEGMENTOS[0],
         _expandido: false,
       }))
       setPreview(formulas)
-      setArquivo(data.arquivo || file.name)
+      setArquivo(String(data.arquivo || file.name))
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao processar arquivo.')
     } finally {
