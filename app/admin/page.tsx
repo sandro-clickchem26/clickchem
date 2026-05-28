@@ -852,10 +852,20 @@ function DocsCientificos({ pin }: { pin: string }) {
 
   useEffect(() => { carregar() }, [carregar])
 
+  function aplicarArquivo(f: File) {
+    setArquivo(f)
+    setForm(p => ({
+      ...p,
+      titulo: p.titulo.trim()
+        ? p.titulo
+        : f.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim(),
+    }))
+  }
+
   function onDrop(e: React.DragEvent) {
     e.preventDefault(); setDragging(false)
     const f = e.dataTransfer.files[0]
-    if (f) setArquivo(f)
+    if (f) aplicarArquivo(f)
   }
 
   async function enviar() {
@@ -919,7 +929,7 @@ function DocsCientificos({ pin }: { pin: string }) {
           className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all mb-4 ${dragging ? 'border-blue-400 bg-blue-500/10' : arquivo ? 'border-green-500/50 bg-green-500/5' : 'border-white/15 hover:border-white/30'}`}
         >
           <input ref={inputRef} type="file" accept=".pdf,.docx,.doc" className="hidden"
-            onChange={e => { if (e.target.files?.[0]) setArquivo(e.target.files[0]); e.target.value = '' }} />
+            onChange={e => { if (e.target.files?.[0]) aplicarArquivo(e.target.files[0]); e.target.value = '' }} />
           {arquivo ? (
             <div className="flex items-center justify-center gap-2">
               <CheckCircle2 size={16} className="text-green-400" />
