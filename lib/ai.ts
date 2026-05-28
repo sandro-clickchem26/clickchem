@@ -249,8 +249,8 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const dadosFinais: Record<string, unknown> = { ...dados }
 
-  if (!temMatchForte && !usuarioAutorizaComposicaoSemReferencia) {
-    console.log('🔴 BACKEND: RECUSANDO - sem fórmula de referência e sem autorização do usuário')
+  if (!temMatchForte && !usuarioAutorizaComposicaoSemReferencia && userObrigatorias.length === 0) {
+    console.log('🔴 BACKEND: RECUSANDO - nenhuma das condições foi atendida')
     // Sem fórmula de referência e sem autorização: RECUSAR imediatamente
     return {
       analise_critica: {
