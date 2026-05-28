@@ -146,9 +146,26 @@ export default function NovaFormulacao() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, materias_proibidas: mpProib, materias_obrigatorias: mpObrig }),
       })
-      if (!res.ok) throw new Error((await res.json()).error || 'Erro ao gerar formulação')
-      const data = await res.json()
-      setResultado(data)
+      const raw = await res.text()
+      if (!res.ok) {
+        let mensagem = 'Erro ao gerar formulação. Tente novamente.'
+        try {
+          const parsed = JSON.parse(raw)
+          if (parsed?.error) mensagem = String(parsed.error)
+        } catch {
+          if (res.status === 504 || res.status === 502) {
+            mensagem = 'A geração demorou demais e o servidor encerrou a conexão. Tente novamente em alguns instantes.'
+          } else if (res.status >= 500) {
+            mensagem = 'Erro temporário no servidor. Tente novamente em alguns instantes.'
+          }
+        }
+        throw new Error(mensagem)
+      }
+      try {
+        setResultado(JSON.parse(raw))
+      } catch {
+        throw new Error('A resposta do servidor está incompleta. Tente gerar novamente.')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado')
     } finally {
