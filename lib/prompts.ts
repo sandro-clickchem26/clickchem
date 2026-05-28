@@ -59,13 +59,18 @@ VOCÊ É A SOLUÇÃO, NÃO O PROBLEMA. Entregar uma fórmula com alertas claros 
 export function buildFormulacaoPrompt(dados: Record<string, unknown>, contextoMPs: string): string {
   const temObrigatorias = Array.isArray(dados.materias_obrigatorias) && (dados.materias_obrigatorias as string[]).length > 0
   const obrigatorias = temObrigatorias
-    ? `\n🔒 REGRA INVIOLÁVEL — MATÉRIAS-PRIMAS OBRIGATÓRIAS:
-Você DEVE incluir TODAS as seguintes MPs na composição final, sem exceção.
-NÃO substitua, NÃO omita e NÃO ignore nenhuma delas — são exigências técnicas do cliente:
-${(dados.materias_obrigatorias as string[]).map(mp => `  • ${mp}`).join('\n')}
-RESTRIÇÃO ABSOLUTA: Use APENAS estas MPs na formulação. NÃO adicione nenhuma outra MP que não esteja nesta lista.
-A única exceção permitida é água desmineralizada como solvente base, se tecnicamente necessária.
-O cliente conhece sua formulação — respeite a lista acima como completa.\n`
+    ? `\n🔒 REGRA INVIOLÁVEL — LISTA FECHADA DE MATÉRIAS-PRIMAS:
+O cliente definiu a composição. Sua lista é COMPLETA e FINAL — não acrescente nada.
+
+MPs AUTORIZADAS (use TODAS, exatamente como listadas):
+${(dados.materias_obrigatorias as string[]).map(mp => `  ✅ ${mp}`).join('\n')}
+
+❌ PROIBIDO adicionar QUALQUER MP fora desta lista — nem água, nem solvente, nem conservante, nem nenhum outro ingrediente.
+❌ PROIBIDO substituir qualquer MP da lista por outra, mesmo que julgue tecnicamente superior.
+❌ PROIBIDO omitir qualquer MP da lista.
+
+A composição final deve conter EXATAMENTE ${(dados.materias_obrigatorias as string[]).length} componente(s) — nem mais, nem menos.
+Distribua os percentuais entre estas MPs de forma tecnicamente coerente, fechando em 100%.\n`
     : ''
 
   const proibidas = Array.isArray(dados.materias_proibidas) && dados.materias_proibidas.length > 0

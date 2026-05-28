@@ -248,6 +248,37 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
   }
 }
 
+// Remove componentes não autorizados quando o usuário especificou lista fechada de MPs
+function filtrarMPsNaoAutorizadas(resultado: unknown, obrigatorias: string[]): unknown {
+  if (!obrigatorias || obrigatorias.length === 0) return resultado
+  try {
+    const r = resultado as Record<string, unknown>
+    const formulacao = r.formulacao as Record<string, unknown>
+    if (!formulacao) return resultado
+
+    const composicao = formulacao.composicao as Array<Record<string, unknown>>
+    if (!Array.isArray(composicao)) return resultado
+
+    const norm = (s: string) =>
+      s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9\s]/g, '').trim()
+
+    const obrigNorm = obrigatorias.map(norm)
+
+    const filtrada = composicao.filter(c => {
+      const nome = norm(String(c.materia_prima || ''))
+      // Aceita se o nome do componente contém a MP obrigatória ou vice-versa (match parcial)
+      return obrigNorm.some(ob => nome.includes(ob) || ob.includes(nome) || nome.split(' ').some(w => w.length > 3 && ob.includes(w)))
+    })
+
+    // Segurança: se filtro removeu tudo, retorna original
+    if (filtrada.length === 0) return resultado
+
+    return { ...r, formulacao: { ...formulacao, composicao: filtrada } }
+  } catch {
+    return resultado
+  }
+}
+
 // Garante que a soma dos percentual_recomendado fecha EXATAMENTE em 100%
 // O componente com maior percentual (normalmente o solvente/veículo base) absorve a diferença
 function fecharPercentuais(resultado: unknown): unknown {
@@ -347,7 +378,15 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return fecharPercentuais(extractJSON(text))
+  const resultado = extractJSON(text)
+
+  // Se o usuário definiu lista fechada de MPs, remove qualquer componente não autorizado
+  if (userObrigatorias.length > 0) {
+    const filtrado = filtrarMPsNaoAutorizadas(resultado, userObrigatorias)
+    return fecharPercentuais(filtrado) // re-fecha percentuais após filtrar
+  }
+
+  return fecharPercentuais(resultado)
 }
 
 async function buildMPContextParaAnalise(formula: Record<string, unknown>): Promise<string> {
