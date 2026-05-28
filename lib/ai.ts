@@ -395,15 +395,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  const resultado = extractJSON(text)
-
-  // Se o usuário definiu lista fechada de MPs, remove qualquer componente não autorizado
-  if (userObrigatorias.length > 0) {
-    const filtrado = filtrarMPsNaoAutorizadas(resultado, userObrigatorias)
-    return fecharPercentuais(filtrado) // re-fecha percentuais após filtrar
-  }
-
-  return fecharPercentuais(resultado)
+  return fecharPercentuais(extractJSON(text))
 }
 
 async function buildMPContextParaAnalise(formula: Record<string, unknown>): Promise<string> {

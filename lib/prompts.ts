@@ -58,19 +58,18 @@ VOCÊ É A SOLUÇÃO, NÃO O PROBLEMA. Entregar uma fórmula com alertas claros 
 
 export function buildFormulacaoPrompt(dados: Record<string, unknown>, contextoMPs: string): string {
   const temObrigatorias = Array.isArray(dados.materias_obrigatorias) && (dados.materias_obrigatorias as string[]).length > 0
+  const nMPs = temObrigatorias ? (dados.materias_obrigatorias as string[]).length : 0
   const obrigatorias = temObrigatorias
-    ? `\n🔒 REGRA INVIOLÁVEL — LISTA FECHADA DE MATÉRIAS-PRIMAS:
-O cliente definiu a composição. Sua lista é COMPLETA e FINAL — não acrescente nada.
+    ? `\n🔒 LISTA FECHADA — COMPOSIÇÃO DEFINIDA PELO CLIENTE:
+A composição tem EXATAMENTE ${nMPs} matéria(s)-prima(s). Nem uma a mais, nem uma a menos.
 
-MPs AUTORIZADAS (use TODAS, exatamente como listadas):
-${(dados.materias_obrigatorias as string[]).map(mp => `  ✅ ${mp}`).join('\n')}
+${(dados.materias_obrigatorias as string[]).map((mp, i) => `  ${i + 1}. ${mp}`).join('\n')}
 
-❌ PROIBIDO adicionar QUALQUER MP fora desta lista — nem água, nem solvente, nem conservante, nem nenhum outro ingrediente.
-❌ PROIBIDO substituir qualquer MP da lista por outra, mesmo que julgue tecnicamente superior.
-❌ PROIBIDO omitir qualquer MP da lista.
-
-A composição final deve conter EXATAMENTE ${(dados.materias_obrigatorias as string[]).length} componente(s) — nem mais, nem menos.
-Distribua os percentuais entre estas MPs de forma tecnicamente coerente, fechando em 100%.\n`
+REGRAS ABSOLUTAS:
+• Use APENAS estas ${nMPs} MPs. O array "composicao" deve ter EXATAMENTE ${nMPs} itens.
+• NÃO adicione água, solvente, conservante ou qualquer outro ingrediente não listado.
+• NÃO substitua nenhuma MP por sinônimo ou alternativa — use o nome exato acima.
+• Distribua os percentuais entre estas ${nMPs} MPs somando 100%.\n`
     : ''
 
   const proibidas = Array.isArray(dados.materias_proibidas) && dados.materias_proibidas.length > 0
