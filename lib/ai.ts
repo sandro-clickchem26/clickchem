@@ -248,6 +248,75 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
   }
 }
 
+// Garante que a soma dos percentual_recomendado fecha EXATAMENTE em 100%
+// O componente com maior percentual (normalmente o solvente/veículo base) absorve a diferença
+function fecharPercentuais(resultado: unknown): unknown {
+  try {
+    const r = resultado as Record<string, unknown>
+    const formulacao = r.formulacao as Record<string, unknown>
+    if (!formulacao) return resultado
+
+    const composicao = formulacao.composicao as Array<Record<string, unknown>>
+    if (!Array.isArray(composicao) || composicao.length === 0) return resultado
+
+    const perc = (c: Record<string, unknown>) =>
+      typeof c.percentual_recomendado === 'number' ? c.percentual_recomendado : 0
+
+    const soma = composicao.reduce((s, c) => s + perc(c), 0)
+    const diff = parseFloat((100 - soma).toFixed(4))
+
+    if (Math.abs(diff) < 0.05) return resultado // já fechado
+
+    // Prefere ajustar solvente/veículo base; senão usa o componente de maior percentual
+    const keywords = ['água', 'agua', 'water', 'solvente', 'solvent', 'veículo', 'veiculo', 'diluente', 'q.s.p', 'qsp', 'base']
+    let idxAlvo = -1
+    for (let i = 0; i < composicao.length; i++) {
+      const nome = String(composicao[i].materia_prima || '').toLowerCase()
+      if (keywords.some(k => nome.includes(k))) { idxAlvo = i; break }
+    }
+    if (idxAlvo === -1) {
+      // Usa o componente com maior percentual
+      idxAlvo = composicao.reduce((best, c, i) => perc(c) > perc(composicao[best]) ? i : best, 0)
+    }
+
+    const novoPerc = parseFloat((perc(composicao[idxAlvo]) + diff).toFixed(2))
+
+    if (novoPerc < 0) {
+      // Caso extremo: redistribui proporcionalmente
+      const fator = 100 / soma
+      return {
+        ...r,
+        formulacao: {
+          ...formulacao,
+          composicao: composicao.map(c => ({
+            ...c,
+            percentual_recomendado: parseFloat((perc(c) * fator).toFixed(2)),
+          })),
+        },
+      }
+    }
+
+    return {
+      ...r,
+      formulacao: {
+        ...formulacao,
+        composicao: composicao.map((c, i) =>
+          i === idxAlvo
+            ? {
+                ...c,
+                percentual_recomendado: novoPerc,
+                percentual_minimo: Math.min(novoPerc, typeof c.percentual_minimo === 'number' ? c.percentual_minimo : novoPerc),
+                percentual_maximo: Math.max(novoPerc, typeof c.percentual_maximo === 'number' ? c.percentual_maximo : novoPerc),
+              }
+            : c
+        ),
+      },
+    }
+  } catch {
+    return resultado // nunca quebra — retorna original se algo falhar
+  }
+}
+
 export async function gerarFormulacao(dados: Record<string, unknown>) {
   const segmento = String(dados.segmento || '')
   const descricao = String(dados.descricao || '')
@@ -278,7 +347,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return extractJSON(text)
+  return fecharPercentuais(extractJSON(text))
 }
 
 async function buildMPContextParaAnalise(formula: Record<string, unknown>): Promise<string> {

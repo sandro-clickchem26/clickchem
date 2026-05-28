@@ -81,6 +81,12 @@ ${(dados.materias_proibidas as string[]).map(mp => `  • ${mp}`).join('\n')}\n`
 PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
 ${obrigatorias}${proibidas}${contextoMPs ? `\nMPs DISPONÍVEIS:\n${contextoMPs}` : ''}
 
+⚠️ REGRA MATEMÁTICA ABSOLUTA — FECHAMENTO EM 100%:
+A soma de TODOS os valores "percentual_recomendado" da composição DEVE ser EXATAMENTE 100,0%.
+Antes de retornar, some todos os percentual_recomendado e verifique. Se a soma não for 100,0%, redistribua.
+O solvente/veículo principal (água desmineralizada, solvente base, etc.) deve ser o último componente e absorver o que faltar para fechar em 100,0%.
+NUNCA retorne uma composição que some mais ou menos que 100,0%.
+
 Retorne APENAS JSON válido (sem markdown):
 
 {
