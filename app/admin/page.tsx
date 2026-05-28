@@ -863,8 +863,10 @@ function DocsCientificos({ pin }: { pin: string }) {
       const res = await fetch('/api/admin/documentos/upload', {
         method: 'POST', headers: { 'x-admin-pin': pin }, body: fd,
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      const raw = await res.text()
+      let data: Record<string, unknown> = {}
+      try { data = JSON.parse(raw) } catch { throw new Error(`Erro no servidor: ${raw.slice(0, 120)}`) }
+      if (!res.ok) throw new Error(String(data.error || 'Erro ao enviar'))
       setSucesso(`"${form.titulo}" importado com sucesso!`)
       setArquivo(null)
       setForm({ titulo: '', autores: '', ano: '', fonte: '', segmento: SEGMENTOS[0], tags: '', resumo: '' })

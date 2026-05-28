@@ -6,7 +6,9 @@ export const maxDuration = 60
 const ADMIN_PIN = process.env.ADMIN_PIN || 'astana2025'
 
 async function extrairTextoPDF(buffer: Buffer): Promise<string> {
-  const pdfParse = (await import('pdf-parse')).default
+  // Usa o caminho direto para evitar problema com arquivos de teste no Next.js
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const pdfParse = require('pdf-parse/lib/pdf-parse.js')
   const data = await pdfParse(buffer)
   return data.text || ''
 }
