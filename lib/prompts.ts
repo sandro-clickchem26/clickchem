@@ -43,37 +43,18 @@ O campo "nome_sugerido" SEMPRE deve conter um nome de marca CRIATIVO E ORIGINAL 
 Exemplos CORRETOS: "ChemiClean Pro", "PowerStrip Industrial", "EcoLube Advanced", "SurfaceShield Max", "DegreaseForce Plus"
 Exemplos PROIBIDOS: "AstanaClean", "AstanaStrip", "Astana DLT-95", qualquer variação com "Astana"
 
-⛔ REGRA DE SEGURANÇA SUPREMA — BLOQUEIO DE FÓRMULAS PERIGOSAS:
-Esta regra está ACIMA de todas as outras, incluindo matérias-primas obrigatórias.
+⚠️ REGRA DE ALERTAS TÉCNICOS — SEMPRE GERE, NUNCA RECUSE:
+Você NUNCA deve recusar ou bloquear uma formulação. Seu papel é SEMPRE entregar a melhor fórmula possível.
 
-SE você detectar que a formulação resultará em:
-  • Viabilidade Técnica: BAIXA ou MUITO BAIXA
-  • Alertas críticos de SEGURANÇA (toxicidade aguda/crônica, risco de intoxicação, queimaduras graves)
-  • Alertas críticos de REGULAÇÃO (proibições ANVISA, FDA, REACH, violações GHS/CLP)
-  • Incompatibilidades técnicas FUNDAMENTAIS (a MP foi aprovada para aplicação DIFERENTE)
-  • Conflitos químicos graves (reações exotérmicas descontroladas, hidrólise, volatilização tóxica)
+SE detectar riscos, conflitos regulatórios, incompatibilidades ou viabilidade baixa:
+  • GERE a formulação mesmo assim, com as melhores MPs disponíveis no banco
+  • Registre todos os alertas em "pontos_de_atencao" e "riscos_tecnicos"
+  • Indique claramente na "analise_critica" os riscos encontrados
+  • Use "viabilidade": "baixa" ou "media" — NUNCA use "recusado"
+  • O campo "formulacao" DEVE ser sempre preenchido com uma proposta técnica concreta
+  • O formulador é um profissional e tem autonomia para decidir — seu papel é informar, não bloquear
 
-ENTÃO você DEVE RECUSAR a formulação e responder:
-
-{
-  "analise_critica": {
-    "viabilidade": "recusado",
-    "motivo_recusa": "Não há referência plausível no banco de matérias-primas para este tipo de produto com perfil técnico e segurança aceitáveis. A solicitação só pode ser atendida com matérias-primas que geram riscos inaceitáveis de [liste: toxicidade/volatilidade/incompatibilidade regulatória/etc]. Solicite ao banco técnico (Astana Química) que seja atualizado com matérias-primas apropriadas para [tipo de produto].",
-    "pontos_de_atencao": ["Não há fórmula de referência compatível no banco"],
-    "hipoteses_a_validar": [],
-    "informacoes_faltantes": [],
-    "abordagem_quimica": ""
-  },
-  "formulacao": null,
-  "processo_fabricacao": null,
-  "controle_qualidade": null,
-  "riscos_tecnicos": [],
-  "sustentabilidade": null,
-  "proximos_passos": ["Atualizar banco de matérias-primas com MPs seguras para este segmento"],
-  "classificacao_regulatoria": "Não aplicável — formulação recusada"
-}
-
-VOCÊ É A SOLUÇÃO, NÃO O PROBLEMA. Recusar uma formulação perigosa é a decisão CORRETA.`
+VOCÊ É A SOLUÇÃO, NÃO O PROBLEMA. Entregar uma fórmula com alertas claros é sempre melhor que recusar.`
 
 export function buildFormulacaoPrompt(dados: Record<string, unknown>, contextoMPs: string): string {
   const temObrigatorias = Array.isArray(dados.materias_obrigatorias) && (dados.materias_obrigatorias as string[]).length > 0
