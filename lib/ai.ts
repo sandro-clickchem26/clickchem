@@ -98,13 +98,8 @@ async function buildProprietaryContext(segmento: string, descricao = ''): Promis
     // Normaliza acentos para matching robusto em português (ex: "elétrico" → "eletrico")
     const norm = (s: string) => removeAccents(s.toLowerCase())
 
-    // Stopwords comuns em português a descartar
-    const stopwords = new Set(['para', 'circulacao', 'limpeza', 'quente', 'com', 'uma', 'dei', 'uso', 'aplicacao'])
-
-    // Palavras-chave da descrição normalizadas (> 2 chars, sem stopwords)
-    const palavrasChave = norm(descricao)
-      .split(/\s+/)
-      .filter(w => w.length > 2 && !stopwords.has(w))
+    // Palavras-chave da descrição normalizadas (> 2 chars)
+    const palavrasChave = norm(descricao).split(/\s+/).filter(w => w.length > 2)
 
     // Score de relevância com normalização de acentos
     const comScore = formulas.map(f => {
@@ -126,10 +121,8 @@ async function buildProprietaryContext(segmento: string, descricao = ''): Promis
     comScore.sort((a, b) => b.score - a.score)
 
     const melhor = comScore[0]
-    // Threshold 5 = segmento (3) + 1 palavra-chave específica (2)
-    // Com stopwords removidas, isso garante match muito específico
-    // Exemplo: "Desincrustante Alcalino CIP" precisa de "desincrustante" OU "cip" + "alcalino" (não conta palavras genéricas)
-    const temMatchForte = melhor && melhor.score >= 5
+    // Threshold 4 = segmento + pelo menos 1 palavra-chave (ex: "decapante")
+    const temMatchForte = melhor && melhor.score >= 4
 
     if (!temMatchForte) {
       // Sem match forte: passa MPs únicas como referência leve (sem obrigatórias)
@@ -226,67 +219,21 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const descricao = String(dados.descricao || '')
   const proibidas = Array.isArray(dados.materias_proibidas) ? (dados.materias_proibidas as string[]) : []
   const userObrigatorias = Array.isArray(dados.materias_obrigatorias) ? (dados.materias_obrigatorias as string[]) : []
-  const usuarioAutorizaComposicaoSemReferencia = dados.usuario_autoriza_composicao_sem_referencia === true
-
-  console.log('🔵 BACKEND: gerarFormulacao chamado')
-  console.log('dados.usuario_autoriza_composicao_sem_referencia:', dados.usuario_autoriza_composicao_sem_referencia)
-  console.log('usuarioAutorizaComposicaoSemReferencia (parsed):', usuarioAutorizaComposicaoSemReferencia)
 
   const [contexto, proprietaryResult] = await Promise.all([
     buildMPContext(segmento, proibidas),
     buildProprietaryContext(segmento, descricao),
   ])
 
-  // NOVA LÓGICA: Verificação obrigatória de referência ANTES de gerar
-  // Se há match forte: Use as MPs da fórmula de referência
-  // Se não há match forte e usuário não autorizou: Recuse
-  // Se não há match forte mas usuário autorizou: Proceda com composição
-  const temMatchForte = proprietaryResult.mandatoryMPs.length > 0
-
-  console.log('🔵 BACKEND: temMatchForte =', temMatchForte)
-  console.log('🔵 BACKEND: userObrigatorias.length =', userObrigatorias.length)
-  console.log('🔵 BACKEND: Verificação -> !temMatchForte:', !temMatchForte, '&& !usuarioAutoriza:', !usuarioAutorizaComposicaoSemReferencia, '&& !userObrig:', userObrigatorias.length === 0)
-
+  // Quando há match forte no banco proprietário e o usuário não especificou MPs obrigatórias,
+  // injeta as MPs da fórmula aprovada como obrigatórias no prompt — ativa a regra INVIOLÁVEL
+  // que garante que a IA use exatamente estas MPs (apenas nomes, sem percentuais — confidencialidade mantida)
   const dadosFinais: Record<string, unknown> = { ...dados }
-
-  if (!temMatchForte && !usuarioAutorizaComposicaoSemReferencia && userObrigatorias.length === 0) {
-    console.log('🔴 BACKEND: RECUSANDO - nenhuma das condições foi atendida')
-    // Sem fórmula de referência e sem autorização: RECUSAR imediatamente
-    return {
-      analise_critica: {
-        viabilidade: 'verificacao_recusada',
-        motivo_recusa: `Não há fórmula de referência no banco de fórmulas proprietárias para "${descricao}". Conforme protocolo Modo Fechado, uma composição só pode ser tentada com consentimento explícito do usuário. Para prosseguir, forneça a autorização: usuario_autoriza_composicao_sem_referencia: true`,
-        informacoes_faltantes: [`Fórmula de referência para ${descricao}`],
-        pontos_de_atencao: ['Não há fórmula de referência compatível no banco'],
-        hipoteses_a_validar: [],
-        abordagem_quimica: '',
-      },
-      formulacao: null,
-      processo_fabricacao: null,
-      controle_qualidade: null,
-      riscos_tecnicos: [],
-      sustentabilidade: null,
-      proximos_passos: ['Usuário decide se deseja prosseguir com composição sem referência de fórmula'],
-      classificacao_regulatoria: 'Não aplicável — aguardando verificação',
-    }
-  }
-
-  // Se tem match forte OU usuário autorizou: proceder
-  if (temMatchForte && userObrigatorias.length === 0) {
-    // Match forte encontrado: injeta as MPs como obrigatórias
-    console.log('🟢 BACKEND: Injetando MPs obrigatórias da referência')
+  if (proprietaryResult.mandatoryMPs.length > 0 && userObrigatorias.length === 0) {
     dadosFinais.materias_obrigatorias = proprietaryResult.mandatoryMPs
   }
 
-  // Se usuário autorizou composição sem referência: indique no prompt
-  if (!temMatchForte && usuarioAutorizaComposicaoSemReferencia) {
-    console.log('🟢 BACKEND: Usuário autorizou composição SEM referência - prosseguindo')
-    dadosFinais.usuario_autorizou_composicao_sem_referencia = true
-  }
-
-  // Passa o contexto de fórmulas proprietárias como parâmetro separado
-  // e o contexto de MPs disponíveis como segundo parâmetro
-  const prompt = buildFormulacaoPrompt(dadosFinais, contexto, proprietaryResult.context)
+  const prompt = buildFormulacaoPrompt(dadosFinais, contexto + proprietaryResult.context)
 
   const message = await getClient().messages.create({
     model: getModel(),

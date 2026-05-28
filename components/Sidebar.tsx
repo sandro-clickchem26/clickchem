@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
@@ -48,13 +49,13 @@ export function Sidebar({ mobileOpen = false, onClose }: Props) {
         {/* Logo — só no desktop (no mobile está no MobileHeader) */}
         <div className="hidden md:flex justify-center px-4 py-4 border-b border-[#1B3A6B]/60">
           <Link href="/">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/logo.png"
               alt="Click Chem"
               width={170}
               height={170}
               className="rounded-full object-cover"
+              priority
             />
           </Link>
         </div>
