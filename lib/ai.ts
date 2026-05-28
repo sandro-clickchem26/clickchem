@@ -98,53 +98,47 @@ async function buildProprietaryContext(segmento: string, descricao = ''): Promis
     // Normaliza acentos para matching robusto em português (ex: "elétrico" → "eletrico")
     const norm = (s: string) => removeAccents(s.toLowerCase())
 
-    // Palavras-chave da descrição normalizadas (> 2 chars)
-    const palavrasChave = norm(descricao).split(/\s+/).filter(w => w.length > 2)
+    // Stopwords agressivas — palavras sem valor semântico para matching de fórmula
+    const stopwords = new Set([
+      'para', 'com', 'sem', 'uma', 'uns', 'umas', 'dos', 'das', 'das', 'que',
+      'uso', 'tipo', 'kit', 'fim', 'pro', 'sob', 'sua', 'seu', 'ser', 'tem',
+      'aplicacao', 'aplicacoes', 'produto', 'produtos', 'formula', 'formulacao',
+      'limpeza', 'industria', 'industrial', 'comercial', 'domestico', 'profissional'
+    ])
 
-    // Score de relevância com normalização de acentos
-    const comScore = formulas.map(f => {
-      let score = 0
+    // Palavras-chave SIGNIFICATIVAS da descrição (>= 3 chars, sem stopwords)
+    const palavrasChavePrincipais = norm(descricao)
+      .split(/\s+/)
+      .filter(w => w.length >= 3 && !stopwords.has(w))
+
+    // REGRA CRÍTICA E INVIOLÁVEL: Match forte exige que TODAS as palavras-chave
+    // significativas da descrição estejam presentes em alguma fórmula proprietária.
+    // Sem isso, NÃO há fórmula de referência correspondente — recusar imediatamente.
+    const formulasComMatchTotal = formulas.filter(f => {
       const textoFormula = norm(`${f.segmento} ${f.aplicacao} ${f.nome_interno} ${f.tags || ''}`)
-
-      // Match de segmento (normalizado)
-      if (norm(f.segmento).includes(norm(segmento)) ||
-          norm(segmento).includes(norm(f.segmento))) score += 3
-
-      // Match de cada palavra-chave da descrição (normalizado)
-      for (const kw of palavrasChave) {
-        if (textoFormula.includes(kw)) score += 2
-      }
-
-      return { formula: f, score }
+      // TODAS as palavras-chave principais devem estar no texto da fórmula
+      return palavrasChavePrincipais.length > 0 &&
+        palavrasChavePrincipais.every(kw => textoFormula.includes(kw))
     })
 
-    comScore.sort((a, b) => b.score - a.score)
-
-    const melhor = comScore[0]
-    // Threshold 4 = segmento + pelo menos 1 palavra-chave (ex: "decapante")
-    const temMatchForte = melhor && melhor.score >= 4
+    const temMatchForte = formulasComMatchTotal.length > 0
 
     if (!temMatchForte) {
-      // Sem match forte: passa MPs únicas como referência leve (sem obrigatórias)
-      const pool = comScore.filter(x => x.score > 0).slice(0, 3).map(x => x.formula)
-      if (pool.length === 0) return vazio
-      const mpSet = new Map<string, string>()
-      for (const f of pool) {
-        try {
-          const comps = JSON.parse(f.composicao) as Array<{ materia_prima: string; funcao: string }>
-          for (const c of comps) {
-            if (!mpSet.has(c.materia_prima)) mpSet.set(c.materia_prima, c.funcao)
-          }
-        } catch { /* ignora */ }
-      }
-      const linhas = Array.from(mpSet.entries()).map(([mp, fn]) => `• ${mp} — ${fn}`).join('\n')
-      return {
-        context: `\nMPs UTILIZADAS EM PRODUTOS APROVADOS DA ASTANA (considere como candidatas):\n${linhas}\n`,
-        mandatoryMPs: [],
-      }
+      // SEM match forte: retorna vazio sem expor MPs alternativas — a regra crítica
+      // exige RECUSA IMEDIATA quando não há fórmula correspondente no banco.
+      return vazio
     }
 
-    // Match forte: formula específica encontrada
+    // Match forte: escolhe a fórmula mais específica (mais matches totais com segmento)
+    const melhor = formulasComMatchTotal
+      .map(f => {
+        const textoFormula = norm(`${f.segmento} ${f.aplicacao} ${f.nome_interno} ${f.tags || ''}`)
+        const segmentoMatch = norm(f.segmento).includes(norm(segmento)) ||
+          norm(segmento).includes(norm(f.segmento)) ? 1 : 0
+        return { formula: f, especificidade: segmentoMatch + textoFormula.length }
+      })
+      .sort((a, b) => b.especificidade - a.especificidade)[0]
+
     const f = melhor.formula
     let composicao: Array<{ materia_prima: string; funcao: string }> = []
     try {
