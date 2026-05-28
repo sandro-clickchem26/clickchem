@@ -248,8 +248,11 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
   }
 }
 
-// Remove componentes não autorizados quando o usuário especificou lista fechada de MPs
-function filtrarMPsNaoAutorizadas(resultado: unknown, obrigatorias: string[]): unknown {
+// Garante que a composição final contenha EXATAMENTE as MPs obrigatórias.
+// Estratégia: faz matching de cada MP obrigatória com o componente mais parecido da IA,
+// preservando os dados técnicos (%, justificativa, etc.) da IA quando encontra match.
+// Componentes não associados a nenhuma MP obrigatória são descartados.
+function enforcarMPsObrigatorias(resultado: unknown, obrigatorias: string[]): unknown {
   if (!obrigatorias || obrigatorias.length === 0) return resultado
   try {
     const r = resultado as Record<string, unknown>
@@ -257,42 +260,63 @@ function filtrarMPsNaoAutorizadas(resultado: unknown, obrigatorias: string[]): u
     if (!formulacao) return resultado
 
     const composicao = formulacao.composicao as Array<Record<string, unknown>>
-    if (!Array.isArray(composicao)) return resultado
+    if (!Array.isArray(composicao) || composicao.length === 0) return resultado
 
     const norm = (s: string) =>
-      s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9\s]/g, '').trim()
+      s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
 
-    const obrigNorm = obrigatorias.map(norm)
-
-    // Verifica se um componente da IA corresponde a alguma MP obrigatória
-    function isAutorizado(nomeComp: string): boolean {
-      const nome = norm(nomeComp)
-      return obrigNorm.some(ob => {
-        if (nome.includes(ob) || ob.includes(nome)) return true
-        // Match por palavras significativas (evita rejeitar "Lauril Éter Sulfato de Sódio 70%" quando lista tem "Lauril Éter Sulfato de Sódio")
-        const palavrasOb = ob.split(/\s+/).filter(w => w.length > 3)
-        const palavrasNome = nome.split(/\s+/).filter(w => w.length > 3)
-        if (palavrasOb.length === 0) return false
-        const matches = palavrasOb.filter(w => nome.includes(w)).length
-        // Aceita se ≥60% das palavras da MP obrigatória aparecem no nome do componente
-        return matches / palavrasOb.length >= 0.6 ||
-          // OU se ≥60% das palavras do componente aparecem na MP obrigatória
-          (palavrasNome.length > 0 && palavrasNome.filter(w => ob.includes(w)).length / palavrasNome.length >= 0.6)
-      })
+    // Calcula score de similaridade entre nome do componente da IA e MP obrigatória
+    function score(nomeComp: string, mpObrig: string): number {
+      const a = norm(nomeComp)
+      const b = norm(mpObrig)
+      if (a === b) return 100
+      if (a.includes(b) || b.includes(a)) return 80
+      // Overlap por palavras significativas (>2 chars)
+      const bWords = b.split(/\s+/).filter(w => w.length > 2)
+      if (bWords.length === 0) return 0
+      const matches = bWords.filter(w => a.includes(w)).length
+      return Math.round((matches / bWords.length) * 60)
     }
 
-    const filtrada = composicao.filter(c => isAutorizado(String(c.materia_prima || '')))
+    const usedIdx = new Set<number>()
+    const composicaoFinal: Array<Record<string, unknown>> = []
 
-    // Segurança: se o filtro removeu alguma MP que deveria estar (falso negativo),
-    // abortamos o filtro e retornamos o original — melhor ter extras do que faltar obrigatórias
-    const todasObrigPresentes = obrigNorm.every(ob =>
-      filtrada.some(c => isAutorizado(String(c.materia_prima || '')))
-    )
-    if (!todasObrigPresentes || filtrada.length === 0) return resultado
+    for (const mp of obrigatorias) {
+      // Encontra o componente com maior score para esta MP obrigatória
+      let bestIdx = -1
+      let bestScore = -1
+      for (let i = 0; i < composicao.length; i++) {
+        if (usedIdx.has(i)) continue
+        const s = score(String(composicao[i].materia_prima || ''), mp)
+        if (s > bestScore) { bestScore = s; bestIdx = i }
+      }
 
-    return { ...r, formulacao: { ...formulacao, composicao: filtrada } }
+      if (bestIdx >= 0 && bestScore >= 40) {
+        // Match encontrado: usa dados técnicos da IA mas com nome exato da lista
+        usedIdx.add(bestIdx)
+        composicaoFinal.push({ ...composicao[bestIdx], materia_prima: mp })
+      } else {
+        // MP obrigatória ausente ou substituída: adiciona com % proporcional como base
+        const percBase = parseFloat((100 / obrigatorias.length).toFixed(2))
+        composicaoFinal.push({
+          materia_prima: mp,
+          funcao_tecnica: 'Componente obrigatório — percentual redistribuído',
+          percentual_minimo: 1.0,
+          percentual_maximo: 99.0,
+          percentual_recomendado: percBase,
+          justificativa: 'Especificado pelo formulador. Ajuste o percentual conforme necessidade técnica.',
+          alternativas: [],
+          nivel_toxicidade: 'medio',
+          custo_estimado_kg: 0,
+          disponibilidade_comercial: 'alta',
+        })
+      }
+    }
+
+    return { ...r, formulacao: { ...formulacao, composicao: composicaoFinal } }
   } catch {
-    return resultado
+    return resultado // nunca quebra
   }
 }
 
@@ -395,7 +419,14 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return fecharPercentuais(extractJSON(text))
+  const resultado = extractJSON(text)
+
+  // Se o usuário definiu MPs obrigatórias, garante que APENAS elas apareçam na composição
+  if (userObrigatorias.length > 0) {
+    return fecharPercentuais(enforcarMPsObrigatorias(resultado, userObrigatorias))
+  }
+
+  return fecharPercentuais(resultado)
 }
 
 async function buildMPContextParaAnalise(formula: Record<string, unknown>): Promise<string> {
