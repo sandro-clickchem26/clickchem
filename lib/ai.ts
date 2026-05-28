@@ -219,16 +219,11 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const descricao = String(dados.descricao || '')
   const proibidas = Array.isArray(dados.materias_proibidas) ? (dados.materias_proibidas as string[]) : []
   const userObrigatorias = Array.isArray(dados.materias_obrigatorias) ? (dados.materias_obrigatorias as string[]) : []
-  const usuarioAutorizaComposicaoSemReferencia = dados.usuario_autoriza_composicao_sem_referencia === true
 
   const [contexto, proprietaryResult] = await Promise.all([
     buildMPContext(segmento, proibidas),
     buildProprietaryContext(segmento, descricao),
   ])
-
-  // Bloqueio do Modo Fechado desativado a pedido do usuário.
-  // O sistema agora gera a fórmula mesmo sem referência no banco proprietário.
-  // Quando há match forte, usa as MPs como referência; quando não há, gera livremente.
 
   // Quando há match forte no banco proprietário e o usuário não especificou MPs obrigatórias,
   // injeta as MPs da fórmula aprovada como obrigatórias no prompt — ativa a regra INVIOLÁVEL
@@ -242,7 +237,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const message = await getClient().messages.create({
     model: getModel(),
-    max_tokens: 4096,
+    max_tokens: 8096,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
@@ -337,7 +332,7 @@ export async function analisarFormula(formula: Record<string, unknown>) {
 
   const message = await getClient().messages.create({
     model: getModel(),
-    max_tokens: 4096,
+    max_tokens: 8096,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })

@@ -146,30 +146,9 @@ export default function NovaFormulacao() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, materias_proibidas: mpProib, materias_obrigatorias: mpObrig }),
       })
-      // Lê o corpo como texto primeiro (funciona mesmo se não for JSON)
-      const raw = await res.text()
-      if (!res.ok) {
-        // Tenta extrair mensagem de erro JSON; se falhar, usa mensagem amigável
-        let mensagem = 'Erro ao gerar formulação. Tente novamente.'
-        try {
-          const parsed = JSON.parse(raw)
-          if (parsed?.error) mensagem = String(parsed.error)
-        } catch {
-          // Resposta não é JSON — provavelmente timeout do servidor (504) ou erro de gateway
-          if (res.status === 504 || res.status === 502) {
-            mensagem = 'A geração demorou demais e o servidor encerrou a conexão. Tente novamente em alguns instantes.'
-          } else if (res.status >= 500) {
-            mensagem = 'Erro temporário no servidor. Tente novamente em alguns instantes.'
-          }
-        }
-        throw new Error(mensagem)
-      }
-      // Resposta OK: parseia como JSON com fallback amigável
-      try {
-        setResultado(JSON.parse(raw))
-      } catch {
-        throw new Error('A resposta do servidor está incompleta. Tente gerar novamente.')
-      }
+      if (!res.ok) throw new Error((await res.json()).error || 'Erro ao gerar formulação')
+      const data = await res.json()
+      setResultado(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado')
     } finally {
@@ -207,47 +186,12 @@ export default function NovaFormulacao() {
   async function refinar(instrucoes: string) {
     setLoading(true)
     try {
-      // Detecta se a chamada veio do botão "Prosseguir sem Referência"
-      const isAutorizacao = instrucoes === 'usuario_autoriza_composicao_sem_referencia'
-      const payload: Record<string, unknown> = {
-        ...form,
-        materias_proibidas: mpProib,
-        materias_obrigatorias: mpObrig,
-        formulacao_anterior: resultado,
-      }
-      if (isAutorizacao) {
-        // Autorização: envia o flag boolean (não como instrução de refinamento)
-        payload.usuario_autoriza_composicao_sem_referencia = true
-      } else {
-        // Refinamento normal
-        payload.refinamento = instrucoes
-      }
       const res = await fetch('/api/formulacao', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...form, materias_proibidas: mpProib, materias_obrigatorias: mpObrig, refinamento: instrucoes, formulacao_anterior: resultado }),
       })
-      // Lê o corpo como texto primeiro (funciona mesmo se não for JSON)
-      const raw = await res.text()
-      if (!res.ok) {
-        let mensagem = 'Erro ao refinar formulação. Tente novamente.'
-        try {
-          const parsed = JSON.parse(raw)
-          if (parsed?.error) mensagem = String(parsed.error)
-        } catch {
-          if (res.status === 504 || res.status === 502) {
-            mensagem = 'A geração demorou demais e o servidor encerrou a conexão. Tente novamente em alguns instantes.'
-          } else if (res.status >= 500) {
-            mensagem = 'Erro temporário no servidor. Tente novamente em alguns instantes.'
-          }
-        }
-        throw new Error(mensagem)
-      }
-      try {
-        setResultado(JSON.parse(raw))
-      } catch {
-        throw new Error('A resposta do servidor está incompleta. Tente novamente.')
-      }
+      setResultado(await res.json())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao refinar')
     } finally {

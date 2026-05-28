@@ -82,47 +82,6 @@ export function FormulacaoResult({ data, onSalvar, onRelatorio, onRefinar }: For
   }, 0)
   const temCustoReal = Object.values(custosReais).some(v => v !== '' && !isNaN(Number(v)))
 
-  // Detecta se foi recusado por falta de fórmula de referência (Modo Fechado)
-  const foiRecusadoPorFaltaDeReferencia = analise?.viabilidade === 'verificacao_recusada'
-  const motivoRecusa = String(analise?.motivo_recusa || 'Fórmula de Referência Não Encontrada')
-
-  // Quando recusado: mostra APENAS o alerta com botão para autorizar composição sem referência
-  if (foiRecusadoPorFaltaDeReferencia) {
-    return (
-      <div className="animate-fade-in-up">
-        <Card className="mb-6 border-yellow-500/50 bg-yellow-500/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-400">
-              <AlertTriangle size={20} />
-              Fórmula de Referência Não Encontrada
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-gray-300">
-              {motivoRecusa}
-            </p>
-            <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-              <p className="text-xs font-semibold text-yellow-300 mb-2">Como prosseguir:</p>
-              <p className="text-xs text-gray-300">
-                Clique no botão abaixo para que o sistema tente compor uma fórmula usando as matérias-primas disponíveis no banco.
-                A fórmula será gerada sem uma referência proprietária explícita.
-              </p>
-            </div>
-            {onRefinar && (
-              <Button
-                variant="primary"
-                onClick={() => onRefinar('usuario_autoriza_composicao_sem_referencia')}
-                className="w-full"
-              >
-                Prosseguir sem Referência (Autorizar Composição)
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   return (
     <div className="animate-fade-in-up">
       {/* Cabeçalho do resultado */}
