@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { chatContextual } from '@/lib/ai'
 
+// Aumenta o timeout máximo para 60s (limite do plano Hobby da Vercel)
+export const maxDuration = 60
+
 export async function POST(req: NextRequest) {
   try {
     const { mensagens, contexto } = await req.json()
