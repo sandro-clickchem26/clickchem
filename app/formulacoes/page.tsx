@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Archive, FlaskConical } from 'lucide-react'
+import { Archive, FlaskConical, Trash2, AlertTriangle } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
 import { FormulacaoResult } from '@/components/FormulacaoResult'
 import { gerarCodigoRelatorio } from '@/lib/utils'
@@ -43,6 +43,8 @@ export default function MinhasFormulacoes() {
   const [expandidos, setExpandidos] = useState<Set<string>>(new Set())
   const [busca, setBusca] = useState('')
   const [pdfLoading, setPdfLoading] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<FormulaSalva | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/formulacao/listar')
@@ -58,6 +60,24 @@ export default function MinhasFormulacoes() {
       s.has(id) ? s.delete(id) : s.add(id)
       return s
     })
+  }
+
+  async function handleDeletar(f: FormulaSalva) {
+    setDeletingId(f.id)
+    try {
+      const res = await fetch(`/api/formulacao/${f.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Erro ao deletar fórmula')
+      }
+      // Remove a fórmula da listagem local
+      setFormulas(prev => prev.filter(x => x.id !== f.id))
+      setConfirmDelete(null)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao deletar fórmula')
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   async function handleGerarPDF(f: FormulaSalva) {
@@ -199,6 +219,15 @@ export default function MinhasFormulacoes() {
                           {f.score_sustentab}/10
                         </Badge>
                       )}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setConfirmDelete(f) }}
+                        title="Deletar fórmula"
+                        aria-label="Deletar fórmula"
+                        className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                      >
+                        <Trash2 size={15} />
+                      </button>
                       <span className="text-gray-500 text-xs">{expandido ? '▲' : '▼'}</span>
                     </div>
                   </div>
@@ -226,6 +255,62 @@ export default function MinhasFormulacoes() {
             )}
           </div>
         </>
+      )}
+
+      {/* Modal de confirmação de delete */}
+      {confirmDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-fade-in-up"
+          onClick={() => !deletingId && setConfirmDelete(null)}
+        >
+          <div
+            className="bg-[#111f3a] border border-red-500/30 rounded-xl p-6 max-w-md w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0">
+                <AlertTriangle size={18} className="text-red-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-white font-semibold text-base mb-1">Deletar fórmula?</h3>
+                <p className="text-sm text-gray-400">
+                  Tem certeza que deseja deletar <span className="font-semibold text-gray-200">&quot;{confirmDelete.nome}&quot;</span>?
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Esta ação é <span className="font-semibold text-red-400">irreversível</span>. A fórmula será permanentemente removida.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(null)}
+                disabled={!!deletingId}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/5 transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeletar(confirmDelete)}
+                disabled={!!deletingId}
+                className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-500 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {deletingId === confirmDelete.id ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Deletando...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} />
+                    Deletar
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
