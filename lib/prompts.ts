@@ -79,7 +79,6 @@ ${(dados.materias_proibidas as string[]).map(mp => `  • ${mp}`).join('\n')}\n`
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 
 PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
-CONCISÃO OBRIGATÓRIA: textos curtos (1-2 frases), arrays com no máximo 3 itens, seja direto.
 ${obrigatorias}${proibidas}${contextoMPs ? `\nMPs DISPONÍVEIS:\n${contextoMPs}` : ''}
 
 Retorne APENAS JSON válido (sem markdown):

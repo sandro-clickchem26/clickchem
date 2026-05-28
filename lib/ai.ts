@@ -237,7 +237,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const message = await getClient().messages.create({
     model: getModel(),
-    max_tokens: 2000,
+    max_tokens: 4096,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
@@ -332,7 +332,7 @@ export async function analisarFormula(formula: Record<string, unknown>) {
 
   const message = await getClient().messages.create({
     model: getModel(),
-    max_tokens: 2000,
+    max_tokens: 4096,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
@@ -685,7 +685,7 @@ export async function analisarTendencias(segmento: string, tipo: string, descric
 
   const message = await getClient().messages.create({
     model: getModel(),
-    max_tokens: 2000,
+    max_tokens: 4096,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
