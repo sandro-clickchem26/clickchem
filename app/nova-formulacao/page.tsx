@@ -113,8 +113,11 @@ export default function NovaFormulacao() {
 
   function addObrig() {
     const v = novaMPObrig.trim()
-    if (!v || r.current.mpObrig.includes(v)) return
-    const n = [...r.current.mpObrig, v]
+    if (!v) return
+    // Aceita múltiplas MPs separadas por vírgula
+    const novas = v.split(',').map(s => s.trim()).filter(Boolean)
+    const n = [...r.current.mpObrig]
+    for (const mp of novas) { if (!n.includes(mp)) n.push(mp) }
     r.current.mpObrig = n
     setMpObrig(n)
     setNovaMPObrig('')

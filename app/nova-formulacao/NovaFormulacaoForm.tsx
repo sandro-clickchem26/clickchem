@@ -151,8 +151,11 @@ export default function NovaFormulacaoForm() {
 
   function adicionarMPObrigatoria() {
     const v = novaMPObrig.trim()
-    if (!v || materiasObrigatorias.includes(v)) return
-    const novas = [...materiasObrigatorias, v]
+    if (!v) return
+    // Aceita múltiplas MPs separadas por vírgula
+    const itens = v.split(',').map(s => s.trim()).filter(Boolean)
+    const novas = [...materiasObrigatorias]
+    for (const mp of itens) { if (!novas.includes(mp)) novas.push(mp) }
     setMateriasObrigatorias(novas)
     setNovaMPObrig('')
     salvarStorage({ materiasObrigatorias: novas })

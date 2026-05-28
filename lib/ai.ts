@@ -393,7 +393,10 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const segmento = String(dados.segmento || '')
   const descricao = String(dados.descricao || '')
   const proibidas = Array.isArray(dados.materias_proibidas) ? (dados.materias_proibidas as string[]) : []
-  const userObrigatorias = Array.isArray(dados.materias_obrigatorias) ? (dados.materias_obrigatorias as string[]) : []
+  // Garante array de MPs individuais — separa caso venha como "A, B, C" num único item
+  const userObrigatorias = (Array.isArray(dados.materias_obrigatorias)
+    ? (dados.materias_obrigatorias as string[])
+    : []).flatMap(mp => mp.split(',').map(s => s.trim()).filter(Boolean))
 
   const [contexto, proprietaryResult, docsContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
