@@ -102,6 +102,10 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
       setErro('Formato não suportado. Use PDF, Word (.docx) ou Excel (.xlsx).')
       return
     }
+    if (file.size > 4 * 1024 * 1024) {
+      setErro(`Arquivo muito grande (${(file.size / 1024 / 1024).toFixed(1)} MB). Limite: 4 MB. Comprima o PDF ou divida o documento.`)
+      return
+    }
     setLoading(true)
     setErro(null)
     setPreview(null)
@@ -857,6 +861,10 @@ function DocsCientificos({ pin }: { pin: string }) {
   async function enviar() {
     if (!arquivo) { setErro('Selecione um arquivo'); return }
     if (!form.titulo.trim()) { setErro('Título é obrigatório'); return }
+    if (arquivo.size > 4 * 1024 * 1024) {
+      setErro(`Arquivo muito grande (${(arquivo.size / 1024 / 1024).toFixed(1)} MB). Limite: 4 MB. Comprima o PDF ou divida o documento.`)
+      return
+    }
     setUploading(true); setErro(null); setSucesso(null)
     try {
       const fd = new FormData()
