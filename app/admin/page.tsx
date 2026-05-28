@@ -835,6 +835,7 @@ function DocsCientificos({ pin }: { pin: string }) {
   const [sucesso, setSucesso] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
   const [arquivo, setArquivo] = useState<File | null>(null)
+  const [extraindo, setExtraindo] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState({
     titulo: '', autores: '', ano: '', fonte: '', segmento: SEGMENTOS[0], tags: '', resumo: '',
@@ -852,14 +853,38 @@ function DocsCientificos({ pin }: { pin: string }) {
 
   useEffect(() => { carregar() }, [carregar])
 
-  function aplicarArquivo(f: File) {
+  async function aplicarArquivo(f: File) {
     setArquivo(f)
-    setForm(p => ({
-      ...p,
-      titulo: p.titulo.trim()
-        ? p.titulo
-        : f.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim(),
-    }))
+    // Preenche título imediatamente com nome do arquivo como fallback
+    const nomeBase = f.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim()
+    setForm(p => ({ ...p, titulo: p.titulo.trim() ? p.titulo : nomeBase }))
+
+    // Extrai metadados via IA em paralelo (apenas se tamanho ok)
+    if (f.size <= 4 * 1024 * 1024) {
+      setExtraindo(true)
+      try {
+        const fd = new FormData()
+        fd.append('file', f)
+        const res = await fetch('/api/admin/documentos/extrair-metadados', {
+          method: 'POST',
+          headers: { 'x-admin-pin': pin },
+          body: fd,
+        })
+        if (res.ok) {
+          const meta = await res.json() as Record<string, unknown>
+          setForm(p => ({
+            titulo: (meta.titulo as string) || p.titulo,
+            autores: (meta.autores as string) || p.autores,
+            ano: meta.ano ? String(meta.ano) : p.ano,
+            fonte: (meta.fonte as string) || p.fonte,
+            segmento: p.segmento,
+            tags: Array.isArray(meta.tags) ? (meta.tags as string[]).join(', ') : p.tags,
+            resumo: (meta.resumo as string) || p.resumo,
+          }))
+        }
+      } catch { /* ignora — campos ficam com valores do usuário */ }
+      finally { setExtraindo(false) }
+    }
   }
 
   function onDrop(e: React.DragEvent) {
@@ -946,6 +971,14 @@ function DocsCientificos({ pin }: { pin: string }) {
             </>
           )}
         </div>
+
+        {/* Indicador extração */}
+        {extraindo && (
+          <div className="flex items-center gap-2 text-xs text-blue-400 mb-3 px-1">
+            <div className="w-3 h-3 border border-blue-400/40 border-t-blue-400 rounded-full animate-spin shrink-0" />
+            Extraindo metadados do documento com IA...
+          </div>
+        )}
 
         {/* Metadados */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
