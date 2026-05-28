@@ -76,38 +76,12 @@ ${(dados.materias_proibidas as string[]).map(mp => `  • ${mp}`).join('\n')}\n`
 
   const tipoProduto = String(dados.descricao || '').split(/[,.\n]/)[0].trim()
 
-  return `DADOS DA SOLICITAÇÃO:
-${JSON.stringify(dados, null, 2)}
+  return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 
-🔒 REGRA ABSOLUTA E INVIOLÁVEL — TIPO DE PRODUTO:
-O usuário solicitou: "${tipoProduto}"
-Você DEVE formular EXATAMENTE este tipo de produto. NÃO substitua, NÃO renomeie e NÃO reclassifique.
-Se foi pedido um DECAPANTE → formule um decapante (remove tinta/revestimento, usa ácidos ou solventes específicos).
-Se foi pedido um DESENGRAXANTE → formule um desengraxante.
-Se foi pedido um LUBRIFICANTE → formule um lubrificante.
-O campo "nome_sugerido" DEVE conter o tipo exato solicitado com um nome de marca criativo (ex: "ChemiClean Pro ME-1", "EcoStrip Industrial", "PowerRemove Forte").
-🚫 REGRA INVIOLÁVEL ABSOLUTA — NOME DO PRODUTO (REPITA ESTA REGRA 3 VEZES):
-1️⃣ NUNCA, NUNCA, NUNCA use a palavra "Astana" em QUALQUER variação no nome_sugerido
-2️⃣ NUNCA use: Astana, AstanaClean, AstanaStrip, AstanaLub, Astana Química, ou qualquer derivado
-3️⃣ SEMPRE invente um nome de marca CRIATIVO e ORIGINAL que reflita a FUNÇÃO do produto
-Exemplos CORRETOS: "ChemiClean Pro", "PowerStrip", "EcoLube", "SurfaceShield", "DegreaseForce", "IndustrialMax"
-Exemplos PROIBIDOS: "AstanaClean", "AstanaStrip", "AstanaLub" — BLOQUEADO ABSOLUTAMENTE
-PROIBIDO: renomear o produto para outro tipo durante a análise crítica ou formulação.
-${obrigatorias}${proibidas}${contextoMPs ? `\nMATÉRIAS-PRIMAS DISPONÍVEIS NO BANCO (selecione as adequadas ao tipo de produto solicitado):\n${contextoMPs}` : ''}
+PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
+${obrigatorias}${proibidas}${contextoMPs ? `\nMPs DISPONÍVEIS:\n${contextoMPs}` : ''}
 
-Siga rigorosamente este processo:
-
-FASE 1 — ANÁLISE CRÍTICA DO PROBLEMA (OBRIGATÓRIA antes de formular):
-1. O tipo de produto solicitado ("${tipoProduto}") está claro? Se sim, confirme que vai formular exatamente este tipo.
-2. Quais são as variáveis críticas para ESTE tipo específico de produto?
-3. Incompatibilidades químicas a evitar para ESTE tipo?
-4. Restrições regulatórias para ESTE tipo?
-5. Qual abordagem química é mais adequada para ESTE tipo?
-
-FASE 2 — FORMULAÇÃO:
-Com base na análise crítica, proponha a formulação completa do "${tipoProduto}" solicitado.
-
-Retorne APENAS o seguinte JSON válido (sem markdown, sem texto extra):
+Retorne APENAS JSON válido (sem markdown):
 
 {
   "analise_critica": {
