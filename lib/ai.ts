@@ -264,14 +264,31 @@ function filtrarMPsNaoAutorizadas(resultado: unknown, obrigatorias: string[]): u
 
     const obrigNorm = obrigatorias.map(norm)
 
-    const filtrada = composicao.filter(c => {
-      const nome = norm(String(c.materia_prima || ''))
-      // Aceita se o nome do componente contém a MP obrigatória ou vice-versa (match parcial)
-      return obrigNorm.some(ob => nome.includes(ob) || ob.includes(nome) || nome.split(' ').some(w => w.length > 3 && ob.includes(w)))
-    })
+    // Verifica se um componente da IA corresponde a alguma MP obrigatória
+    function isAutorizado(nomeComp: string): boolean {
+      const nome = norm(nomeComp)
+      return obrigNorm.some(ob => {
+        if (nome.includes(ob) || ob.includes(nome)) return true
+        // Match por palavras significativas (evita rejeitar "Lauril Éter Sulfato de Sódio 70%" quando lista tem "Lauril Éter Sulfato de Sódio")
+        const palavrasOb = ob.split(/\s+/).filter(w => w.length > 3)
+        const palavrasNome = nome.split(/\s+/).filter(w => w.length > 3)
+        if (palavrasOb.length === 0) return false
+        const matches = palavrasOb.filter(w => nome.includes(w)).length
+        // Aceita se ≥60% das palavras da MP obrigatória aparecem no nome do componente
+        return matches / palavrasOb.length >= 0.6 ||
+          // OU se ≥60% das palavras do componente aparecem na MP obrigatória
+          (palavrasNome.length > 0 && palavrasNome.filter(w => ob.includes(w)).length / palavrasNome.length >= 0.6)
+      })
+    }
 
-    // Segurança: se filtro removeu tudo, retorna original
-    if (filtrada.length === 0) return resultado
+    const filtrada = composicao.filter(c => isAutorizado(String(c.materia_prima || '')))
+
+    // Segurança: se o filtro removeu alguma MP que deveria estar (falso negativo),
+    // abortamos o filtro e retornamos o original — melhor ter extras do que faltar obrigatórias
+    const todasObrigPresentes = obrigNorm.every(ob =>
+      filtrada.some(c => isAutorizado(String(c.materia_prima || '')))
+    )
+    if (!todasObrigPresentes || filtrada.length === 0) return resultado
 
     return { ...r, formulacao: { ...formulacao, composicao: filtrada } }
   } catch {
@@ -372,7 +389,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const message = await getClient().messages.create({
     model: getModel(),
-    max_tokens: 4096,
+    max_tokens: 6000,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
