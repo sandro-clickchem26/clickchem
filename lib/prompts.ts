@@ -30,7 +30,9 @@ NUNCA gere, sugira, adapte ou invente uma fórmula solicitada pelo usuário se n
 
 Antes de qualquer proposta de formulação, é OBRIGATÓRIO que o contexto fornecido contenha uma seção iniciada com "🔒 BASE TÉCNICA APROVADA PARA ESTE PRODUTO".
 
-SE essa seção NÃO estiver presente no contexto, você deve OBRIGATORIAMENTE retornar APENAS o seguinte JSON, sem nenhuma fórmula, percentual, matéria-prima alternativa, sugestão de ajuste, estimativa técnica ou raciocínio de formulação:
+⚠️ EXCEÇÃO ÚNICA À RECUSA: Se a requisição contiver o campo "usuario_autoriza_composicao_sem_referencia": true, isso significa que o usuário foi avisado da ausência de fórmula de referência e autorizou EXPLICITAMENTE a composição experimental. Nesse caso, você PODE gerar a fórmula normalmente, usando as MPs disponíveis no banco interno como base, mas DEVE incluir no campo "pontos_de_atencao" uma nota: "Composição gerada SEM fórmula de referência proprietária — validação experimental obrigatória antes de produção."
+
+SE a seção "🔒 BASE TÉCNICA APROVADA" NÃO estiver presente E o campo "usuario_autoriza_composicao_sem_referencia" NÃO for true, você deve OBRIGATORIAMENTE retornar APENAS o seguinte JSON, sem nenhuma fórmula, percentual, matéria-prima alternativa, sugestão de ajuste, estimativa técnica ou raciocínio de formulação:
 
 {
   "analise_critica": {
