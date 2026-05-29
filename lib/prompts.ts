@@ -74,9 +74,11 @@ REGRAS ABSOLUTAS:
     : ''
 
   const proibidas = Array.isArray(dados.materias_proibidas) && dados.materias_proibidas.length > 0
-    ? `\n🚫 REGRA INVIOLÁVEL — MATÉRIAS-PRIMAS PROIBIDAS:
-NUNCA inclua as seguintes MPs na formulação, independentemente de qualquer justificativa técnica:
-${(dados.materias_proibidas as string[]).map(mp => `  • ${mp}`).join('\n')}\n`
+    ? `\n🚫 REGRA ABSOLUTA E INVIOLÁVEL — MATÉRIAS-PRIMAS PROIBIDAS:
+Esta lista tem PRIORIDADE MÁXIMA sobre qualquer referência técnica, banco interno, fonte externa ou internet.
+NUNCA inclua estas MPs na composição. Se elas aparecerem em qualquer referência ou contexto, IGNORE-AS e use alternativas:
+${(dados.materias_proibidas as string[]).map(mp => `  ❌ ${mp}`).join('\n')}
+Se não houver alternativa viável, formule com o que estiver disponível e sinalize na análise crítica.\n`
     : ''
 
   const tipoProduto = String(dados.descricao || '').split(/[,.\n]/)[0].trim()

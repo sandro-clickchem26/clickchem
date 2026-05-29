@@ -84,12 +84,14 @@ async function buildMPContext(segmento: string, restricoes: string[] = []): Prom
 
 interface ProprietaryResult {
   context: string
-  mandatoryMPs: string[]  // nomes das MPs a injetar como obrigatórias (vazio se sem match forte)
+  mandatoryMPs: string[]
+  hasStrongMatch: boolean  // true quando há match forte no banco proprietário (score ≥ 4)
 }
 
-async function buildProprietaryContext(segmento: string, descricao = ''): Promise<ProprietaryResult> {
-  const vazio: ProprietaryResult = { context: '', mandatoryMPs: [] }
+async function buildProprietaryContext(segmento: string, descricao = '', proibidas: string[] = []): Promise<ProprietaryResult> {
+  const vazio: ProprietaryResult = { context: '', mandatoryMPs: [], hasStrongMatch: false }
   try {
+    const normProib = proibidas.map(p => removeAccents(String(p).toLowerCase()))
     const formulas = await prisma.formulaProprietaria.findMany({
       where: { ativa: true },
     })
@@ -141,6 +143,7 @@ async function buildProprietaryContext(segmento: string, descricao = ''): Promis
       return {
         context: `\nMPs UTILIZADAS EM PRODUTOS APROVADOS DA ASTANA (considere como candidatas):\n${linhas}\n`,
         mandatoryMPs: [],
+        hasStrongMatch: false,
       }
     }
 
@@ -151,21 +154,61 @@ async function buildProprietaryContext(segmento: string, descricao = ''): Promis
       composicao = JSON.parse(f.composicao) as Array<{ materia_prima: string; funcao: string }>
     } catch { /* ignora */ }
 
-    // Nomes das MPs para injetar como obrigatórias (sem percentuais — confidencialidade mantida)
-    const mpNames = composicao.map(c => c.materia_prima).filter(Boolean)
+    const mpNomes = composicao.map(c => c.materia_prima).filter(Boolean)
 
-    const linhasComp = composicao.map(c => `  • ${c.materia_prima} — ${c.funcao}`).join('\n')
+    // Se a maioria das MPs da fórmula proprietária está na lista de proibidas,
+    // o match não serve — anula e deixa a busca web atuar
+    if (normProib.length > 0 && mpNomes.length > 0) {
+      const proibidasNaFormula = mpNomes.filter(mp => {
+        const mpNorm = removeAccents(mp.toLowerCase())
+        return normProib.some(p => mpNorm.includes(p) || p.includes(mpNorm))
+      })
+      const percentualProibido = proibidasNaFormula.length / mpNomes.length
+      if (percentualProibido >= 0.5) return vazio  // ≥ 50% proibidas → ignora este match
+    }
 
-    const context = `\n🔒 BASE TÉCNICA APROVADA PARA ESTE PRODUTO (banco interno Astana Química):
+    // Filtra MPs de alta toxicidade — não devem ser auto-sugeridas como referência aprovada
+    let altaToxicidadeNomes = new Set<string>()
+    try {
+      if (mpNomes.length === 0) throw new Error('sem MPs')
+      const mpsDb = await prisma.materiaPrima.findMany({
+        where: {
+          OR: mpNomes.flatMap(nome => [
+            { nome_comercial: { contains: nome, mode: 'insensitive' as const } },
+            { nome_quimico: { contains: nome, mode: 'insensitive' as const } },
+          ]),
+          nivel_toxicidade: 'alto',
+        },
+        select: { nome_comercial: true, nome_quimico: true },
+      })
+      for (const mp of mpsDb) {
+        altaToxicidadeNomes.add(mp.nome_comercial.toLowerCase())
+        if (mp.nome_quimico) altaToxicidadeNomes.add(mp.nome_quimico.toLowerCase())
+      }
+    } catch { /* ignora — usa lista completa se DB falhar */ }
+
+    // Só usa MPs de baixa/média toxicidade e não-proibidas como referência de contexto
+    const composicaoSegura = composicao.filter(c => {
+      const nomeNorm = removeAccents(c.materia_prima.toLowerCase())
+      const eAlta = Array.from(altaToxicidadeNomes).some(alto => nomeNorm.includes(alto) || alto.includes(nomeNorm))
+      const eProibida = normProib.some(p => nomeNorm.includes(p) || p.includes(nomeNorm))
+      return !eAlta && !eProibida
+    })
+
+    if (composicaoSegura.length === 0) return vazio
+
+    const linhasComp = composicaoSegura.map(c => `  • ${c.materia_prima} — ${c.funcao}`).join('\n')
+
+    const context = `\nREFERÊNCIA INTERNA ASTANA — produto similar aprovado (use como inspiração, não como regra):
 Aplicação: ${f.aplicacao}
-Matérias-primas aprovadas e comprovadas para este tipo de produto:
+Ingredientes de referência:
 ${linhasComp}
-${f.ph_final ? `pH alvo comprovado: ${f.ph_final}` : ''}
-${f.viscosidade ? `Viscosidade esperada: ${f.viscosidade}` : ''}
-${f.performance_chave ? `Performance comprovada: ${f.performance_chave}` : ''}
+${f.ph_final ? `pH de referência: ${f.ph_final}` : ''}
+${f.viscosidade ? `Viscosidade de referência: ${f.viscosidade}` : ''}
+${f.performance_chave ? `Performance esperada: ${f.performance_chave}` : ''}
 `
 
-    return { context, mandatoryMPs: mpNames }
+    return { context, mandatoryMPs: [], hasStrongMatch: true }
   } catch {
     return vazio
   }
@@ -389,6 +432,76 @@ function fecharPercentuais(resultado: unknown): unknown {
   }
 }
 
+// Busca na internet quando não há match no banco proprietário
+// Usa Tavily API (TAVILY_API_KEY no .env) — silencioso se chave não configurada
+async function buildWebContext(segmento: string, descricao: string, proibidas: string[] = []): Promise<string> {
+  try {
+    const apiKey = (process.env.TAVILY_API_KEY || '').trim()
+    if (!apiKey) return ''
+
+    // Se há MPs proibidas, busca especificamente por alternativas sem elas
+    const exclusoes = proibidas.length > 0
+      ? ` alternativas sem ${proibidas.slice(0, 3).join(' sem ')}`
+      : ''
+    const query = `fórmula química ${descricao} ${segmento} composição matérias-primas técnica industrial${exclusoes}`
+
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(), 10000)
+
+    const res = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: apiKey,
+        query,
+        search_depth: 'basic',
+        max_results: 5,
+        include_answer: true,
+        include_raw_content: false,
+      }),
+      signal: controller.signal,
+    })
+
+    if (!res.ok) return ''
+
+    const data = await res.json() as {
+      answer?: string
+      results?: Array<{ title: string; content: string; url: string; score: number }>
+    }
+
+    const partes: string[] = []
+
+    // Resposta sintetizada pelo Tavily (quando disponível)
+    if (data.answer && data.answer.length > 50) {
+      partes.push(`Síntese técnica:\n${data.answer.slice(0, 600)}`)
+    }
+
+    // Top resultados com conteúdo extraído
+    const resultados = (data.results ?? [])
+      .filter(r => r.score > 0.3 && r.content && r.content.length > 80)
+      .slice(0, 4)
+      .map(r => `• ${r.title}\n  ${r.content.slice(0, 350)}`)
+
+    if (resultados.length > 0) {
+      partes.push(resultados.join('\n'))
+    }
+
+    if (partes.length === 0) return ''
+
+    // Aviso explícito para a IA respeitar as proibidas mesmo no contexto externo
+    const avisoProibidas = proibidas.length > 0
+      ? `\n⛔ ATENÇÃO: Mesmo que as referências abaixo citem estes ingredientes, eles são ABSOLUTAMENTE PROIBIDOS nesta formulação e NÃO devem aparecer na composição: ${proibidas.join(', ')}\n`
+      : ''
+
+    return `\nREFERÊNCIAS TÉCNICAS DA INTERNET (use como base — as restrições do usuário prevalecem sobre qualquer fonte externa):
+${avisoProibidas}
+${partes.join('\n\n')}
+`
+  } catch {
+    return '' // silencioso — busca externa é complemento, não requisito
+  }
+}
+
 export async function gerarFormulacao(dados: Record<string, unknown>) {
   const segmento = String(dados.segmento || '')
   const descricao = String(dados.descricao || '')
@@ -400,19 +513,28 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const [contexto, proprietaryResult, docsContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
-    buildProprietaryContext(segmento, descricao),
+    buildProprietaryContext(segmento, descricao, proibidas),
     buildDocumentosContext(segmento, descricao),
   ])
 
-  // Quando há match forte no banco proprietário e o usuário não especificou MPs obrigatórias,
-  // injeta as MPs da fórmula aprovada como obrigatórias no prompt — ativa a regra INVIOLÁVEL
-  // que garante que a IA use exatamente estas MPs (apenas nomes, sem percentuais — confidencialidade mantida)
-  const dadosFinais: Record<string, unknown> = { ...dados }
-  if (proprietaryResult.mandatoryMPs.length > 0 && userObrigatorias.length === 0) {
-    dadosFinais.materias_obrigatorias = proprietaryResult.mandatoryMPs
+  // Busca na internet apenas quando não há match forte no banco proprietário
+  let webContext = ''
+  if (!proprietaryResult.hasStrongMatch) {
+    try { webContext = await buildWebContext(segmento, descricao, proibidas) } catch { webContext = '' }
   }
 
-  const prompt = buildFormulacaoPrompt(dadosFinais, contexto + proprietaryResult.context + docsContext)
+  // Contexto proprietário é passado apenas como inspiração/referência —
+  // NUNCA como MPs obrigatórias, pois isso causaria injeção de químicos inadequados em outras fórmulas.
+  // Apenas o usuário pode definir MPs obrigatórias via interface.
+  const dadosFinais: Record<string, unknown> = { ...dados }
+
+  // Ativa flag de pesquisa externa quando há contexto web — sem isso o system prompt
+  // bloqueia o uso de fontes externas e o AI não gera JSON válido
+  if (webContext) {
+    dadosFinais.pesquisa_internet_ativa = true
+  }
+
+  const prompt = buildFormulacaoPrompt(dadosFinais, contexto + proprietaryResult.context + docsContext + webContext)
 
   const message = await getClient().messages.create({
     model: getModel(),

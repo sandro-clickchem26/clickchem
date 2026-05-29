@@ -16,7 +16,17 @@ export async function POST(req: NextRequest) {
     const resultado = await gerarFormulacao(body)
     return NextResponse.json(resultado)
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Erro interno do servidor'
+    // Log completo no servidor para diagnóstico
+    console.error('[formulacao/route] ERRO:', err)
+
+    let msg: string
+    if (err instanceof Error) {
+      msg = err.message
+    } else if (typeof err === 'string') {
+      msg = err
+    } else {
+      try { msg = JSON.stringify(err) } catch { msg = 'Erro interno do servidor' }
+    }
 
     if (msg.includes('API key') || msg.includes('authentication')) {
       return NextResponse.json(

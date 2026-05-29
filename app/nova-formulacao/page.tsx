@@ -154,7 +154,12 @@ export default function NovaFormulacao() {
         let mensagem = 'Erro ao gerar formulação. Tente novamente.'
         try {
           const parsed = JSON.parse(raw)
-          if (parsed?.error) mensagem = String(parsed.error)
+          const e = parsed?.error
+          if (e) {
+            if (typeof e === 'string') mensagem = e
+            else if (typeof e?.message === 'string') mensagem = e.message
+            else mensagem = JSON.stringify(e)
+          }
         } catch {
           if (res.status === 504 || res.status === 502) {
             mensagem = 'A geração demorou demais e o servidor encerrou a conexão. Tente novamente em alguns instantes.'
@@ -170,7 +175,7 @@ export default function NovaFormulacao() {
         throw new Error('A resposta do servidor está incompleta. Tente gerar novamente.')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro inesperado')
+      setError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
     }
@@ -211,9 +216,27 @@ export default function NovaFormulacao() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, materias_proibidas: mpProib, materias_obrigatorias: mpObrig, refinamento: instrucoes, formulacao_anterior: resultado }),
       })
-      setResultado(await res.json())
+      const raw = await res.text()
+      if (!res.ok) {
+        let mensagem = 'Erro ao refinar formulação. Tente novamente.'
+        try {
+          const parsed = JSON.parse(raw)
+          const e = parsed?.error
+          if (e) {
+            if (typeof e === 'string') mensagem = e
+            else if (typeof e?.message === 'string') mensagem = e.message
+            else mensagem = JSON.stringify(e)
+          }
+        } catch { /* ignora — usa mensagem padrão */ }
+        throw new Error(mensagem)
+      }
+      try {
+        setResultado(JSON.parse(raw))
+      } catch {
+        throw new Error('A resposta do servidor está incompleta. Tente novamente.')
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao refinar')
+      setError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
     }
