@@ -82,11 +82,18 @@ Se não houver alternativa viável, formule com o que estiver disponível e sina
     : ''
 
   const tipoProduto = String(dados.descricao || '').split(/[,.\n]/)[0].trim()
+  const buscaInternetAtiva = dados.pesquisa_internet_ativa === true
+
+  const secaoMPs = contextoMPs
+    ? buscaInternetAtiva
+      ? `\nREFERÊNCIA DO BANCO INTERNO (MPs disponíveis localmente):\n${contextoMPs}\n\n🌐 MODO INTERNET ATIVO: Você DEVE usar as MPs mencionadas nas REFERÊNCIAS TÉCNICAS DA INTERNET acima, mesmo que não constem no banco interno. Priorize a composição encontrada na internet para este produto. As MPs do banco interno são apenas referência secundária — use-as apenas se a internet não tiver informação suficiente.`
+      : `\nMPs DISPONÍVEIS:\n${contextoMPs}`
+    : ''
 
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 
 PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
-${obrigatorias}${proibidas}${contextoMPs ? `\nMPs DISPONÍVEIS:\n${contextoMPs}` : ''}
+${obrigatorias}${proibidas}${secaoMPs}
 
 ⚠️ REGRA MATEMÁTICA ABSOLUTA — FECHAMENTO EM 100%:
 A soma de TODOS os valores "percentual_recomendado" da composição DEVE ser EXATAMENTE 100,0%.
