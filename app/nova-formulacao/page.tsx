@@ -81,6 +81,7 @@ const TIPOS_SISTEMA_RESINA = [
   { value: 'Nitrocelulose', label: 'Nitrocelulose' },
   { value: 'Poliuretano 2K', label: 'Poliuretano 2K' },
   { value: 'Poliuretano monocomponente', label: 'Poliuretano monocomponente' },
+  { value: 'Resinas Amínicas', label: 'Resinas Amínicas' },
   { value: 'Outro sistema', label: 'Outro sistema' },
 ]
 
