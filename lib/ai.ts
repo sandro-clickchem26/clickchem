@@ -108,9 +108,17 @@ async function buildProprietaryContext(segmento: string, descricao = '', proibid
       let score = 0
       const textoFormula = norm(`${f.segmento} ${f.aplicacao} ${f.nome_interno} ${f.tags || ''}`)
 
-      // Match de segmento (normalizado)
-      if (norm(f.segmento).includes(norm(segmento)) ||
-          norm(segmento).includes(norm(f.segmento))) score += 3
+      // Match de segmento (normalizado) — compatível com segmentos renomeados
+      const segNorm = norm(segmento)
+      const fSegNorm = norm(f.segmento)
+      const segMatch = fSegNorm.includes(segNorm) || segNorm.includes(fSegNorm)
+      // Compatibilidade com segmentos que foram desmembrados do antigo "Tintas, Vernizes, Resinas e Polímeros"
+      const segCompat =
+        (segNorm.includes('resina') || segNorm.includes('polimero')) &&
+        (fSegNorm.includes('resina') || fSegNorm.includes('polimero') || fSegNorm.includes('tinta')) ||
+        (segNorm.includes('tinta') || segNorm.includes('verniz')) &&
+        (fSegNorm.includes('tinta') || fSegNorm.includes('verniz') || fSegNorm.includes('resina'))
+      if (segMatch || segCompat) score += 3
 
       // Match de cada palavra-chave da descrição (normalizado)
       for (const kw of palavrasChave) {
