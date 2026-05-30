@@ -468,10 +468,11 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     buildDocumentosContext(segmento, descricao),
   ])
 
-  // Busca externa: somente quando não é Tintas e Vernizes (que exige somente banco interno)
-  // A IA decide se o banco P&D tem algo compatível — se não, usa a referência externa
+  // Busca externa: SOMENTE quando o banco P&D não tem fórmulas para o segmento
+  // e o segmento não é Tintas e Vernizes (que exige exclusivamente banco interno)
+  // Ordem obrigatória: P&D primeiro → internet apenas como segunda camada
   let webContext = ''
-  if (!isTintasVernizes) {
+  if (!isTintasVernizes && !proprietaryResult.hasFormulas) {
     try { webContext = await buildWebContext(segmento, descricao, proibidas) } catch { webContext = '' }
   }
 

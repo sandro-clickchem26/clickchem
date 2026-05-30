@@ -51,6 +51,8 @@ export function FormulacaoResult({ data, onSalvar, onRelatorio, onRefinar }: For
 
   const analise = data.analise_critica as Record<string, unknown> | undefined
   const formulacao = data.formulacao as Record<string, unknown> | undefined
+  const fonte = String(data.fonte || '')
+  const formulaReferencia = String(data.formula_referencia || '')
   const processo = data.processo_fabricacao as Record<string, unknown> | undefined
   const cq = data.controle_qualidade as Record<string, unknown> | undefined
   const riscos = data.riscos_tecnicos as Array<Record<string, unknown>> | undefined
@@ -89,6 +91,25 @@ export function FormulacaoResult({ data, onSalvar, onRelatorio, onRefinar }: For
         <div>
           <h2 className="text-2xl font-bold text-white">{String(formulacao?.nome_sugerido || 'Formulação Gerada')}</h2>
           <p className="text-gray-400 mt-1 text-sm">{String(formulacao?.descricao_tecnica || '')}</p>
+          {fonte && (
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
+                fonte === 'P&D Proprietário'
+                  ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
+                  : fonte === 'Busca Externa Técnica'
+                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                  : 'bg-gray-500/15 border-gray-500/40 text-gray-400'
+              }`}>
+                {fonte === 'P&D Proprietário' ? '🏭' : fonte === 'Busca Externa Técnica' ? '🌐' : '📋'}
+                {' '}Fonte: {fonte}
+              </span>
+              {formulaReferencia && formulaReferencia !== 'null' && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-white/5 border border-white/10 text-gray-400">
+                  Ref: {formulaReferencia}
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex gap-2 flex-wrap">
           {onRefinar && (
