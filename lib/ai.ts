@@ -404,7 +404,7 @@ async function buildWebContext(segmento: string, descricao: string, proibidas: s
     const query = `fórmula química ${descricao} ${segmento} composição matérias-primas técnica industrial${exclusoes}`
 
     const controller = new AbortController()
-    setTimeout(() => controller.abort(), 10000)
+    setTimeout(() => controller.abort(), 5000)
 
     const res = await fetch('https://api.tavily.com/search', {
       method: 'POST',
@@ -470,20 +470,15 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const isTintasVernizes = segmento === 'Tintas e Vernizes'
 
-  // Busca contexto: banco de MPs, banco P&D proprietário e documentos científicos em paralelo
-  const [contexto, proprietaryResult, docsContext] = await Promise.all([
+  // Todas as consultas em paralelo — reduz tempo total antes da chamada à IA
+  const [contexto, proprietaryResult, docsContext, webContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
     buildProprietaryContext(segmento),
     buildDocumentosContext(segmento, descricao),
+    isTintasVernizes
+      ? Promise.resolve('')
+      : buildWebContext(segmento, descricao, proibidas).catch(() => ''),
   ])
-
-  // Busca externa: segunda camada obrigatória quando não é Tintas e Vernizes
-  // O prompt instrui a IA a usar Tavily SOMENTE se nenhuma fórmula do P&D for compatível
-  // Isso implementa a ordem: P&D primeiro → internet só se P&D não resolver
-  let webContext = ''
-  if (!isTintasVernizes) {
-    try { webContext = await buildWebContext(segmento, descricao, proibidas) } catch { webContext = '' }
-  }
 
   const dadosFinais: Record<string, unknown> = { ...dados }
   if (webContext) dadosFinais.pesquisa_internet_ativa = true
@@ -492,7 +487,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const message = await getClient().messages.create({
     model: getModel(),
-    max_tokens: 8000,
+    max_tokens: 6000,
     temperature: 0,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
