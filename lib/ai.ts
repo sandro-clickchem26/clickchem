@@ -84,142 +84,80 @@ async function buildMPContext(segmento: string, restricoes: string[] = []): Prom
 
 interface ProprietaryResult {
   context: string
-  mandatoryMPs: string[]
-  hasStrongMatch: boolean  // true quando há match forte no banco proprietário (score ≥ 4)
+  hasFormulas: boolean  // true se há fórmulas no banco (independente de compatibilidade)
 }
 
-async function buildProprietaryContext(segmento: string, descricao = '', proibidas: string[] = []): Promise<ProprietaryResult> {
-  const vazio: ProprietaryResult = { context: '', mandatoryMPs: [], hasStrongMatch: false }
+// Monta o contexto do banco P&D para a IA avaliar compatibilidade
+// A IA — não um algoritmo de score — decide qual fórmula usar e se é compatível
+async function buildProprietaryContext(segmento: string): Promise<ProprietaryResult> {
+  const vazio: ProprietaryResult = { context: '', hasFormulas: false }
   try {
-    const normProib = proibidas.map(p => removeAccents(String(p).toLowerCase()))
     const formulas = await prisma.formulaProprietaria.findMany({
       where: { ativa: true },
+      orderBy: { createdAt: 'desc' },
     })
     if (formulas.length === 0) return vazio
 
-    // Normaliza acentos para matching robusto em português (ex: "elétrico" → "eletrico")
+    // Filtra primeiro por segmento (pré-filtro amplo para não sobrecarregar o contexto)
+    // Compatível com segmentos renomeados (ex: "Tintas e Vernizes" ↔ "Tintas, Vernizes, Resinas e Polímeros")
     const norm = (s: string) => removeAccents(s.toLowerCase())
+    const segNorm = norm(segmento)
 
-    // Palavras-chave da descrição normalizadas (> 2 chars)
-    const palavrasChave = norm(descricao).split(/\s+/).filter(w => w.length > 2)
-
-    // Score de relevância com normalização de acentos
-    const comScore = formulas.map(f => {
-      let score = 0
-      const textoFormula = norm(`${f.segmento} ${f.aplicacao} ${f.nome_interno} ${f.tags || ''}`)
-
-      // Match de segmento (normalizado) — compatível com segmentos renomeados
-      const segNorm = norm(segmento)
-      const fSegNorm = norm(f.segmento)
-      const segMatch = fSegNorm.includes(segNorm) || segNorm.includes(fSegNorm)
-      // Compatibilidade com segmentos que foram desmembrados do antigo "Tintas, Vernizes, Resinas e Polímeros"
-      const segCompat =
-        (segNorm.includes('resina') || segNorm.includes('polimero')) &&
-        (fSegNorm.includes('resina') || fSegNorm.includes('polimero') || fSegNorm.includes('tinta')) ||
-        (segNorm.includes('tinta') || segNorm.includes('verniz')) &&
-        (fSegNorm.includes('tinta') || fSegNorm.includes('verniz') || fSegNorm.includes('resina'))
-      if (segMatch || segCompat) score += 3
-
-      // Match de cada palavra-chave da descrição (normalizado)
-      for (const kw of palavrasChave) {
-        if (textoFormula.includes(kw)) score += 2
-      }
-
-      return { formula: f, score }
+    const relevantes = formulas.filter(f => {
+      const fSeg = norm(f.segmento)
+      // Match direto ou palavras em comum
+      return fSeg.includes(segNorm) || segNorm.includes(fSeg) ||
+        segNorm.split(/\s+/).some(w => w.length > 3 && fSeg.includes(w)) ||
+        fSeg.split(/\s+/).some(w => w.length > 3 && segNorm.includes(w))
     })
 
-    comScore.sort((a, b) => b.score - a.score)
+    // Usa as relevantes ao segmento; se vazias, passa todas (banco pequeno)
+    const pool = relevantes.length > 0 ? relevantes : formulas.slice(0, 10)
 
-    const melhor = comScore[0]
-    // Threshold 4 = segmento + pelo menos 1 palavra-chave (ex: "decapante")
-    const temMatchForte = melhor && melhor.score >= 4
+    const formulasStr = pool.map(f => {
+      let composicao: Array<{ materia_prima: string; funcao: string; percentual?: string }> = []
+      try { composicao = JSON.parse(f.composicao) } catch { /* ignora */ }
 
-    if (!temMatchForte) {
-      // Sem match forte: passa MPs únicas como referência leve (sem obrigatórias)
-      const pool = comScore.filter(x => x.score > 0).slice(0, 3).map(x => x.formula)
-      if (pool.length === 0) return vazio
-      const mpSet = new Map<string, string>()
-      for (const f of pool) {
-        try {
-          const comps = JSON.parse(f.composicao) as Array<{ materia_prima: string; funcao: string }>
-          for (const c of comps) {
-            if (!mpSet.has(c.materia_prima)) mpSet.set(c.materia_prima, c.funcao)
-          }
-        } catch { /* ignora */ }
-      }
-      const linhas = Array.from(mpSet.entries()).map(([mp, fn]) => `• ${mp} — ${fn}`).join('\n')
-      return {
-        context: `\nMPs UTILIZADAS EM PRODUTOS APROVADOS DA ASTANA (considere como candidatas):\n${linhas}\n`,
-        mandatoryMPs: [],
-        hasStrongMatch: false,
-      }
-    }
+      const comp = composicao.map(c =>
+        `      • ${c.materia_prima}${c.percentual ? ` — ${c.percentual}%` : ''} (${c.funcao})`
+      ).join('\n')
 
-    // Match forte: formula específica encontrada
-    const f = melhor.formula
-    let composicao: Array<{ materia_prima: string; funcao: string }> = []
-    try {
-      composicao = JSON.parse(f.composicao) as Array<{ materia_prima: string; funcao: string }>
-    } catch { /* ignora */ }
+      return `  ┌─ FÓRMULA: "${f.nome_interno}"
+  │  Segmento: ${f.segmento}
+  │  Aplicação: ${f.aplicacao}
+  │  ${f.tags ? `Tags: ${f.tags}` : ''}
+  │  ${f.ph_final ? `pH final: ${f.ph_final}` : ''}
+  │  ${f.viscosidade ? `Viscosidade: ${f.viscosidade}` : ''}
+  │  ${f.performance_chave ? `Performance: ${f.performance_chave}` : ''}
+  │  Composição:
+${comp}
+  └─────────────────────────────`
+    }).join('\n\n')
 
-    const mpNomes = composicao.map(c => c.materia_prima).filter(Boolean)
+    const context = `
+🏭 BANCO P&D PROPRIETÁRIO ASTANA QUÍMICA — ${pool.length} fórmula(s) disponível(is) para este segmento:
 
-    // Se a maioria das MPs da fórmula proprietária está na lista de proibidas,
-    // o match não serve — anula e deixa a busca web atuar
-    if (normProib.length > 0 && mpNomes.length > 0) {
-      const proibidasNaFormula = mpNomes.filter(mp => {
-        const mpNorm = removeAccents(mp.toLowerCase())
-        return normProib.some(p => mpNorm.includes(p) || p.includes(mpNorm))
-      })
-      const percentualProibido = proibidasNaFormula.length / mpNomes.length
-      if (percentualProibido >= 0.5) return vazio  // ≥ 50% proibidas → ignora este match
-    }
+${formulasStr}
 
-    // Filtra MPs de alta toxicidade — não devem ser auto-sugeridas como referência aprovada
-    let altaToxicidadeNomes = new Set<string>()
-    try {
-      if (mpNomes.length === 0) throw new Error('sem MPs')
-      const mpsDb = await prisma.materiaPrima.findMany({
-        where: {
-          OR: mpNomes.flatMap(nome => [
-            { nome_comercial: { contains: nome, mode: 'insensitive' as const } },
-            { nome_quimico: { contains: nome, mode: 'insensitive' as const } },
-          ]),
-          nivel_toxicidade: 'alto',
-        },
-        select: { nome_comercial: true, nome_quimico: true },
-      })
-      for (const mp of mpsDb) {
-        altaToxicidadeNomes.add(mp.nome_comercial.toLowerCase())
-        if (mp.nome_quimico) altaToxicidadeNomes.add(mp.nome_quimico.toLowerCase())
-      }
-    } catch { /* ignora — usa lista completa se DB falhar */ }
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGRA DE USO DO BANCO P&D (OBRIGATÓRIA):
+Você DEVE analisar tecnicamente cada fórmula acima e verificar se é compatível com o pedido do usuário.
+Critérios de compatibilidade técnica: segmento, tipo de produto, função, base química, sistema/resina, substrato, propriedades e restrições.
 
-    // Só usa MPs de baixa/média toxicidade e não-proibidas como referência de contexto
-    const composicaoSegura = composicao.filter(c => {
-      const nomeNorm = removeAccents(c.materia_prima.toLowerCase())
-      const eAlta = Array.from(altaToxicidadeNomes).some(alto => nomeNorm.includes(alto) || alto.includes(nomeNorm))
-      const eProibida = normProib.some(p => nomeNorm.includes(p) || p.includes(nomeNorm))
-      return !eAlta && !eProibida
-    })
+SE ENCONTRAR compatibilidade técnica real:
+  → Use essa fórmula como referência principal (composição, proporções, processo)
+  → No JSON de resposta, preencha: "fonte": "P&D Proprietário" e "formula_referencia": "<nome da fórmula>"
 
-    if (composicaoSegura.length === 0) return vazio
+SE NÃO ENCONTRAR compatibilidade técnica real (fórmulas do banco são de outro tipo/aplicação):
+  → Sinalize com "fonte": "Busca Externa Técnica" e use apenas referências externas disponíveis no contexto
+  → NÃO adapte uma fórmula incompatível — isso geraria um produto tecnicamente inviável
 
-    const linhasComp = composicaoSegura.map(c => `  • ${c.materia_prima} — ${c.funcao}`).join('\n')
-
-    const context = `\nREFERÊNCIA INTERNA ASTANA — produto similar aprovado (use como inspiração, não como regra):
-Aplicação: ${f.aplicacao}
-Ingredientes de referência:
-${linhasComp}
-${f.ph_final ? `pH de referência: ${f.ph_final}` : ''}
-${f.viscosidade ? `Viscosidade de referência: ${f.viscosidade}` : ''}
-${f.performance_chave ? `Performance esperada: ${f.performance_chave}` : ''}
+SE NÃO HOUVER BASE TÉCNICA SUFICIENTE (nem PD, nem referências externas):
+  → Preencha "viabilidade": "nao_encontrada" na analise_critica
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `
 
-    // mandatoryMPs usa apenas os MPs seguros (já filtrados por toxicidade e proibidas)
-    const mandatoryMPs = composicaoSegura.map(c => c.materia_prima)
-
-    return { context, mandatoryMPs, hasStrongMatch: true }
+    return { context, hasFormulas: true }
   } catch {
     return vazio
   }
@@ -517,48 +455,35 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const segmento = String(dados.segmento || '')
   const descricao = String(dados.descricao || '')
   const proibidas = Array.isArray(dados.materias_proibidas) ? (dados.materias_proibidas as string[]) : []
-  // Garante array de MPs individuais — separa caso venha como "A, B, C" num único item
   const userObrigatorias = (Array.isArray(dados.materias_obrigatorias)
     ? (dados.materias_obrigatorias as string[])
     : []).flatMap(mp => mp.split(',').map(s => s.trim()).filter(Boolean))
 
-  // Segmento Tintas e Vernizes tem regras especiais: somente banco interno, sem internet
   const isTintasVernizes = segmento === 'Tintas e Vernizes'
 
+  // Busca contexto: banco de MPs, banco P&D proprietário e documentos científicos em paralelo
   const [contexto, proprietaryResult, docsContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
-    buildProprietaryContext(segmento, descricao, proibidas),
+    buildProprietaryContext(segmento),
     buildDocumentosContext(segmento, descricao),
   ])
 
-  // Tintas/vernizes: sem match no banco → erro específico (não inventa fórmula)
-  if (isTintasVernizes && !proprietaryResult.hasStrongMatch) {
-    throw new Error('FORMULA_NAO_ENCONTRADA')
-  }
-
-  // Busca na internet apenas quando: não é tintas/vernizes E não há match forte no PD
+  // Busca externa: somente quando não é Tintas e Vernizes (que exige somente banco interno)
+  // A IA decide se o banco P&D tem algo compatível — se não, usa a referência externa
   let webContext = ''
-  if (!isTintasVernizes && !proprietaryResult.hasStrongMatch) {
+  if (!isTintasVernizes) {
     try { webContext = await buildWebContext(segmento, descricao, proibidas) } catch { webContext = '' }
   }
 
-  // Contexto proprietário é passado apenas como inspiração/referência —
-  // NUNCA como MPs obrigatórias, pois isso causaria injeção de químicos inadequados em outras fórmulas.
-  // Apenas o usuário pode definir MPs obrigatórias via interface.
   const dadosFinais: Record<string, unknown> = { ...dados }
-
-  // Ativa flag de pesquisa externa quando há contexto web — sem isso o system prompt
-  // bloqueia o uso de fontes externas e o AI não gera JSON válido
-  if (webContext) {
-    dadosFinais.pesquisa_internet_ativa = true
-  }
+  if (webContext) dadosFinais.pesquisa_internet_ativa = true
 
   const prompt = buildFormulacaoPrompt(dadosFinais, contexto + proprietaryResult.context + docsContext + webContext)
 
   const message = await getClient().messages.create({
     model: getModel(),
-    max_tokens: 6000,
-    temperature: 0,   // determinístico: mesma entrada → mesma saída
+    max_tokens: 8000,
+    temperature: 0,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
@@ -566,15 +491,15 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
   const resultado = extractJSON(text)
 
-  // Se o usuário definiu MPs obrigatórias, usa as dele
-  if (userObrigatorias.length > 0) {
-    return fecharPercentuais(enforcarMPsObrigatorias(resultado, userObrigatorias))
+  // Verifica se a IA sinalizou que não encontrou fórmula compatível
+  const analise = (resultado as Record<string, unknown>)?.analise_critica as Record<string, unknown> | undefined
+  if (analise?.viabilidade === 'nao_encontrada') {
+    throw new Error('FORMULA_NAO_ENCONTRADA')
   }
 
-  // Se o banco proprietário tem match forte com MPs seguras, usa a fórmula do PD
-  // (MPs já filtradas: sem alta toxicidade, sem proibidas pelo usuário)
-  if (proprietaryResult.mandatoryMPs.length > 0) {
-    return fecharPercentuais(enforcarMPsObrigatorias(resultado, proprietaryResult.mandatoryMPs))
+  // MPs obrigatórias definidas pelo usuário têm prioridade máxima
+  if (userObrigatorias.length > 0) {
+    return fecharPercentuais(enforcarMPsObrigatorias(resultado, userObrigatorias))
   }
 
   return fecharPercentuais(resultado)
