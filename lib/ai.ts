@@ -111,8 +111,11 @@ async function buildProprietaryContext(segmento: string): Promise<ProprietaryRes
         fSeg.split(/\s+/).some(w => w.length > 3 && segNorm.includes(w))
     })
 
-    // Usa as relevantes ao segmento; se vazias, passa todas (banco pequeno)
-    const pool = relevantes.length > 0 ? relevantes : formulas.slice(0, 10)
+    // Se não há fórmulas relevantes para o segmento, retorna sem contexto
+    // para que o Tavily seja acionado como segunda camada
+    if (relevantes.length === 0) return vazio
+
+    const pool = relevantes
 
     const formulasStr = pool.map(f => {
       let composicao: Array<{ materia_prima: string; funcao: string; percentual?: string }> = []
@@ -140,20 +143,26 @@ ${comp}
 ${formulasStr}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-REGRA DE USO DO BANCO P&D (OBRIGATÓRIA):
-Você DEVE analisar tecnicamente cada fórmula acima e verificar se é compatível com o pedido do usuário.
-Critérios de compatibilidade técnica: segmento, tipo de produto, função, base química, sistema/resina, substrato, propriedades e restrições.
+ORDEM OBRIGATÓRIA DE PRIORIDADE — SIGA EXATAMENTE:
 
-SE ENCONTRAR compatibilidade técnica real:
-  → Use essa fórmula como referência principal (composição, proporções, processo)
-  → No JSON de resposta, preencha: "fonte": "P&D Proprietário" e "formula_referencia": "<nome da fórmula>"
+PASSO 1 — BANCO P&D PROPRIETÁRIO (sempre primeiro):
+Analise CADA fórmula acima. Verifique compatibilidade técnica real considerando:
+segmento, tipo de produto, função, base química, sistema/resina, substrato, propriedades e restrições do usuário.
 
-SE NÃO ENCONTRAR compatibilidade técnica real (fórmulas do banco são de outro tipo/aplicação):
-  → Sinalize com "fonte": "Busca Externa Técnica" e use apenas referências externas disponíveis no contexto
-  → NÃO adapte uma fórmula incompatível — isso geraria um produto tecnicamente inviável
+  ✅ SE COMPATÍVEL: use essa fórmula como referência principal.
+     → "fonte": "P&D Proprietário", "formula_referencia": "<nome exato da fórmula>"
+     → NÃO consulte referências externas. A resposta vem exclusivamente do P&D.
 
-SE NÃO HOUVER BASE TÉCNICA SUFICIENTE (nem PD, nem referências externas):
-  → Preencha "viabilidade": "nao_encontrada" na analise_critica
+  ❌ SE NENHUMA FOR COMPATÍVEL: vá para o PASSO 2.
+     → NÃO adapte uma fórmula incompatível. Isso geraria produto tecnicamente inviável.
+
+PASSO 2 — REFERÊNCIAS EXTERNAS (somente se P&D não resolveu):
+Use as referências técnicas externas disponíveis no contexto (artigos, patentes, fichas técnicas).
+  → "fonte": "Busca Externa Técnica", "formula_referencia": null
+
+PASSO 3 — SEM BASE TÉCNICA (somente se P&D e externas falharam):
+  → "viabilidade": "nao_encontrada" na analise_critica
+  → NÃO invente fórmula genérica
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `
 
@@ -468,11 +477,11 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     buildDocumentosContext(segmento, descricao),
   ])
 
-  // Busca externa: SOMENTE quando o banco P&D não tem fórmulas para o segmento
-  // e o segmento não é Tintas e Vernizes (que exige exclusivamente banco interno)
-  // Ordem obrigatória: P&D primeiro → internet apenas como segunda camada
+  // Busca externa: segunda camada obrigatória quando não é Tintas e Vernizes
+  // O prompt instrui a IA a usar Tavily SOMENTE se nenhuma fórmula do P&D for compatível
+  // Isso implementa a ordem: P&D primeiro → internet só se P&D não resolver
   let webContext = ''
-  if (!isTintasVernizes && !proprietaryResult.hasFormulas) {
+  if (!isTintasVernizes) {
     try { webContext = await buildWebContext(segmento, descricao, proibidas) } catch { webContext = '' }
   }
 
