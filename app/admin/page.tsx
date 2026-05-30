@@ -14,7 +14,8 @@ const SEGMENTOS = [
   'Limpeza e Manutenção Industrial',
   'Automotivo',
   'Saneantes e Domissanitários',
-  'Tintas, Vernizes, Resinas e Polímeros',
+  'Tintas e Vernizes',
+  'Resinas e Polímeros',
   'Biossolventes e Biolubrificantes',
 ]
 const SEG_OPTIONS = SEGMENTOS.map(s => ({ value: s, label: s }))
@@ -472,14 +473,16 @@ const SEG_CORES: Record<string, string> = {
   'Limpeza e Manutenção Industrial': 'border-blue-500/40 text-blue-400 bg-blue-500/10',
   'Automotivo': 'border-orange-500/40 text-orange-400 bg-orange-500/10',
   'Saneantes e Domissanitários': 'border-green-500/40 text-green-400 bg-green-500/10',
-  'Tintas, Vernizes, Resinas e Polímeros': 'border-purple-500/40 text-purple-400 bg-purple-500/10',
+  'Tintas e Vernizes': 'border-purple-500/40 text-purple-400 bg-purple-500/10',
+  'Resinas e Polímeros': 'border-violet-500/40 text-violet-400 bg-violet-500/10',
   'Biossolventes e Biolubrificantes': 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10',
 }
 const SEG_EMOJI: Record<string, string> = {
   'Limpeza e Manutenção Industrial': '🧪',
   'Automotivo': '🚗',
   'Saneantes e Domissanitários': '🧴',
-  'Tintas, Vernizes, Resinas e Polímeros': '🎨',
+  'Tintas e Vernizes': '🎨',
+  'Resinas e Polímeros': '🧪',
   'Biossolventes e Biolubrificantes': '🌿',
 }
 
