@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     if (msg === 'FORMULA_NAO_ENCONTRADA') {
       return NextResponse.json(
-        { error: 'Fórmula de Referência Não Encontrada' },
+        { error: 'Fórmula Compatível Não Encontrada' },
         { status: 404 }
       )
     }
