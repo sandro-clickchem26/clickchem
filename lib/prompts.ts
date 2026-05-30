@@ -76,7 +76,6 @@ Se não houver alternativa viável, formule com o que estiver disponível e sina
     : ''
 
   const tipoProduto = String(dados.descricao || '').split(/[,.\n]/)[0].trim()
-  const buscaInternetAtiva = dados.pesquisa_internet_ativa === true
 
   const secaoMPs = contextoMPs
     ? `\nCONTEXTO TÉCNICO (siga a ordem de prioridade do system prompt):\n${contextoMPs}`
