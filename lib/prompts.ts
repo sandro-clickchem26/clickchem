@@ -79,9 +79,7 @@ Se não houver alternativa viável, formule com o que estiver disponível e sina
   const buscaInternetAtiva = dados.pesquisa_internet_ativa === true
 
   const secaoMPs = contextoMPs
-    ? buscaInternetAtiva
-      ? `\nREFERÊNCIA DO BANCO INTERNO (MPs disponíveis localmente):\n${contextoMPs}\n\n🌐 MODO INTERNET ATIVO: Você DEVE usar as MPs mencionadas nas REFERÊNCIAS TÉCNICAS DA INTERNET acima, mesmo que não constem no banco interno. Priorize a composição encontrada na internet para este produto. As MPs do banco interno são apenas referência secundária — use-as apenas se a internet não tiver informação suficiente.`
-      : `\nMPs DISPONÍVEIS:\n${contextoMPs}`
+    ? `\nCONTEXTO TÉCNICO (siga a ordem de prioridade do system prompt):\n${contextoMPs}`
     : ''
 
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
