@@ -56,6 +56,32 @@ const ODORES = [
   { value: 'Sem preferência', label: 'Sem preferência' },
 ]
 
+// Escala Gardner de viscosidade — usada em Resinas e Polímeros
+const VISCOSIDADES_GARDNER = [
+  { value: '', label: 'Selecione (Escala Gardner)...' },
+  { value: 'Gardner A — 50 cps / 0,5 Poise',    label: 'A  —  50 cps  /  0,5 Poise' },
+  { value: 'Gardner Q — 435 cps / 4,35 Poise',   label: 'Q  —  435 cps  /  4,35 Poise' },
+  { value: 'Gardner R — 470 cps / 4,70 Poise',   label: 'R  —  470 cps  /  4,70 Poise' },
+  { value: 'Gardner S — 500 cps / 5,00 Poise',   label: 'S  —  500 cps  /  5,00 Poise' },
+  { value: 'Gardner T — 550 cps / 5,50 Poise',   label: 'T  —  550 cps  /  5,50 Poise' },
+  { value: 'Gardner U — 627 cps / 6,27 Poise',   label: 'U  —  627 cps  /  6,27 Poise' },
+  { value: 'Gardner V — 884 cps / 8,84 Poise',   label: 'V  —  884 cps  /  8,84 Poise' },
+  { value: 'Gardner W — 1070 cps / 10,70 Poise', label: 'W  —  1.070 cps  /  10,70 Poise' },
+  { value: 'Gardner X — 1290 cps / 12,90 Poise', label: 'X  —  1.290 cps  /  12,90 Poise' },
+  { value: 'Gardner Y — 1760 cps / 17,60 Poise', label: 'Y  —  1.760 cps  /  17,60 Poise' },
+  { value: 'Gardner Z — 2270 cps / 22,70 Poise', label: 'Z  —  2.270 cps  /  22,70 Poise' },
+  { value: 'Gardner Z1 — 2700 cps / 27,00 Poise', label: 'Z1  —  2.700 cps  /  27,00 Poise' },
+  { value: 'Gardner Z2 — 3620 cps / 36,20 Poise', label: 'Z2  —  3.620 cps  /  36,20 Poise' },
+  { value: 'Gardner Z3 — 4630 cps / 46,30 Poise', label: 'Z3  —  4.630 cps  /  46,30 Poise' },
+  { value: 'Gardner Z4 — 6340 cps / 63,40 Poise', label: 'Z4  —  6.340 cps  /  63,40 Poise' },
+  { value: 'Gardner Z5 — 9850 cps / 98,50 Poise', label: 'Z5  —  9.850 cps  /  98,50 Poise' },
+  { value: 'Gardner Z6 — 14800 cps / 148,00 Poise', label: 'Z6  —  14.800 cps  /  148,00 Poise' },
+  { value: 'Gardner Z7 — 388 Stokes',  label: 'Z7  —  388 Stokes' },
+  { value: 'Gardner Z8 — 590 Stokes',  label: 'Z8  —  590 Stokes' },
+  { value: 'Gardner Z9 — 855 Stokes',  label: 'Z9  —  855 Stokes' },
+  { value: 'Gardner Z10 — 1066 Stokes', label: 'Z10  —  1.066 Stokes' },
+]
+
 const SEGMENTO_TINTAS = 'Tintas e Vernizes'
 
 const TIPOS_SISTEMA_RESINA = [
@@ -480,7 +506,10 @@ export default function NovaFormulacao() {
               <Input label="pH mínimo" id="ph_min" type="number" min="1" max="14" step="0.5" value={form.ph_min} onChange={e => campo('ph_min', e.target.value)} placeholder="1" className="w-full" />
               <Input label="pH máximo" id="ph_max" type="number" min="1" max="14" step="0.5" value={form.ph_max} onChange={e => campo('ph_max', e.target.value)} placeholder="14" className="w-full" />
             </div>
-            <Select label="Viscosidade Esperada" id="viscosidade" options={VISCOSIDADES} value={form.viscosidade} onChange={e => campo('viscosidade', e.target.value)} />
+            {form.segmento === 'Resinas e Polímeros'
+              ? <Select label="Viscosidade Gardner" id="viscosidade" options={VISCOSIDADES_GARDNER} value={form.viscosidade} onChange={e => campo('viscosidade', e.target.value)} />
+              : <Select label="Viscosidade Esperada" id="viscosidade" options={VISCOSIDADES} value={form.viscosidade} onChange={e => campo('viscosidade', e.target.value)} />
+            }
             <Select label="Forma Física do Produto" id="forma_fisica" options={FORMAS_FISICAS} value={form.forma_fisica} onChange={e => campo('forma_fisica', e.target.value)} />
             <Input label="Temperatura de Aplicação (°C)" id="temperatura" type="text" value={form.temperatura} onChange={e => campo('temperatura', e.target.value)} placeholder="Ex: 50°C ou 20–60°C" />
             <div className="md:col-span-2">
