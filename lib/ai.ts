@@ -216,7 +216,10 @@ ${f.viscosidade ? `Viscosidade de referência: ${f.viscosidade}` : ''}
 ${f.performance_chave ? `Performance esperada: ${f.performance_chave}` : ''}
 `
 
-    return { context, mandatoryMPs: [], hasStrongMatch: true }
+    // mandatoryMPs usa apenas os MPs seguros (já filtrados por toxicidade e proibidas)
+    const mandatoryMPs = composicaoSegura.map(c => c.materia_prima)
+
+    return { context, mandatoryMPs, hasStrongMatch: true }
   } catch {
     return vazio
   }
@@ -563,9 +566,15 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
   const resultado = extractJSON(text)
 
-  // Se o usuário definiu MPs obrigatórias, garante que APENAS elas apareçam na composição
+  // Se o usuário definiu MPs obrigatórias, usa as dele
   if (userObrigatorias.length > 0) {
     return fecharPercentuais(enforcarMPsObrigatorias(resultado, userObrigatorias))
+  }
+
+  // Se o banco proprietário tem match forte com MPs seguras, usa a fórmula do PD
+  // (MPs já filtradas: sem alta toxicidade, sem proibidas pelo usuário)
+  if (proprietaryResult.mandatoryMPs.length > 0) {
+    return fecharPercentuais(enforcarMPsObrigatorias(resultado, proprietaryResult.mandatoryMPs))
   }
 
   return fecharPercentuais(resultado)
