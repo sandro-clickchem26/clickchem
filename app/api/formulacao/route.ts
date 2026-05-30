@@ -16,7 +16,6 @@ export async function POST(req: NextRequest) {
     const resultado = await gerarFormulacao(body)
     return NextResponse.json(resultado)
   } catch (err) {
-    // Log completo no servidor para diagnóstico
     console.error('[formulacao/route] ERRO:', err)
 
     let msg: string
@@ -26,6 +25,13 @@ export async function POST(req: NextRequest) {
       msg = err
     } else {
       try { msg = JSON.stringify(err) } catch { msg = 'Erro interno do servidor' }
+    }
+
+    if (msg === 'FORMULA_NAO_ENCONTRADA') {
+      return NextResponse.json(
+        { error: 'Fórmula de Referência Não Encontrada' },
+        { status: 404 }
+      )
     }
 
     if (msg.includes('API key') || msg.includes('authentication')) {

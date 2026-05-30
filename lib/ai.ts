@@ -511,15 +511,27 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     ? (dados.materias_obrigatorias as string[])
     : []).flatMap(mp => mp.split(',').map(s => s.trim()).filter(Boolean))
 
+  // Segmento Tintas/Vernizes tem regras especiais: somente banco interno, sem internet
+  const isTintasVernizes = segmento.toLowerCase().includes('tinta') ||
+    segmento.toLowerCase().includes('verniz') ||
+    segmento.toLowerCase().includes('resina') ||
+    segmento.toLowerCase().includes('polimero') ||
+    segmento.toLowerCase().includes('polímero')
+
   const [contexto, proprietaryResult, docsContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
     buildProprietaryContext(segmento, descricao, proibidas),
     buildDocumentosContext(segmento, descricao),
   ])
 
-  // Busca na internet apenas quando não há match forte no banco proprietário
+  // Tintas/vernizes: sem match no banco → erro específico (não inventa fórmula)
+  if (isTintasVernizes && !proprietaryResult.hasStrongMatch) {
+    throw new Error('FORMULA_NAO_ENCONTRADA')
+  }
+
+  // Busca na internet apenas quando: não é tintas/vernizes E não há match forte no PD
   let webContext = ''
-  if (!proprietaryResult.hasStrongMatch) {
+  if (!isTintasVernizes && !proprietaryResult.hasStrongMatch) {
     try { webContext = await buildWebContext(segmento, descricao, proibidas) } catch { webContext = '' }
   }
 

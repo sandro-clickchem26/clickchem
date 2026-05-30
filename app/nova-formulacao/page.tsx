@@ -55,6 +55,114 @@ const ODORES = [
   { value: 'Sem preferência', label: 'Sem preferência' },
 ]
 
+const SEGMENTO_TINTAS = 'Tintas, Vernizes, Resinas e Polímeros'
+
+const TIPOS_SISTEMA_RESINA = [
+  { value: '', label: 'Selecione o sistema/resina...' },
+  { value: 'Poliéster saturado', label: 'Poliéster saturado' },
+  { value: 'Poliéster hidroxilado', label: 'Poliéster hidroxilado' },
+  { value: 'Acrílico carboxilado', label: 'Acrílico carboxilado' },
+  { value: 'Acrílico hidroxilado', label: 'Acrílico hidroxilado' },
+  { value: 'Acrílico termoplástico', label: 'Acrílico termoplástico' },
+  { value: 'Acrílico 2K PU', label: 'Acrílico 2K PU' },
+  { value: 'Alquídica curta', label: 'Alquídica curta' },
+  { value: 'Alquídica média', label: 'Alquídica média' },
+  { value: 'Alquídica longa', label: 'Alquídica longa' },
+  { value: 'Alquídica fenolada', label: 'Alquídica fenolada' },
+  { value: 'Alquídica acrilada', label: 'Alquídica acrilada' },
+  { value: 'Alquídica melamina', label: 'Alquídica melamina' },
+  { value: 'Éster epóxi', label: 'Éster epóxi' },
+  { value: 'Epóxi-amina', label: 'Epóxi-amina' },
+  { value: 'Epóxi-poliamida', label: 'Epóxi-poliamida' },
+  { value: 'Epóxi-fenólico', label: 'Epóxi-fenólico' },
+  { value: 'Poliéster-melamina', label: 'Poliéster-melamina' },
+  { value: 'Acrílico-melamina', label: 'Acrílico-melamina' },
+  { value: 'Fenólica', label: 'Fenólica' },
+  { value: 'Nitrocelulose', label: 'Nitrocelulose' },
+  { value: 'Poliuretano 2K', label: 'Poliuretano 2K' },
+  { value: 'Poliuretano monocomponente', label: 'Poliuretano monocomponente' },
+  { value: 'Outro sistema', label: 'Outro sistema' },
+]
+
+const TIPOS_PRODUTO_TINTA = [
+  { value: '', label: 'Selecione o tipo de produto...' },
+  { value: 'Tinta', label: 'Tinta' },
+  { value: 'Verniz', label: 'Verniz' },
+  { value: 'Primer', label: 'Primer' },
+  { value: 'Esmalte', label: 'Esmalte' },
+  { value: 'Fundo', label: 'Fundo' },
+  { value: 'Selador', label: 'Selador' },
+  { value: 'Revestimento anticorrosivo', label: 'Revestimento anticorrosivo' },
+  { value: 'Verniz de impregnação', label: 'Verniz de impregnação' },
+  { value: 'Tinta de acabamento', label: 'Tinta de acabamento' },
+  { value: 'Outro', label: 'Outro' },
+]
+
+const BASES_SISTEMA = [
+  { value: '', label: 'Selecione a base...' },
+  { value: 'Base solvente', label: 'Base solvente' },
+  { value: 'Base água', label: 'Base água' },
+  { value: 'Alto sólidos', label: 'Alto sólidos' },
+  { value: '100% sólidos', label: '100% sólidos' },
+  { value: 'UV/EB', label: 'UV/EB' },
+  { value: 'Pó', label: 'Pó' },
+]
+
+const TIPOS_CURA = [
+  { value: '', label: 'Selecione o tipo de cura...' },
+  { value: 'Secagem ao ar', label: 'Secagem ao ar' },
+  { value: 'Cura em estufa', label: 'Cura em estufa' },
+  { value: 'Cura oxidativa', label: 'Cura oxidativa' },
+  { value: 'Cura 2K', label: 'Cura 2K' },
+  { value: 'Cura UV', label: 'Cura UV' },
+  { value: 'Cura por evaporação de solvente', label: 'Cura por evaporação de solvente' },
+  { value: 'Cura por reação química', label: 'Cura por reação química' },
+]
+
+const SUBSTRATOS_TINTA = [
+  { value: '', label: 'Selecione o substrato...' },
+  { value: 'Aço carbono', label: 'Aço carbono' },
+  { value: 'Alumínio', label: 'Alumínio' },
+  { value: 'Galvanizado', label: 'Galvanizado' },
+  { value: 'Madeira', label: 'Madeira' },
+  { value: 'Plástico', label: 'Plástico' },
+  { value: 'Concreto', label: 'Concreto' },
+  { value: 'Cobre', label: 'Cobre' },
+  { value: 'Motor elétrico', label: 'Motor elétrico' },
+  { value: 'Embalagem metálica', label: 'Embalagem metálica' },
+  { value: 'Outro', label: 'Outro' },
+]
+
+const METODOS_APLICACAO_TINTA = [
+  { value: '', label: 'Selecione o método...' },
+  { value: 'Pistola convencional', label: 'Pistola convencional' },
+  { value: 'Airless', label: 'Airless' },
+  { value: 'Eletrostática', label: 'Eletrostática' },
+  { value: 'Rolo', label: 'Rolo' },
+  { value: 'Pincel', label: 'Pincel' },
+  { value: 'Imersão', label: 'Imersão' },
+  { value: 'Flow coat', label: 'Flow coat' },
+  { value: 'Coil coating', label: 'Coil coating' },
+  { value: 'Spray automático', label: 'Spray automático' },
+  { value: 'Outro', label: 'Outro' },
+]
+
+const TEMPERATURAS_CURA = [
+  { value: '', label: 'Selecione a temperatura...' },
+  { value: 'Ambiente', label: 'Ambiente' },
+  { value: '60–80 °C', label: '60–80 °C' },
+  { value: '100–120 °C', label: '100–120 °C' },
+  { value: '130–160 °C', label: '130–160 °C' },
+  { value: '180–220 °C', label: '180–220 °C' },
+  { value: 'Outro valor', label: 'Outro valor' },
+]
+
+const PROPRIEDADES_TINTA = [
+  'Brilho alto', 'Fosco', 'Alta dureza', 'Flexibilidade', 'Aderência',
+  'Resistência química', 'Resistência à corrosão', 'Resistência térmica',
+  'Resistência UV', 'Secagem rápida', 'Baixo VOC', 'Menor toxicidade',
+]
+
 const FORM_INICIAL = {
   segmento: '',
   descricao: '',
@@ -73,6 +181,15 @@ const FORM_INICIAL = {
   custo_alvo: '',
   volume: '',
   odor: '',
+  // Campos específicos Tintas e Vernizes
+  tipo_sistema_resina: '',
+  tipo_produto_tinta: '',
+  base_sistema: '',
+  tipo_cura: '',
+  substrato_tinta: '',
+  metodo_aplicacao_tinta: '',
+  temperatura_cura: '',
+  propriedades_desejadas: [] as string[],
 }
 
 export default function NovaFormulacao() {
@@ -90,6 +207,14 @@ export default function NovaFormulacao() {
 
   function campo(field: string, value: string) {
     const f = { ...r.current.form, [field]: value } as typeof FORM_INICIAL
+    r.current.form = f
+    setForm(f)
+  }
+
+  function checkProp(value: string) {
+    const lista = r.current.form.propriedades_desejadas
+    const nova = lista.includes(value) ? lista.filter(v => v !== value) : [...lista, value]
+    const f = { ...r.current.form, propriedades_desejadas: nova } as typeof FORM_INICIAL
     r.current.form = f
     setForm(f)
   }
@@ -135,10 +260,18 @@ export default function NovaFormulacao() {
     setMpObrig(n)
   }
 
+  const isTintas = form.segmento === SEGMENTO_TINTAS
+
   async function gerar() {
     if (!form.segmento || !form.descricao) {
       setError('Preencha o segmento e a descrição do produto.')
       return
+    }
+    if (isTintas) {
+      if (!form.tipo_sistema_resina || !form.tipo_produto_tinta || !form.base_sistema || !form.tipo_cura) {
+        setError('Para Tintas e Vernizes, preencha obrigatoriamente: Tipo de Sistema/Resina, Tipo de Produto, Base do Sistema e Tipo de Cura.')
+        return
+      }
     }
     setError(null)
     setLoading(true)
@@ -294,6 +427,48 @@ export default function NovaFormulacao() {
             <Input label="Tipo de Sujeira / Resíduo / Contaminante" id="sujeira" value={form.sujeira} onChange={e => campo('sujeira', e.target.value)} placeholder="Ex: Óleo mineral de corte, Graxa sintética" />
           </div>
         </div>
+
+        {/* ESPECIFICAÇÕES TINTAS E VERNIZES */}
+        {isTintas && (
+          <div className="bg-[#0f1f3a] border border-blue-500/30 rounded-xl p-6">
+            <h2 className="text-base font-semibold text-white mb-1 pb-2 border-b border-blue-500/20">
+              Especificações Técnicas — Tintas e Vernizes
+            </h2>
+            <p className="text-xs text-blue-400/70 mb-4">Campos obrigatórios para este segmento</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="md:col-span-2">
+                <Select label="Tipo de Sistema / Resina *" id="tipo_sistema_resina" options={TIPOS_SISTEMA_RESINA} value={form.tipo_sistema_resina} onChange={e => campo('tipo_sistema_resina', e.target.value)} />
+              </div>
+              <Select label="Tipo de Produto *" id="tipo_produto_tinta" options={TIPOS_PRODUTO_TINTA} value={form.tipo_produto_tinta} onChange={e => campo('tipo_produto_tinta', e.target.value)} />
+              <Select label="Base do Sistema *" id="base_sistema" options={BASES_SISTEMA} value={form.base_sistema} onChange={e => campo('base_sistema', e.target.value)} />
+              <div className="md:col-span-2">
+                <Select label="Tipo de Cura / Secagem *" id="tipo_cura" options={TIPOS_CURA} value={form.tipo_cura} onChange={e => campo('tipo_cura', e.target.value)} />
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-500 mb-3">Campos opcionais (melhoram a precisão técnica)</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <Select label="Substrato de Aplicação" id="substrato_tinta" options={SUBSTRATOS_TINTA} value={form.substrato_tinta} onChange={e => campo('substrato_tinta', e.target.value)} />
+              <Select label="Método de Aplicação" id="metodo_aplicacao_tinta" options={METODOS_APLICACAO_TINTA} value={form.metodo_aplicacao_tinta} onChange={e => campo('metodo_aplicacao_tinta', e.target.value)} />
+              <div className="md:col-span-2">
+                <Select label="Temperatura de Cura" id="temperatura_cura" options={TEMPERATURAS_CURA} value={form.temperatura_cura} onChange={e => campo('temperatura_cura', e.target.value)} />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-300 block mb-2">Propriedades Desejadas</label>
+              <div className="flex flex-wrap gap-2">
+                {PROPRIEDADES_TINTA.map(prop => (
+                  <label key={prop} className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs cursor-pointer border transition-colors ${form.propriedades_desejadas.includes(prop) ? 'bg-blue-500/20 border-blue-500/50 text-blue-300' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'}`}>
+                    <input type="checkbox" className="sr-only" checked={form.propriedades_desejadas.includes(prop)} onChange={() => checkProp(prop)} />
+                    {prop}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* PARÂMETROS TÉCNICOS */}
         <div className="bg-[#111f3a] border border-white/8 rounded-xl p-6">
