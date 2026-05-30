@@ -13,7 +13,8 @@ const SEGMENTOS = [
   { value: 'Limpeza e Manutenção Industrial', label: 'Limpeza e Manutenção Industrial' },
   { value: 'Automotivo', label: 'Automotivo' },
   { value: 'Saneantes e Domissanitários', label: 'Saneantes e Domissanitários' },
-  { value: 'Tintas, Vernizes, Resinas e Polímeros', label: 'Tintas, Vernizes, Resinas e Polímeros' },
+  { value: 'Tintas e Vernizes', label: 'Tintas e Vernizes' },
+  { value: 'Resinas e Polímeros', label: 'Resinas e Polímeros' },
   { value: 'Biossolventes, Biopolímeros e Biolubrificantes', label: 'Biossolventes e Biolubrificantes' },
 ]
 const VISCOSIDADES = [
@@ -55,7 +56,7 @@ const ODORES = [
   { value: 'Sem preferência', label: 'Sem preferência' },
 ]
 
-const SEGMENTO_TINTAS = 'Tintas, Vernizes, Resinas e Polímeros'
+const SEGMENTO_TINTAS = 'Tintas e Vernizes'
 
 const TIPOS_SISTEMA_RESINA = [
   { value: '', label: 'Selecione o sistema/resina...' },

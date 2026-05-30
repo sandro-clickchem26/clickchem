@@ -511,12 +511,8 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     ? (dados.materias_obrigatorias as string[])
     : []).flatMap(mp => mp.split(',').map(s => s.trim()).filter(Boolean))
 
-  // Segmento Tintas/Vernizes tem regras especiais: somente banco interno, sem internet
-  const isTintasVernizes = segmento.toLowerCase().includes('tinta') ||
-    segmento.toLowerCase().includes('verniz') ||
-    segmento.toLowerCase().includes('resina') ||
-    segmento.toLowerCase().includes('polimero') ||
-    segmento.toLowerCase().includes('polímero')
+  // Segmento Tintas e Vernizes tem regras especiais: somente banco interno, sem internet
+  const isTintasVernizes = segmento === 'Tintas e Vernizes'
 
   const [contexto, proprietaryResult, docsContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
