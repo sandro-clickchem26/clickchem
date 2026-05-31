@@ -115,7 +115,8 @@ async function buildProprietaryContext(segmento: string): Promise<ProprietaryRes
     // para que o Tavily seja acionado como segunda camada
     if (relevantes.length === 0) return vazio
 
-    const pool = relevantes
+    // Limita a 8 fórmulas para evitar contexto excessivo e timeout
+    const pool = relevantes.slice(0, 8)
 
     const formulasStr = pool.map(f => {
       let composicao: Array<{ materia_prima: string; funcao: string; percentual?: string }> = []
