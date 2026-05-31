@@ -138,31 +138,43 @@ ${comp}
     }).join('\n\n')
 
     const context = `
-🏭 BANCO P&D PROPRIETÁRIO ASTANA QUÍMICA — ${pool.length} fórmula(s) disponível(is) para este segmento:
+BASE TÉCNICA INTERNA P&D — REFERÊNCIAS ASTANA QUÍMICA (${pool.length} referência(s) para este segmento):
 
 ${formulasStr}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ORDEM OBRIGATÓRIA DE PRIORIDADE — SIGA EXATAMENTE:
+INSTRUÇÕES OBRIGATÓRIAS — BASE TÉCNICA INTERNA:
 
-PASSO 1 — BANCO P&D PROPRIETÁRIO (sempre primeiro):
-Analise CADA fórmula acima. Verifique compatibilidade técnica real considerando:
-segmento, tipo de produto, função, base química, sistema/resina, substrato, propriedades e restrições do usuário.
+PASSO 1 — VERIFICAR COMPATIBILIDADE TÉCNICA:
+Analise CADA referência acima. Verifique compatibilidade real com o pedido considerando:
+segmento, tipo, função, base química, sistema/resina, substrato, mecanismo de ação,
+propriedades desejadas, restrições de toxicidade/custo/desempenho e condições de aplicação.
 
-  ✅ SE COMPATÍVEL: use essa fórmula como referência principal.
-     → "fonte": "P&D Proprietário", "formula_referencia": "<nome exato da fórmula>"
-     → NÃO consulte referências externas. A resposta vem exclusivamente do P&D.
+  SE UMA OU MAIS REFERÊNCIAS FOREM COMPATÍVEIS: execute o PASSO 2.
+  SE NENHUMA FOR COMPATÍVEL TECNICAMENTE: execute o PASSO 3.
 
-  ❌ SE NENHUMA FOR COMPATÍVEL: vá para o PASSO 2.
-     → NÃO adapte uma fórmula incompatível. Isso geraria produto tecnicamente inviável.
+PASSO 2 — GERAR SUGESTÃO FORMULATIVA DERIVADA:
+Use as referências compatíveis APENAS como base técnica. Gere uma fórmula NOVA e DERIVADA:
+  1. Identifique componentes recorrentes entre as versões compatíveis
+  2. Compare as faixas percentuais entre as versões
+  3. Avalie a função técnica de cada componente
+  4. Mescle tecnicamente as versões: ajuste percentuais, selecione os mais coerentes,
+     adapte às restrições do usuário, exclua componentes incompatíveis
+  5. Otimize as proporções para o pedido específico
 
-PASSO 2 — REFERÊNCIAS EXTERNAS (somente se P&D não resolveu):
-Use as referências técnicas externas disponíveis no contexto (artigos, patentes, fichas técnicas).
-  → "fonte": "Busca Externa Técnica", "formula_referencia": null
+  PROIBICOES ABSOLUTAS:
+  - NUNCA reproduza composição idêntica (mesmos componentes + mesmos percentuais de uma versão)
+  - NUNCA revele nomes internos, versões, códigos, históricos ou que existe fórmula cadastrada
+  - NUNCA apresente a sugestão como fórmula original
 
-PASSO 3 — SEM BASE TÉCNICA (somente se P&D e externas falharam):
-  → "viabilidade": "nao_encontrada" na analise_critica
-  → NÃO invente fórmula genérica
+  "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa derivada."
+  "formula_referencia": null
+
+PASSO 3 — REFERÊNCIAS EXTERNAS (somente se nenhuma referência interna for compatível):
+  "fonte": "Busca Externa Técnica"
+
+PASSO 4 — SEM BASE TÉCNICA SUFICIENTE:
+  "viabilidade": "nao_encontrada" — NÃO gere fórmula genérica
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `
 
