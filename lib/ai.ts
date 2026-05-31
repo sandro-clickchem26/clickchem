@@ -158,9 +158,10 @@ Use as referências compatíveis APENAS como base técnica. Gere uma fórmula NO
   1. Identifique componentes recorrentes entre as versões compatíveis
   2. Compare as faixas percentuais entre as versões
   3. Avalie a função técnica de cada componente
-  4. Mescle tecnicamente as versões: ajuste percentuais, selecione os mais coerentes,
+  4. Preserve a lógica técnica do sistema (mecanismo de cura, compatibilidade, função de cada fase)
+  5. Mescle tecnicamente: ajuste percentuais, selecione componentes mais recorrentes e coerentes,
      adapte às restrições do usuário, exclua componentes incompatíveis
-  5. Otimize as proporções para o pedido específico
+  6. Otimize as proporções para o pedido específico do usuário
 
   PROIBICOES ABSOLUTAS:
   - NUNCA reproduza composição idêntica (mesmos componentes + mesmos percentuais de uma versão)
