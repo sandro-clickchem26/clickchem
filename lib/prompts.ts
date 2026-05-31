@@ -96,8 +96,8 @@ NUNCA retorne uma composição que some mais ou menos que 100,0%.
 Retorne APENAS JSON válido (sem markdown):
 
 {
-  "fonte": "P&D Proprietário|Busca Externa Técnica|Banco Interno",
-  "formula_referencia": "nome da fórmula PD usada ou null",
+  "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa derivada. | Busca Externa Técnica | Banco Interno",
+  "formula_referencia": null,
   "analise_critica": {
     "viabilidade": "alta|media|baixa|nao_encontrada",
     "pontos_de_atencao": ["..."],

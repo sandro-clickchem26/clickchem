@@ -94,14 +94,14 @@ export function FormulacaoResult({ data, onSalvar, onRelatorio, onRefinar }: For
           {fonte && (
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
-                fonte === 'P&D Proprietário'
+                fonte.includes('P&D Proprietário')
                   ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
-                  : fonte === 'Busca Externa Técnica'
+                  : fonte.includes('Busca Externa')
                   ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
                   : 'bg-gray-500/15 border-gray-500/40 text-gray-400'
               }`}>
-                {fonte === 'P&D Proprietário' ? '🏭' : fonte === 'Busca Externa Técnica' ? '🌐' : '📋'}
-                {' '}Fonte: {fonte}
+                {fonte.includes('P&D Proprietário') ? '🏭' : fonte.includes('Busca Externa') ? '🌐' : '📋'}
+                {' '}{fonte}
               </span>
               {formulaReferencia && formulaReferencia !== 'null' && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-white/5 border border-white/10 text-gray-400">
