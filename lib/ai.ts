@@ -118,22 +118,26 @@ async function buildProprietaryContext(segmento: string): Promise<ProprietaryRes
     // Limita a 8 fórmulas para evitar contexto excessivo e timeout
     const pool = relevantes.slice(0, 8)
 
-    const formulasStr = pool.map(f => {
+    const formulasStr = pool.map((f, idx) => {
       let composicao: Array<{ materia_prima: string; funcao: string; percentual?: string }> = []
       try { composicao = JSON.parse(f.composicao) } catch { /* ignora */ }
 
-      const comp = composicao.map(c =>
-        `      • ${c.materia_prima}${c.percentual ? ` — ${c.percentual}%` : ''} (${c.funcao})`
-      ).join('\n')
+      // Percentuais mostrados como FAIXA para evitar cópia exata
+      const comp = composicao.map(c => {
+        const perc = parseFloat(String(c.percentual || '0'))
+        const faixaMin = perc > 0 ? Math.max(0.1, parseFloat((perc * 0.8).toFixed(1))) : ''
+        const faixaMax = perc > 0 ? parseFloat((perc * 1.2).toFixed(1)) : ''
+        const faixaStr = faixaMin && faixaMax ? ` — faixa ${faixaMin}–${faixaMax}%` : ''
+        return `      • ${c.materia_prima}${faixaStr} (${c.funcao})`
+      }).join('\n')
 
-      return `  ┌─ FÓRMULA: "${f.nome_interno}"
-  │  Segmento: ${f.segmento}
+      // Nome interno NUNCA exposto — usa label genérico para confidencialidade
+      return `  ┌─ REFERÊNCIA TÉCNICA ${String.fromCharCode(65 + idx)}
   │  Aplicação: ${f.aplicacao}
-  │  ${f.tags ? `Tags: ${f.tags}` : ''}
   │  ${f.ph_final ? `pH final: ${f.ph_final}` : ''}
   │  ${f.viscosidade ? `Viscosidade: ${f.viscosidade}` : ''}
   │  ${f.performance_chave ? `Performance: ${f.performance_chave}` : ''}
-  │  Composição:
+  │  Componentes (use APENAS estes como base — não adicione MPs externas):
 ${comp}
   └─────────────────────────────`
     }).join('\n\n')
@@ -165,9 +169,11 @@ Use as referências compatíveis APENAS como base técnica. Gere uma fórmula NO
   6. Otimize as proporções para o pedido específico do usuário
 
   PROIBICOES ABSOLUTAS:
-  - NUNCA reproduza composição idêntica (mesmos componentes + mesmos percentuais de uma versão)
-  - NUNCA revele nomes internos, versões, códigos, históricos ou que existe fórmula cadastrada
-  - NUNCA apresente a sugestão como fórmula original
+  - NUNCA use MPs que não estejam listadas nas referências técnicas acima
+  - NUNCA use conhecimento geral de química para adicionar componentes novos
+  - NUNCA reproduza percentuais idênticos aos das referências — use as faixas como guia
+  - NUNCA revele nomes internos, códigos de referência (ex: RA1029) ou percentuais exatos originais
+  - NUNCA mencione "Referência Técnica A/B/C" na justificativa — use apenas termos técnicos
 
   "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa derivada."
   "formula_referencia": null
