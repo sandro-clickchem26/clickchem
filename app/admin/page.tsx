@@ -17,6 +17,7 @@ const SEGMENTOS = [
   'Tintas e Vernizes',
   'Resinas e Polímeros',
   'Biossolventes e Biolubrificantes',
+  'Cosmético',
 ]
 const SEG_OPTIONS = SEGMENTOS.map(s => ({ value: s, label: s }))
 
@@ -476,6 +477,7 @@ const SEG_CORES: Record<string, string> = {
   'Tintas e Vernizes': 'border-purple-500/40 text-purple-400 bg-purple-500/10',
   'Resinas e Polímeros': 'border-violet-500/40 text-violet-400 bg-violet-500/10',
   'Biossolventes e Biolubrificantes': 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10',
+  'Cosmético': 'border-pink-500/40 text-pink-400 bg-pink-500/10',
 }
 const SEG_EMOJI: Record<string, string> = {
   'Limpeza e Manutenção Industrial': '🧪',
@@ -484,6 +486,7 @@ const SEG_EMOJI: Record<string, string> = {
   'Tintas e Vernizes': '🎨',
   'Resinas e Polímeros': '🧪',
   'Biossolventes e Biolubrificantes': '🌿',
+  'Cosmético': '💄',
 }
 
 function ListaCadastradas({ pin, formulas, onAtualizar }: { pin: string; formulas: FormulaDB[]; onAtualizar: () => void }) {
