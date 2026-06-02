@@ -288,7 +288,8 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
     }).join('\n\n---\n\n')
 
     return `\n📚 DOCUMENTAÇÃO CIENTÍFICA RELEVANTE (banco interno Astana Química — use como embasamento técnico):\n${linhas}\n`
-  } catch {
+  } catch (err) {
+    console.error(`[buildDocumentosContext] ERRO:`, err)
     return ''
   }
 }
@@ -522,6 +523,8 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const isTintasVernizes = segmento === 'Tintas e Vernizes'
 
   // Todas as consultas em paralelo — reduz tempo total antes da chamada à IA
+  console.log(`[gerarFormulacao] Chamando buildDocumentosContext para segmento: "${segmento}"`)
+
   const [contexto, proprietaryResult, docsContext, webContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
     buildProprietaryContext(segmento),
@@ -530,6 +533,8 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
       ? Promise.resolve('')
       : buildWebContext(segmento, descricao, proibidas).catch(() => ''),
   ])
+
+  console.log(`[gerarFormulacao] docsContext length: ${docsContext.length} chars`)
 
   const dadosFinais: Record<string, unknown> = { ...dados }
   if (webContext) dadosFinais.pesquisa_internet_ativa = true
