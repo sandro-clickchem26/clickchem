@@ -1149,7 +1149,7 @@ export default function AdminPage() {
           { id: 'importar', label: 'Importar Arquivo', icon: Upload },
           { id: 'manual', label: 'Cadastrar Manual', icon: Plus },
           { id: 'cadastradas', label: `Formulações (${formulas.length})`, icon: FileText },
-          { id: 'documentos', label: 'Docs. Científicos', icon: FlaskConical },
+          { id: 'documentos', label: 'Artigos Científicos', icon: FlaskConical },
         ] as { id: Aba; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
           <button
             key={id}
