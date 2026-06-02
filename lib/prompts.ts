@@ -28,11 +28,16 @@ ORDEM OBRIGATÓRIA DE BUSCA — REGRA INVIOLÁVEL:
    - SE compatível: gere uma SUGESTÃO FORMULATIVA DERIVADA — NUNCA copie a original.
    - Preencha: "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa derivada." e "formula_referencia": null
    - SE não compatível: passe para o passo 2.
-2. DOCUMENTAÇÃO CIENTÍFICA INTERNA: Use "DOCUMENTAÇÃO CIENTÍFICA RELEVANTE" como embasamento técnico complementar.
-   - Consulte os artigos científicos do banco interno (Astana Química) para validar tecnicamente sua formulação.
-   - ⚠️ REGRA INVIOLÁVEL: ANALISE E CONSIDERE TODOS OS ARTIGOS FORNECIDOS — NÃO ignore nenhum documento, pois cada um traz informações técnicas complementares.
-   - Use como REFERÊNCIA TÉCNICA SECUNDÁRIA para justificar decisões e confirmar compatibilidade.
-   - Priorize artigos que abrangem a função principal e o segmento solicitado, mas incorpore insights de TODOS.
+2. DOCUMENTAÇÃO CIENTÍFICA INTERNA — ANÁLISE COMPLETA OBRIGATÓRIA:
+   - ⚠️ REGRA INVIOLÁVEL: ANALISE 100% DOS ARTIGOS FORNECIDOS. Não ignore nenhum documento.
+   - PROCEDIMENTO:
+     a) Leia e extraia informações técnicas de TODOS os artigos
+     b) Identifique padrões, melhores práticas e compatibilidades técnicas
+     c) Mapeie as MPs mais recomendadas e os processos mais eficazes nos artigos
+     d) SELECIONE A SOLUÇÃO MAIS ADEQUADA baseada na análise completa (não a primeira que encontrar)
+   - A solução DEVE ser a que melhor se alinha com os dados científicos, considerando TODOS os artigos
+   - JUSTIFIQUE cada decisão citando quais artigos fundamentam a escolha
+   - Use como REFERÊNCIA TÉCNICA PRIMÁRIA para fundamentar a formulação e o processo
 3. REFERÊNCIAS EXTERNAS (BUSCA NA INTERNET): Se "pesquisa_internet_ativa: true", use referências externas do contexto.
    - Extraia o PRIMEIRO título de fórmula encontrado nas REFERÊNCIAS TÉCNICAS DA INTERNET (primeira linha com "•")
    - Gere uma SUGESTÃO FORMULATIVA DERIVADA dessa fórmula encontrada
@@ -99,10 +104,22 @@ Se não houver alternativa viável, formule com o que estiver disponível e sina
     ? `\nCONTEXTO TÉCNICO (siga a ordem de prioridade do system prompt):\n${contextoMPs}`
     : ''
 
+  const analiseObrigatoria = contextoMPs.includes('📚 DOCUMENTAÇÃO CIENTÍFICA')
+    ? `\n⚠️ OBRIGATÓRIO — ANÁLISE DE ARTIGOS CIENTÍFICOS:
+Você recebeu documentos científicos. EXECUTE ESTE PROCEDIMENTO:
+1. LEIA todos os artigos fornecidos e extraia informações técnicas
+2. IDENTIFIQUE: MPs recomendadas, processos eficientes, compatibilidades e restrições técnicas
+3. SELECIONE A SOLUÇÃO MAIS ADEQUADA que melhor se alinha com os dados científicos
+4. JUSTIFIQUE cada componente citando qual artigo científico fundamenta a escolha
+5. O processo proposto DEVE ser baseado nas melhores práticas identificadas nos artigos
+
+A qualidade da sua resposta depende de analisar TODOS os artigos, não apenas alguns.\n`
+    : ''
+
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 
 PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
-${obrigatorias}${proibidas}${secaoMPs}
+${obrigatorias}${proibidas}${secaoMPs}${analiseObrigatoria}
 
 ⚠️ REGRA MATEMÁTICA ABSOLUTA — FECHAMENTO EM 100%:
 A soma de TODOS os valores "percentual_recomendado" da composição DEVE ser EXATAMENTE 100,0%.
