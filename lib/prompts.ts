@@ -109,15 +109,39 @@ Se não houver alternativa viável, formule com o que estiver disponível e sina
     : ''
 
   const analiseObrigatoria = contextoMPs.includes('📚 DOCUMENTAÇÃO CIENTÍFICA')
-    ? `\n⚠️ OBRIGATÓRIO — ANÁLISE DE ARTIGOS CIENTÍFICOS:
-Você recebeu documentos científicos. EXECUTE ESTE PROCEDIMENTO:
-1. LEIA todos os artigos fornecidos e extraia informações técnicas
-2. IDENTIFIQUE: MPs recomendadas, processos eficientes, compatibilidades e restrições técnicas
-3. SELECIONE A SOLUÇÃO MAIS ADEQUADA que melhor se alinha com os dados científicos
-4. JUSTIFIQUE cada componente citando qual artigo científico fundamenta a escolha
-5. O processo proposto DEVE ser baseado nas melhores práticas identificadas nos artigos
+    ? `\n⚠️ OBRIGATÓRIO — ANÁLISE AVANÇADA E OTIMIZAÇÃO DE ARTIGOS CIENTÍFICOS:
+Você recebeu documentos científicos. EXECUTE ESTE PROCEDIMENTO RIGOROSAMENTE:
 
-A qualidade da sua resposta depende de analisar TODOS os artigos, não apenas alguns.\n`
+1. LEIA E ANALISE PROFUNDAMENTE todos os artigos fornecidos
+   - Extraia informações técnicas completas
+   - Identifique as MELHORES PRÁTICAS para o TIPO DE PROCESSO específico solicitado
+
+2. COMPARE E IDENTIFIQUE PADRÕES entre os artigos:
+   - Qual abordagem é mais eficaz para ESTE caso específico?
+   - Quais MPs são MAIS RECOMENDADAS nos artigos para este tipo de síntese?
+   - Qual é a melhor sequência de processamento?
+   - Quais aditivos melhoram a estabilidade PARA ESTE TIPO específico?
+
+3. SELECIONE A SOLUÇÃO MAIS OTIMIZADA (não genérica):
+   - Escolha a formulação que MELHOR se alinha com os dados científicos
+   - Priorize as MELHORES PRÁTICAS identificadas nos artigos para ESTE caso
+   - Se há múltiplas abordagens nos artigos, escolha a com MELHOR desempenho
+
+4. JUSTIFIQUE CADA DECISÃO com citações específicas:
+   - "Segundo [Autor, Ano], esta abordagem é melhor para [CASO ESPECÍFICO] porque..."
+   - Explique POR QUE você escolheu AQUELA solução em vez de outra
+
+5. OTIMIZE a formulação baseado no que os artigos dizem ser ideal para ESTE processo:
+   - Não retorne uma fórmula genérica: retorne A MELHOR para este pedido específico
+   - O processo proposto DEVE incorporar as melhores práticas identificadas
+
+⚠️ REGRA CRÍTICA: Sua resposta NÃO é aceitável se:
+   ✗ Você não analisou TODOS os artigos
+   ✗ Você retornou uma fórmula genérica em vez de otimizada para o caso
+   ✗ Você não justificou POR QUE aquela é a MELHOR para este caso específico
+   ✗ Você não comparou as abordagens diferentes nos artigos
+
+A qualidade depende de análise profunda, comparativa e otimizada dos artigos.\n`
     : ''
 
   // Ordem de busca dinâmica por segmento
