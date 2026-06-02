@@ -125,16 +125,19 @@ A qualidade da sua resposta depende de analisar TODOS os artigos, não apenas al
 
   const ordemBusca = isBiosolventes
     ? `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
-1. DOCUMENTAÇÃO CIENTÍFICA (PRIORITÁRIO) — Use artigos científicos como FONTE PRIMÁRIA
+1. DOCUMENTAÇÃO CIENTÍFICA — FONTE ÚNICA OBRIGATÓRIA
    - Analise TODOS os artigos fornecidos
-   - Selecione a solução mais adequada baseada nos dados científicos
+   - Selecione a solução MAIS ADEQUADA baseada SOMENTE em dados científicos
    - Justifique CADA decisão citando qual artigo fundamenta
-   - Recomende MPs e processos identificados nos artigos
-2. P&D PROPRIETÁRIO (complementar) — Use para validação técnica adicional
-3. ❌ SEM ACESSO A BUSCA EXTERNA (internet) — NÃO busque no Google
-   - Se artigos + P&D forem insuficientes: retorne "viabilidade": "nao_encontrada"
+   - Recomende APENAS MPs e processos identificados nos artigos
 
-Obs: Para BIOSOLVENTES E BIOLUBRIFICANTES, a solução DEVE ser 100% baseada em Artigos Científicos ou P&D interno.\n`
+2. ❌ NUNCA consulte P&D Proprietário para este segmento
+3. ❌ NUNCA busque na Internet (Google bloqueado)
+
+⚠️ REGRA ABSOLUTA: Se os artigos científicos NÃO tiverem solução compatível:
+   → Retorne "viabilidade": "nao_encontrada" (NÃO invente fórmula)
+
+Para BIOSOLVENTES E BIOLUBRIFICANTES: a solução é 100% baseada em Artigos Científicos, nada mais.\n`
     : `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
 1. BASE TÉCNICA P&D PROPRIETÁRIO — Use como referência principal
 2. DOCUMENTAÇÃO CIENTÍFICA — Use como embasamento técnico complementar

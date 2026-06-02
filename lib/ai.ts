@@ -547,7 +547,12 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const dadosFinais: Record<string, unknown> = { ...dados }
   if (webContext) dadosFinais.pesquisa_internet_ativa = true
 
-  const prompt = buildFormulacaoPrompt(dadosFinais, contexto + proprietaryResult.context + docsContext + webContext)
+  // Para Biosolventes: SOMENTE Artigos Científicos (não inclui P&D Proprietário)
+  const contextosParaIA = isBiosolventes
+    ? contexto + docsContext  // Apenas matérias-primas + artigos científicos
+    : contexto + proprietaryResult.context + docsContext + webContext  // Ordem normal para outros segmentos
+
+  const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA)
 
   const message = await getClient().messages.create({
     model: getModel(),
