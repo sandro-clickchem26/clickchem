@@ -131,9 +131,10 @@ A qualidade da sua resposta depende de analisar TODOS os artigos, não apenas al
    - Justifique CADA decisão citando qual artigo fundamenta
    - Recomende MPs e processos identificados nos artigos
 2. P&D PROPRIETÁRIO (complementar) — Use para validação técnica adicional
-3. BUSCA EXTERNA (fallback) — Use apenas se documentação científica for insuficiente
+3. ❌ SEM ACESSO A BUSCA EXTERNA (internet) — NÃO busque no Google
+   - Se artigos + P&D forem insuficientes: retorne "viabilidade": "nao_encontrada"
 
-Obs: Os artigos científicos são a verdade técnica para BIOSOLVENTES E BIOLUBRIFICANTES.\n`
+Obs: Para BIOSOLVENTES E BIOLUBRIFICANTES, a solução DEVE ser 100% baseada em Artigos Científicos ou P&D interno.\n`
     : `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
 1. BASE TÉCNICA P&D PROPRIETÁRIO — Use como referência principal
 2. DOCUMENTAÇÃO CIENTÍFICA — Use como embasamento técnico complementar
