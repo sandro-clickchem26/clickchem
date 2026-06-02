@@ -13,7 +13,7 @@ const SEGMENTOS = [
   { value: 'Automotivo', label: 'Automotivo' },
   { value: 'Saneantes e Domissanitários', label: 'Saneantes e Domissanitários' },
   { value: 'Tintas, Vernizes, Resinas e Polímeros', label: 'Tintas, Vernizes, Resinas e Polímeros' },
-  { value: 'Biossolventes e Biolubrificantes', label: 'Biossolventes e Biolubrificantes' },
+  { value: 'Biosolventes e Biolubrificantes', label: 'Biosolventes e Biolubrificantes' },
 ]
 
 const SEG_CORES: Record<string, string> = {
@@ -21,7 +21,7 @@ const SEG_CORES: Record<string, string> = {
   'Automotivo': 'text-orange-400 bg-orange-500/10 border-orange-500/30',
   'Saneantes e Domissanitários': 'text-green-400 bg-green-500/10 border-green-500/30',
   'Tintas, Vernizes, Resinas e Polímeros': 'text-purple-400 bg-purple-500/10 border-purple-500/30',
-  'Biossolventes e Biolubrificantes': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+  'Biosolventes e Biolubrificantes': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
 }
 
 interface Componente {

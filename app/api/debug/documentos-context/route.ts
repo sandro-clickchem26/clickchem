@@ -57,7 +57,7 @@ async function testBuildDocumentosContext(segmento: string, descricao: string = 
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
-  const segmento = url.searchParams.get('segmento') || 'Biossolventes e Biolubrificantes'
+  const segmento = url.searchParams.get('segmento') || 'Biosolventes e Biolubrificantes'
   const descricao = url.searchParams.get('descricao') || 'biolubricante óleo de mamona'
 
   const resultado = await testBuildDocumentosContext(segmento, descricao)
