@@ -547,16 +547,16 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const dadosFinais: Record<string, unknown> = { ...dados }
   if (webContext) dadosFinais.pesquisa_internet_ativa = true
 
-  // Para Biosolventes: SOMENTE Artigos Científicos (não inclui P&D Proprietário)
-  const contextosParaIA = isBiosolventes
-    ? contexto + docsContext  // Apenas matérias-primas + artigos científicos
-    : contexto + proprietaryResult.context + docsContext + webContext  // Ordem normal para outros segmentos
-
-  // DEBUG: rastrear contexto passado para IA
-  console.log(`[gerarFormulacao] isBiosolventes: ${isBiosolventes}`)
-  console.log(`[gerarFormulacao] contextosParaIA length: ${contextosParaIA.length} chars`)
-  console.log(`[gerarFormulacao] docsContext length: ${docsContext.length} chars`)
-  console.log(`[gerarFormulacao] proprietaryResult.context length: ${proprietaryResult.context.length} chars`)
+  // Para Biosolventes: SOMENTE Artigos Científicos (remove TUDO que não seja artigos)
+  let contextosParaIA: string
+  if (isBiosolventes) {
+    // ⚠️ REGRA INVIOLÁVEL: Biosolventes = SOMENTE docsContext (artigos científicos)
+    // Remove matérias-primas genéricas, P&D, e internet
+    contextosParaIA = docsContext || ''
+  } else {
+    // Outros segmentos: ordem normal
+    contextosParaIA = contexto + proprietaryResult.context + docsContext + webContext
+  }
 
   const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA)
 
