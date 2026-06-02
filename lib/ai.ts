@@ -242,21 +242,29 @@ ${linhas}\n`
 async function buildDocumentosContext(segmento: string, descricao = ''): Promise<string> {
   try {
     const docs = await prisma.documentoCientifico.findMany({ where: { ativo: true } })
-    console.log(`[buildDocumentosContext] Total docs ativos: ${docs.length}`)
+    console.log(`[buildDocumentosContext] Buscando para segmento: "${segmento}" | Total docs ativos: ${docs.length}`)
+
+    // DEBUG: mostra os segmentos dos artigos
+    if (docs.length > 0) {
+      console.log(`[buildDocumentosContext] Segmentos dos artigos:`, docs.map(d => d.segmento).slice(0, 3))
+    }
+
     if (docs.length === 0) return ''
 
     const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
     const palavras = norm(descricao).split(/\s+/).filter(w => w.length > 3)
+    const segmentoPedido = norm(segmento)
+
+    console.log(`[buildDocumentosContext] Segmento normalizado: "${segmentoPedido}"`)
 
     const comScore = docs.map(doc => {
       let score = 0
       const textoDoc = norm(`${doc.segmento} ${doc.titulo} ${doc.tags} ${doc.resumo || ''}`)
       const segNorm = norm(doc.segmento)
-      const segmentoPedido = norm(segmento)
 
       if (segNorm.includes(segmentoPedido) || segmentoPedido.includes(segNorm)) {
         score += 3
-        console.log(`[buildDocumentosContext] Match segmento: "${doc.titulo}" (doc: "${doc.segmento}" vs pedido: "${segmento}")`)
+        console.log(`[buildDocumentosContext] ✅ Match: "${doc.titulo.slice(0, 40)}..." (${doc.segmento})`)
       }
 
       for (const kw of palavras) { if (textoDoc.includes(kw)) score += 1 }
@@ -272,9 +280,11 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
     if (comScore.length === 0) return ''
 
     const linhas = comScore.map(({ doc }) => {
-      const trecho = doc.conteudo.slice(0, 1500).replace(/\s+/g, ' ').trim()
+      // Usa conteúdo se disponível, senão usa resumo
+      const textoDisponivel = (doc.conteudo || doc.resumo || '').trim()
+      const trecho = textoDisponivel.slice(0, 1500).replace(/\s+/g, ' ').trim()
       const ref = [doc.autores, doc.ano, doc.fonte].filter(Boolean).join(', ')
-      return `📄 "${doc.titulo}"${ref ? ` (${ref})` : ''}\n${trecho}`
+      return `📄 "${doc.titulo}"${ref ? ` (${ref})` : ''}${trecho ? `\n${trecho}` : ''}`
     }).join('\n\n---\n\n')
 
     return `\n📚 DOCUMENTAÇÃO CIENTÍFICA RELEVANTE (banco interno Astana Química — use como embasamento técnico):\n${linhas}\n`
