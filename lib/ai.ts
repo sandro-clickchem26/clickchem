@@ -273,18 +273,20 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
         for (const tag of tags) { if (norm(descricao).includes(norm(tag))) score += 2 }
       } catch { /* ignore */ }
       return { doc, score }
-    }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 3)
+    }).filter(x => x.score > 0).sort((a, b) => b.score - a.score)
+    // ⚠️ REGRA INVIOLÁVEL: ANALISAR TODOS OS DOCUMENTOS, NÃO APENAS ALGUNS
+    // Removido .slice(0, 3) para garantir 100% de análise dos artigos científicos
 
-    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length}`)
+    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} (ANALISANDO TODOS)`)
 
     if (comScore.length === 0) return ''
 
-    const linhas = comScore.map(({ doc }) => {
+    const linhas = comScore.map(({ doc, score }) => {
       // Usa conteúdo se disponível, senão usa resumo
       const textoDisponivel = (doc.conteudo || doc.resumo || '').trim()
       const trecho = textoDisponivel.slice(0, 1500).replace(/\s+/g, ' ').trim()
       const ref = [doc.autores, doc.ano, doc.fonte].filter(Boolean).join(', ')
-      return `📄 "${doc.titulo}"${ref ? ` (${ref})` : ''}${trecho ? `\n${trecho}` : ''}`
+      return `📄 "${doc.titulo}" [SCORE: ${score}]${ref ? ` (${ref})` : ''}${trecho ? `\n${trecho}` : ''}`
     }).join('\n\n---\n\n')
 
     return `\n📚 DOCUMENTAÇÃO CIENTÍFICA RELEVANTE (banco interno Astana Química — use como embasamento técnico):\n${linhas}\n`

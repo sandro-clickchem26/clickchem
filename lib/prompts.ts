@@ -30,8 +30,9 @@ ORDEM OBRIGATÓRIA DE BUSCA — REGRA INVIOLÁVEL:
    - SE não compatível: passe para o passo 2.
 2. DOCUMENTAÇÃO CIENTÍFICA INTERNA: Use "DOCUMENTAÇÃO CIENTÍFICA RELEVANTE" como embasamento técnico complementar.
    - Consulte os artigos científicos do banco interno (Astana Química) para validar tecnicamente sua formulação.
+   - ⚠️ REGRA INVIOLÁVEL: ANALISE E CONSIDERE TODOS OS ARTIGOS FORNECIDOS — NÃO ignore nenhum documento, pois cada um traz informações técnicas complementares.
    - Use como REFERÊNCIA TÉCNICA SECUNDÁRIA para justificar decisões e confirmar compatibilidade.
-   - Priorize artigos que abrangem a função principal e o segmento solicitado.
+   - Priorize artigos que abrangem a função principal e o segmento solicitado, mas incorpore insights de TODOS.
 3. REFERÊNCIAS EXTERNAS (BUSCA NA INTERNET): Se "pesquisa_internet_ativa: true", use referências externas do contexto.
    - Extraia o PRIMEIRO título de fórmula encontrado nas REFERÊNCIAS TÉCNICAS DA INTERNET (primeira linha com "•")
    - Gere uma SUGESTÃO FORMULATIVA DERIVADA dessa fórmula encontrada
