@@ -242,6 +242,7 @@ ${linhas}\n`
 async function buildDocumentosContext(segmento: string, descricao = ''): Promise<string> {
   try {
     const docs = await prisma.documentoCientifico.findMany({ where: { ativo: true } })
+    console.log(`[buildDocumentosContext] Total docs ativos: ${docs.length}`)
     if (docs.length === 0) return ''
 
     const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -250,7 +251,14 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
     const comScore = docs.map(doc => {
       let score = 0
       const textoDoc = norm(`${doc.segmento} ${doc.titulo} ${doc.tags} ${doc.resumo || ''}`)
-      if (norm(doc.segmento).includes(norm(segmento)) || norm(segmento).includes(norm(doc.segmento))) score += 3
+      const segNorm = norm(doc.segmento)
+      const segmentoPedido = norm(segmento)
+
+      if (segNorm.includes(segmentoPedido) || segmentoPedido.includes(segNorm)) {
+        score += 3
+        console.log(`[buildDocumentosContext] Match segmento: "${doc.titulo}" (doc: "${doc.segmento}" vs pedido: "${segmento}")`)
+      }
+
       for (const kw of palavras) { if (textoDoc.includes(kw)) score += 1 }
       try {
         const tags = JSON.parse(doc.tags) as string[]
@@ -258,6 +266,8 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
       } catch { /* ignore */ }
       return { doc, score }
     }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 3)
+
+    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length}`)
 
     if (comScore.length === 0) return ''
 
