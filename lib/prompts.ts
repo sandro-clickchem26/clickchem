@@ -28,11 +28,15 @@ ORDEM OBRIGATÓRIA DE BUSCA — REGRA INVIOLÁVEL:
    - SE compatível: gere uma SUGESTÃO FORMULATIVA DERIVADA — NUNCA copie a original.
    - Preencha: "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa derivada." e "formula_referencia": null
    - SE não compatível: passe para o passo 2.
-2. REFERÊNCIAS EXTERNAS (BUSCA NA INTERNET): Se "pesquisa_internet_ativa: true", use referências externas do contexto.
+2. DOCUMENTAÇÃO CIENTÍFICA INTERNA: Use "DOCUMENTAÇÃO CIENTÍFICA RELEVANTE" como embasamento técnico complementar.
+   - Consulte os artigos científicos do banco interno (Astana Química) para validar tecnicamente sua formulação.
+   - Use como REFERÊNCIA TÉCNICA SECUNDÁRIA para justificar decisões e confirmar compatibilidade.
+   - Priorize artigos que abrangem a função principal e o segmento solicitado.
+3. REFERÊNCIAS EXTERNAS (BUSCA NA INTERNET): Se "pesquisa_internet_ativa: true", use referências externas do contexto.
    - Extraia o PRIMEIRO título de fórmula encontrado nas REFERÊNCIAS TÉCNICAS DA INTERNET (primeira linha com "•")
    - Gere uma SUGESTÃO FORMULATIVA DERIVADA dessa fórmula encontrada
    - Preencha: "fonte": "Busca Externa Técnica" e "formula_referencia": "<NOME DA FÓRMULA ENCONTRADA>"
-3. SEM BASE SUFICIENTE: Se nem P&D nem internet tiverem referências compatíveis:
+4. SEM BASE SUFICIENTE: Se nem P&D, nem documentação científica, nem internet tiverem referências compatíveis:
    - Preencha: "viabilidade": "nao_encontrada" e NÃO invente fórmulas.
 
 CONFIDENCIALIDADE ABSOLUTA — REGRA INVIOLÁVEL:
