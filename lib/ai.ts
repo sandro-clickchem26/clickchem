@@ -165,12 +165,19 @@ Use as referências compatíveis APENAS como base técnica. Gere uma fórmula NO
      adapte às restrições do usuário, exclua componentes incompatíveis
   6. Otimize as proporções para o pedido específico do usuário
 
+  ⛔ RESTRIÇÃO CRÍTICA — LISTA FECHADA DE MATÉRIAS-PRIMAS:
+  Você SÓ pode usar as matérias-primas que aparecem nas referências técnicas acima.
+  Extraia EXATAMENTE os nomes dos componentes-chave listados.
+  Se uma MP não aparece nas referências, você ABSOLUTAMENTE NÃO pode incluir na fórmula.
+  Exemplo proibido: se ureia-formaldeído só tem [ureia, paraformol, catalisador ácido],
+  você NÃO pode adicionar [ácido cítrico, benzoico, silicato, conservantes genéricos].
+
   PROIBICOES ABSOLUTAS:
-  - NUNCA use MPs que não estejam listadas nas referências técnicas acima
-  - NUNCA use conhecimento geral de química para adicionar componentes novos
-  - NUNCA reproduza percentuais idênticos aos das referências — use as faixas como guia
-  - NUNCA revele nomes internos, códigos de referência (ex: RA1029) ou percentuais exatos originais
-  - NUNCA mencione "Referência Técnica A/B/C" na justificativa — use apenas termos técnicos
+  - NUNCA invente ou adicione MPs usando conhecimento geral de química
+  - NUNCA use MPs que não estejam EXPLICITAMENTE listadas nas referências técnicas acima
+  - NUNCA reproduza percentuais idênticos — use as faixas como guia
+  - NUNCA revele nomes internos, códigos ou percentuais exatos originais
+  - NUNCA mencione "Referência Técnica A/B/C" — use apenas termos técnicos
 
   "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa derivada."
   "formula_referencia": null
