@@ -23,27 +23,31 @@ PRINCÍPIOS INEGOCIÁVEIS:
 
 FORMATO DE SAÍDA: Retorne SEMPRE JSON válido no schema fornecido, sem texto fora do JSON.
 
-ORDEM OBRIGATÓRIA DE BUSCA — REGRA INVIOLÁVEL:
-1. BASE TÉCNICA INTERNA P&D: Verifique compatibilidade técnica das referências internas fornecidas no contexto.
-   - SE compatível: gere uma SUGESTÃO FORMULATIVA DERIVADA — NUNCA copie a original.
-   - Preencha: "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa derivada." e "formula_referencia": null
-   - SE não compatível: passe para o passo 2.
-2. DOCUMENTAÇÃO CIENTÍFICA INTERNA — ANÁLISE COMPLETA OBRIGATÓRIA:
-   - ⚠️ REGRA INVIOLÁVEL: ANALISE 100% DOS ARTIGOS FORNECIDOS. Não ignore nenhum documento.
+ANÁLISE TÉCNICA OBRIGATÓRIA — REGRA INVIOLÁVEL:
+Se houver DOCUMENTAÇÃO CIENTÍFICA FORNECIDA:
+   - ⚠️ REGRA INVIOLÁVEL: ANALISE 100% DOS ARTIGOS. Não ignore nenhum documento.
    - PROCEDIMENTO:
      a) Leia e extraia informações técnicas de TODOS os artigos
      b) Identifique padrões, melhores práticas e compatibilidades técnicas
      c) Mapeie as MPs mais recomendadas e os processos mais eficazes nos artigos
-     d) SELECIONE A SOLUÇÃO MAIS ADEQUADA baseada na análise completa (não a primeira que encontrar)
-   - A solução DEVE ser a que melhor se alinha com os dados científicos, considerando TODOS os artigos
+     d) SELECIONE A SOLUÇÃO MAIS ADEQUADA baseada na análise completa
    - JUSTIFIQUE cada decisão citando quais artigos fundamentam a escolha
-   - Use como REFERÊNCIA TÉCNICA PRIMÁRIA para fundamentar a formulação e o processo
-3. REFERÊNCIAS EXTERNAS (BUSCA NA INTERNET): Se "pesquisa_internet_ativa: true", use referências externas do contexto.
-   - Extraia o PRIMEIRO título de fórmula encontrado nas REFERÊNCIAS TÉCNICAS DA INTERNET (primeira linha com "•")
-   - Gere uma SUGESTÃO FORMULATIVA DERIVADA dessa fórmula encontrada
-   - Preencha: "fonte": "Busca Externa Técnica" e "formula_referencia": "<NOME DA FÓRMULA ENCONTRADA>"
-4. SEM BASE SUFICIENTE: Se nem P&D, nem documentação científica, nem internet tiverem referências compatíveis:
+
+Se houver BASE TÉCNICA P&D:
+   - Verifique compatibilidade técnica das referências internas fornecidas no contexto
+   - SE compatível: gere uma SUGESTÃO FORMULATIVA DERIVADA — NUNCA copie a original
+   - Preencha: "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa derivada." e "formula_referencia": null
+
+Se houver REFERÊNCIAS EXTERNAS (internet):
+   - Use apenas se "pesquisa_internet_ativa: true"
+   - Extraia o PRIMEIRO título de fórmula encontrado
+   - Gere uma SUGESTÃO FORMULATIVA DERIVADA
+   - Preencha: "fonte": "Busca Externa Técnica" e "formula_referencia": "<NOME>"
+
+Se NENHUMA base for suficiente:
    - Preencha: "viabilidade": "nao_encontrada" e NÃO invente fórmulas.
+
+⚠️ A ORDEM DE PRIORIDADE será definida no prompt específico da solicitação (varia por segmento).
 
 CONFIDENCIALIDADE ABSOLUTA — REGRA INVIOLÁVEL:
 As referências internas P&D são propriedade da Astana Química.
@@ -116,26 +120,29 @@ Você recebeu documentos científicos. EXECUTE ESTE PROCEDIMENTO:
 A qualidade da sua resposta depende de analisar TODOS os artigos, não apenas alguns.\n`
     : ''
 
-  // Aplicar prioridade especial apenas para Biosolventes e Biolubrificantes
+  // Ordem de busca dinâmica por segmento
   const isBiosolventes = String(dados.segmento || '').includes('Biosolventes e Biolubrificantes')
 
-  const prioridadeBiosolventes = isBiosolventes && contextoMPs.includes('📚 DOCUMENTAÇÃO CIENTÍFICA')
-    ? `\n⚠️ SEGMENTO ESPECIAL — BIOSOLVENTES E BIOLUBRIFICANTES:
-Para este segmento, a DOCUMENTAÇÃO CIENTÍFICA é a FONTE PRIMÁRIA.
-PRIORIDADE ABSOLUTA:
-1. ANALISE E USE OS ARTIGOS CIENTÍFICOS como base principal da formulação
-2. Use P&D Proprietário apenas como validação complementar
-3. NUNCA ignore os artigos científicos em favor de P&D
-4. Todas as decisões devem ser justificadas citando os artigos científicos
-5. O processo deve incorporar as melhores práticas identificadas nos artigos
+  const ordemBusca = isBiosolventes
+    ? `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
+1. DOCUMENTAÇÃO CIENTÍFICA (PRIORITÁRIO) — Use artigos científicos como FONTE PRIMÁRIA
+   - Analise TODOS os artigos fornecidos
+   - Selecione a solução mais adequada baseada nos dados científicos
+   - Justifique CADA decisão citando qual artigo fundamenta
+   - Recomende MPs e processos identificados nos artigos
+2. P&D PROPRIETÁRIO (complementar) — Use para validação técnica adicional
+3. BUSCA EXTERNA (fallback) — Use apenas se documentação científica for insuficiente
 
-Os artigos científicos são a verdade técnica para este segmento.\n`
-    : ''
+Obs: Os artigos científicos são a verdade técnica para BIOSOLVENTES E BIOLUBRIFICANTES.\n`
+    : `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
+1. BASE TÉCNICA P&D PROPRIETÁRIO — Use como referência principal
+2. DOCUMENTAÇÃO CIENTÍFICA — Use como embasamento técnico complementar
+3. BUSCA EXTERNA (internet) — Use apenas se P&D for insuficiente\n`
 
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 
 PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
-${obrigatorias}${proibidas}${secaoMPs}${analiseObrigatoria}${prioridadeBiosolventes}`
+${obrigatorias}${proibidas}${secaoMPs}${ordemBusca}${analiseObrigatoria}`
 
 ⚠️ REGRA MATEMÁTICA ABSOLUTA — FECHAMENTO EM 100%:
 A soma de TODOS os valores "percentual_recomendado" da composição DEVE ser EXATAMENTE 100,0%.
