@@ -843,6 +843,9 @@ function DocsCientificos({ pin }: { pin: string }) {
   const [arquivo, setArquivo] = useState<File | null>(null)
   const [extraindo, setExtraindo] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [editandoId, setEditandoId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<Record<string, string>>({})
+  const [salvandoEdit, setSalvandoEdit] = useState(false)
   const [form, setForm] = useState({
     titulo: '', autores: '', ano: '', fonte: '', segmento: SEGMENTOS[0], tags: '', resumo: '',
   })
@@ -941,6 +944,45 @@ function DocsCientificos({ pin }: { pin: string }) {
       body: JSON.stringify({ id }),
     })
     carregar()
+  }
+
+  function iniciarEdicao(doc: DocCientifico) {
+    setEditandoId(doc.id)
+    setEditForm({
+      titulo: doc.titulo || '',
+      autores: doc.autores || '',
+      ano: doc.ano ? String(doc.ano) : '',
+      fonte: doc.fonte || '',
+      segmento: doc.segmento || '',
+      tags: doc.tags || '',
+      resumo: doc.resumo || '',
+    })
+  }
+
+  async function salvarEdicao() {
+    if (!editandoId) return
+    setSalvandoEdit(true)
+    try {
+      const res = await fetch('/api/admin/documentos', {
+        method: 'PATCH',
+        headers: { 'x-admin-pin': pin, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editandoId, ...editForm }),
+      })
+      if (res.ok) {
+        setSucesso('Documento atualizado com sucesso!')
+        setEditandoId(null)
+        carregar()
+      }
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Erro ao salvar')
+    } finally {
+      setSalvandoEdit(false)
+    }
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(null)
+    setEditForm({})
   }
 
   return (
@@ -1074,6 +1116,10 @@ function DocsCientificos({ pin }: { pin: string }) {
                       )}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
+                      <button onClick={() => iniciarEdicao(doc)}
+                        className="text-gray-600 hover:text-blue-400 transition-colors">
+                        <Pencil size={13} />
+                      </button>
                       <button onClick={() => toggleAtivo(doc.id, doc.ativo)}
                         className={`text-xs flex items-center gap-1 transition-colors ${doc.ativo ? 'text-green-400 hover:text-yellow-400' : 'text-gray-500 hover:text-green-400'}`}>
                         {doc.ativo ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
@@ -1089,6 +1135,73 @@ function DocsCientificos({ pin }: { pin: string }) {
           </div>
         )}
       </div>
+
+      {/* Modal de Edição */}
+      {editandoId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#0A1628] border border-blue-500/30 rounded-xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-white mb-4">Editar Documento</h3>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Título</label>
+                <input value={editForm.titulo || ''} onChange={e => setEditForm(p => ({ ...p, titulo: e.target.value }))}
+                  className="w-full bg-[#111f3a] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Segmento</label>
+                <select value={editForm.segmento || ''} onChange={e => setEditForm(p => ({ ...p, segmento: e.target.value }))}
+                  className="w-full bg-[#111f3a] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                  {SEGMENTOS.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Autores</label>
+                <input value={editForm.autores || ''} onChange={e => setEditForm(p => ({ ...p, autores: e.target.value }))}
+                  className="w-full bg-[#111f3a] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Ano</label>
+                  <input type="number" value={editForm.ano || ''} onChange={e => setEditForm(p => ({ ...p, ano: e.target.value }))}
+                    className="w-full bg-[#111f3a] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">Fonte</label>
+                  <input value={editForm.fonte || ''} onChange={e => setEditForm(p => ({ ...p, fonte: e.target.value }))}
+                    className="w-full bg-[#111f3a] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Tags</label>
+                <input value={editForm.tags || ''} onChange={e => setEditForm(p => ({ ...p, tags: e.target.value }))}
+                  className="w-full bg-[#111f3a] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Resumo</label>
+                <textarea value={editForm.resumo || ''} onChange={e => setEditForm(p => ({ ...p, resumo: e.target.value }))}
+                  rows={3} className="w-full bg-[#111f3a] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 resize-none" />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              <button onClick={cancelarEdicao}
+                className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold rounded-lg transition-colors">
+                Cancelar
+              </button>
+              <button onClick={salvarEdicao} disabled={salvandoEdit}
+                className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors">
+                {salvandoEdit ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
