@@ -16,7 +16,7 @@ const SEGMENTOS = [
   'Saneantes e Domissanitários',
   'Tintas e Vernizes',
   'Resinas e Polímeros',
-  'Biossolventes e Biolubrificantes',
+  'Biosolventes e Biolubrificantes',
   'Cosmético',
 ]
 const SEG_OPTIONS = SEGMENTOS.map(s => ({ value: s, label: s }))
@@ -476,7 +476,7 @@ const SEG_CORES: Record<string, string> = {
   'Saneantes e Domissanitários': 'border-green-500/40 text-green-400 bg-green-500/10',
   'Tintas e Vernizes': 'border-purple-500/40 text-purple-400 bg-purple-500/10',
   'Resinas e Polímeros': 'border-violet-500/40 text-violet-400 bg-violet-500/10',
-  'Biossolventes e Biolubrificantes': 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10',
+  'Biosolventes e Biolubrificantes': 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10',
   'Cosmético': 'border-pink-500/40 text-pink-400 bg-pink-500/10',
 }
 const SEG_EMOJI: Record<string, string> = {
@@ -485,7 +485,7 @@ const SEG_EMOJI: Record<string, string> = {
   'Saneantes e Domissanitários': '🧴',
   'Tintas e Vernizes': '🎨',
   'Resinas e Polímeros': '🧪',
-  'Biossolventes e Biolubrificantes': '🌿',
+  'Biosolventes e Biolubrificantes': '🌿',
   'Cosmético': '💄',
 }
 
@@ -1033,7 +1033,7 @@ function DocsCientificos({ pin }: { pin: string }) {
           <div>
             <label className="text-xs text-gray-400 block mb-1">Título <span className="text-red-400">*</span></label>
             <input value={form.titulo} onChange={e => setForm(p => ({ ...p, titulo: e.target.value }))}
-              placeholder="Ex: Biossolventes Terpênicos em Limpeza Industrial"
+              placeholder="Ex: Biosolventes Terpênicos em Limpeza Industrial"
               className="w-full bg-[#0A1628] border border-[#1B3A6B] rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500" />
           </div>
           <div>
