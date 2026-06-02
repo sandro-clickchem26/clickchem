@@ -16,6 +16,7 @@ const SEGMENTOS = [
   { value: 'Tintas e Vernizes', label: 'Tintas e Vernizes' },
   { value: 'Resinas e Polímeros', label: 'Resinas e Polímeros' },
   { value: 'Biossolventes, Biopolímeros e Biolubrificantes', label: 'Biossolventes e Biolubrificantes' },
+  { value: 'Cosmético', label: 'Cosmético' },
 ]
 const VISCOSIDADES = [
   { value: '', label: 'Selecione...' },
@@ -83,6 +84,47 @@ const VISCOSIDADES_GARDNER = [
 ]
 
 const SEGMENTO_TINTAS = 'Tintas e Vernizes'
+const SEGMENTO_COSMETICO = 'Cosmético'
+
+const TIPOS_PRODUTO_COSMETICO = [
+  { value: '', label: 'Selecione o tipo de produto...' },
+  { value: 'Creme facial', label: 'Creme facial' },
+  { value: 'Loção corporal', label: 'Loção corporal' },
+  { value: 'Sérum', label: 'Sérum' },
+  { value: 'Máscara facial', label: 'Máscara facial' },
+  { value: 'Gel limpador', label: 'Gel limpador' },
+  { value: 'Tônico', label: 'Tônico' },
+  { value: 'Protetor solar', label: 'Protetor solar' },
+  { value: 'Demaquilante', label: 'Demaquilante' },
+  { value: 'Shampoo', label: 'Shampoo' },
+  { value: 'Condicionador', label: 'Condicionador' },
+  { value: 'Sabonete líquido', label: 'Sabonete líquido' },
+  { value: 'Mousse / Espuma', label: 'Mousse / Espuma' },
+  { value: 'Outro', label: 'Outro' },
+]
+
+const INDICACOES_COSMETICO = [
+  'Hidratação profunda',
+  'Anti-envelhecimento',
+  'Ação clareadora',
+  'Ação tonificante',
+  'Proteção UV',
+  'Limpeza profunda',
+  'Controle de oleosidade',
+  'Sensibilidade/Calmante',
+  'Antioxidante',
+  'Firmeza/Elasticidade',
+]
+
+const TIPOS_PELE = [
+  { value: '', label: 'Selecione o tipo de pele...' },
+  { value: 'Seca', label: 'Seca' },
+  { value: 'Oleosa', label: 'Oleosa' },
+  { value: 'Mista', label: 'Mista' },
+  { value: 'Sensível', label: 'Sensível' },
+  { value: 'Normal', label: 'Normal' },
+  { value: 'Todos os tipos', label: 'Todos os tipos' },
+]
 
 const TIPOS_SISTEMA_RESINA = [
   { value: '', label: 'Selecione o sistema/resina...' },
@@ -218,6 +260,11 @@ const FORM_INICIAL = {
   metodo_aplicacao_tinta: '',
   temperatura_cura: '',
   propriedades_desejadas: [] as string[],
+  // Campos específicos Cosmético
+  tipo_produto_cosmetico: '',
+  tipo_pele: '',
+  indicacoes_cosmetico: [] as string[],
+  ph_alvo: '',
 }
 
 export default function NovaFormulacao() {
@@ -243,6 +290,14 @@ export default function NovaFormulacao() {
     const lista = r.current.form.propriedades_desejadas
     const nova = lista.includes(value) ? lista.filter(v => v !== value) : [...lista, value]
     const f = { ...r.current.form, propriedades_desejadas: nova } as typeof FORM_INICIAL
+    r.current.form = f
+    setForm(f)
+  }
+
+  function checkIndicacaoCosmetico(value: string) {
+    const lista = r.current.form.indicacoes_cosmetico
+    const nova = lista.includes(value) ? lista.filter(v => v !== value) : [...lista, value]
+    const f = { ...r.current.form, indicacoes_cosmetico: nova } as typeof FORM_INICIAL
     r.current.form = f
     setForm(f)
   }
@@ -289,6 +344,7 @@ export default function NovaFormulacao() {
   }
 
   const isTintas = form.segmento === SEGMENTO_TINTAS
+  const isCosmetico = form.segmento === SEGMENTO_COSMETICO
 
   async function gerar() {
     if (!form.segmento || !form.descricao) {
@@ -298,6 +354,12 @@ export default function NovaFormulacao() {
     if (isTintas) {
       if (!form.tipo_sistema_resina || !form.tipo_produto_tinta || !form.base_sistema || !form.tipo_cura) {
         setError('Para Tintas e Vernizes, preencha obrigatoriamente: Tipo de Sistema/Resina, Tipo de Produto, Base do Sistema e Tipo de Cura.')
+        return
+      }
+    }
+    if (isCosmetico) {
+      if (!form.tipo_produto_cosmetico || !form.tipo_pele) {
+        setError('Para Cosmético, preencha obrigatoriamente: Tipo de Produto e Tipo de Pele.')
         return
       }
     }
@@ -491,6 +553,38 @@ export default function NovaFormulacao() {
                   <label key={prop} className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs cursor-pointer border transition-colors ${form.propriedades_desejadas.includes(prop) ? 'bg-blue-500/20 border-blue-500/50 text-blue-300' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'}`}>
                     <input type="checkbox" className="sr-only" checked={form.propriedades_desejadas.includes(prop)} onChange={() => checkProp(prop)} />
                     {prop}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ESPECIFICAÇÕES COSMÉTICO */}
+        {isCosmetico && (
+          <div className="bg-[#0f1f3a] border border-pink-500/30 rounded-xl p-6">
+            <h2 className="text-base font-semibold text-white mb-1 pb-2 border-b border-pink-500/20">
+              Especificações Técnicas — Cosmético
+            </h2>
+            <p className="text-xs text-pink-400/70 mb-4">Campos obrigatórios para este segmento</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <Select label="Tipo de Produto *" id="tipo_produto_cosmetico" options={TIPOS_PRODUTO_COSMETICO} value={form.tipo_produto_cosmetico} onChange={e => campo('tipo_produto_cosmetico', e.target.value)} />
+              <Select label="Tipo de Pele *" id="tipo_pele" options={TIPOS_PELE} value={form.tipo_pele} onChange={e => campo('tipo_pele', e.target.value)} />
+            </div>
+
+            <p className="text-xs text-gray-500 mb-3">Campos opcionais (melhoram a precisão técnica)</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <Input label="pH Alvo (range)" id="ph_alvo" type="text" value={form.ph_alvo} onChange={e => campo('ph_alvo', e.target.value)} placeholder="Ex: 5.5–6.5" />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-300 block mb-2">Indicações / Benefícios Desejados</label>
+              <div className="flex flex-wrap gap-2">
+                {INDICACOES_COSMETICO.map(ind => (
+                  <label key={ind} className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs cursor-pointer border transition-colors ${form.indicacoes_cosmetico.includes(ind) ? 'bg-pink-500/20 border-pink-500/50 text-pink-300' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'}`}>
+                    <input type="checkbox" className="sr-only" checked={form.indicacoes_cosmetico.includes(ind)} onChange={() => checkIndicacaoCosmetico(ind)} />
+                    {ind}
                   </label>
                 ))}
               </div>
