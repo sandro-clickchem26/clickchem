@@ -116,10 +116,26 @@ Você recebeu documentos científicos. EXECUTE ESTE PROCEDIMENTO:
 A qualidade da sua resposta depende de analisar TODOS os artigos, não apenas alguns.\n`
     : ''
 
+  // Aplicar prioridade especial apenas para Biosolventes e Biolubrificantes
+  const isBiosolventes = String(dados.segmento || '').includes('Biosolventes e Biolubrificantes')
+
+  const prioridadeBiosolventes = isBiosolventes && contextoMPs.includes('📚 DOCUMENTAÇÃO CIENTÍFICA')
+    ? `\n⚠️ SEGMENTO ESPECIAL — BIOSOLVENTES E BIOLUBRIFICANTES:
+Para este segmento, a DOCUMENTAÇÃO CIENTÍFICA é a FONTE PRIMÁRIA.
+PRIORIDADE ABSOLUTA:
+1. ANALISE E USE OS ARTIGOS CIENTÍFICOS como base principal da formulação
+2. Use P&D Proprietário apenas como validação complementar
+3. NUNCA ignore os artigos científicos em favor de P&D
+4. Todas as decisões devem ser justificadas citando os artigos científicos
+5. O processo deve incorporar as melhores práticas identificadas nos artigos
+
+Os artigos científicos são a verdade técnica para este segmento.\n`
+    : ''
+
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 
 PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
-${obrigatorias}${proibidas}${secaoMPs}${analiseObrigatoria}
+${obrigatorias}${proibidas}${secaoMPs}${analiseObrigatoria}${prioridadeBiosolventes}`
 
 ⚠️ REGRA MATEMÁTICA ABSOLUTA — FECHAMENTO EM 100%:
 A soma de TODOS os valores "percentual_recomendado" da composição DEVE ser EXATAMENTE 100,0%.
