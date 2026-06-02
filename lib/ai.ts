@@ -552,6 +552,12 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     ? contexto + docsContext  // Apenas matérias-primas + artigos científicos
     : contexto + proprietaryResult.context + docsContext + webContext  // Ordem normal para outros segmentos
 
+  // DEBUG: rastrear contexto passado para IA
+  console.log(`[gerarFormulacao] isBiosolventes: ${isBiosolventes}`)
+  console.log(`[gerarFormulacao] contextosParaIA length: ${contextosParaIA.length} chars`)
+  console.log(`[gerarFormulacao] docsContext length: ${docsContext.length} chars`)
+  console.log(`[gerarFormulacao] proprietaryResult.context length: ${proprietaryResult.context.length} chars`)
+
   const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA)
 
   const message = await getClient().messages.create({
