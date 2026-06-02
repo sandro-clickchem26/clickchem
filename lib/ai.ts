@@ -122,23 +122,20 @@ async function buildProprietaryContext(segmento: string): Promise<ProprietaryRes
       let composicao: Array<{ materia_prima: string; funcao: string; percentual?: string }> = []
       try { composicao = JSON.parse(f.composicao) } catch { /* ignora */ }
 
-      // Percentuais mostrados como FAIXA para evitar cópia exata
-      const comp = composicao.map(c => {
-        const perc = parseFloat(String(c.percentual || '0'))
-        const faixaMin = perc > 0 ? Math.max(0.1, parseFloat((perc * 0.8).toFixed(1))) : ''
-        const faixaMax = perc > 0 ? parseFloat((perc * 1.2).toFixed(1)) : ''
-        const faixaStr = faixaMin && faixaMax ? ` — faixa ${faixaMin}–${faixaMax}%` : ''
-        return `      • ${c.materia_prima}${faixaStr} (${c.funcao})`
-      }).join('\n')
+      // RESUMO COMPACTO: apenas nomes de componentes-chave (sem faixas, sem funções detalhadas)
+      const componentesChave = composicao
+        .filter(c => c.materia_prima) // remove vazios
+        .map(c => c.materia_prima)
+        .slice(0, 5) // máximo 5 componentes no resumo
+        .join(', ')
 
-      // Nome interno NUNCA exposto — usa label genérico para confidencialidade
+      // Resumo técnico sem composição detalhada
       return `  ┌─ REFERÊNCIA TÉCNICA ${String.fromCharCode(65 + idx)}
   │  Aplicação: ${f.aplicacao}
-  │  ${f.ph_final ? `pH final: ${f.ph_final}` : ''}
+  │  Componentes-chave: ${componentesChave}
+  │  ${f.ph_final ? `pH: ${f.ph_final}` : ''}
   │  ${f.viscosidade ? `Viscosidade: ${f.viscosidade}` : ''}
   │  ${f.performance_chave ? `Performance: ${f.performance_chave}` : ''}
-  │  Componentes (use APENAS estes como base — não adicione MPs externas):
-${comp}
   └─────────────────────────────`
     }).join('\n\n')
 
@@ -417,11 +414,11 @@ async function buildWebContext(segmento: string, descricao: string, proibidas: s
     const apiKey = (process.env.TAVILY_API_KEY || '').trim()
     if (!apiKey) return ''
 
-    // Se há MPs proibidas, busca especificamente por alternativas sem elas
+    // Query expandida para trazer mais resultados relevantes
     const exclusoes = proibidas.length > 0
-      ? ` alternativas sem ${proibidas.slice(0, 3).join(' sem ')}`
+      ? ` -${proibidas.slice(0, 3).join(' -')}`
       : ''
-    const query = `fórmula química ${descricao} ${segmento} composição matérias-primas técnica industrial${exclusoes}`
+    const query = `${descricao} fórmula composição receita formulação ${segmento}${exclusoes}`
 
     const controller = new AbortController()
     setTimeout(() => controller.abort(), 5000)
@@ -448,17 +445,21 @@ async function buildWebContext(segmento: string, descricao: string, proibidas: s
     }
 
     const partes: string[] = []
+    let primeiroTitulo = '' // para extrair nome da fórmula
 
     // Resposta sintetizada pelo Tavily (quando disponível)
     if (data.answer && data.answer.length > 50) {
       partes.push(`Síntese técnica:\n${data.answer.slice(0, 600)}`)
     }
 
-    // Top resultados com conteúdo extraído
+    // Top resultados com conteúdo extraído — filtros mais flexíveis
     const resultados = (data.results ?? [])
-      .filter(r => r.score > 0.3 && r.content && r.content.length > 80)
+      .filter(r => r.score > 0.2 && r.content && r.content.length > 40) // score > 0.2 em vez de 0.3, content > 40 em vez de 80
       .slice(0, 4)
-      .map(r => `• ${r.title}\n  ${r.content.slice(0, 350)}`)
+      .map((r, i) => {
+        if (i === 0) primeiroTitulo = r.title // captura nome da primeira fórmula encontrada
+        return `• ${r.title}\n  ${r.content.slice(0, 300)}`
+      })
 
     if (resultados.length > 0) {
       partes.push(resultados.join('\n'))
@@ -471,9 +472,12 @@ async function buildWebContext(segmento: string, descricao: string, proibidas: s
       ? `\n⛔ ATENÇÃO: Mesmo que as referências abaixo citem estes ingredientes, eles são ABSOLUTAMENTE PROIBIDOS nesta formulação e NÃO devem aparecer na composição: ${proibidas.join(', ')}\n`
       : ''
 
+    // Adiciona metadados de fórmula encontrada para usar em formula_referencia
+    const metadados = primeiroTitulo ? `\n<!-- FÓRMULA_ENCONTRADA: ${primeiroTitulo} -->` : ''
+
     return `\nREFERÊNCIAS TÉCNICAS DA INTERNET (use como base — as restrições do usuário prevalecem sobre qualquer fonte externa):
 ${avisoProibidas}
-${partes.join('\n\n')}
+${partes.join('\n\n')}${metadados}
 `
   } catch {
     return '' // silencioso — busca externa é complemento, não requisito
