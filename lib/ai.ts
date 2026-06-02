@@ -577,12 +577,56 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     throw new Error('FORMULA_NAO_ENCONTRADA')
   }
 
-  // MPs obrigatórias definidas pelo usuário têm prioridade máxima
-  if (userObrigatorias.length > 0) {
-    return fecharPercentuais(enforcarMPsObrigatorias(resultado, userObrigatorias))
+  // ⚠️ VALIDAÇÃO FINAL OBRIGATÓRIA: Segunda chamada à IA para validar e ajustar
+  console.log(`[gerarFormulacao] Iniciando VALIDAÇÃO FINAL da formulação...`)
+
+  const validacaoPrompt = `VALIDAÇÃO E AJUSTE FINAL DE FORMULAÇÃO
+
+Você gerou esta formulação:
+${JSON.stringify(resultado, null, 2)}
+
+PEDIDO ORIGINAL DO USUÁRIO:
+${descricao}
+
+EXECUTE ESTE PROCEDIMENTO RIGOROSAMENTE:
+1. ANALISE se a formulação gerada é coerente com o pedido original
+2. VERIFIQUE se os componentes principais solicitados estão presentes e em proporções adequadas
+3. VALIDE se a fórmula é tecnicamente viável baseada nos artigos científicos
+4. Se houver QUALQUER INCOERÊNCIA:
+   - IDENTIFIQUE exatamente qual é o problema
+   - AJUSTE a fórmula para ser 100% coerente com o pedido
+   - MANTENHA os percentuais somando 100%
+   - JUSTIFIQUE cada componente com base nos artigos
+
+5. RETORNE a fórmula VALIDADA E AJUSTADA em JSON, exatamente no mesmo schema
+
+⚠️ REGRA CRÍTICA: Se a fórmula NÃO for coerente com o pedido, CORRIJA-A. Não retorne fórmulas genéricas ou desalinhadas com o pedido.`
+
+  const validacaoMessage = await getClient().messages.create({
+    model: getModel(),
+    max_tokens: 6000,
+    temperature: 0,
+    system: SYSTEM_PROMPT,
+    messages: [{ role: 'user', content: validacaoPrompt }],
+  })
+
+  const validacaoText = validacaoMessage.content[0].type === 'text' ? validacaoMessage.content[0].text : ''
+  let resultadoFinal: unknown
+
+  try {
+    resultadoFinal = extractJSON(validacaoText)
+    console.log(`[gerarFormulacao] ✅ Validação concluída - Fórmula ajustada se necessário`)
+  } catch (err) {
+    console.log(`[gerarFormulacao] ⚠️ Validação retornou JSON inválido, usando resultado original`)
+    resultadoFinal = resultado
   }
 
-  return fecharPercentuais(resultado)
+  // MPs obrigatórias definidas pelo usuário têm prioridade máxima
+  if (userObrigatorias.length > 0) {
+    return fecharPercentuais(enforcarMPsObrigatorias(resultadoFinal, userObrigatorias))
+  }
+
+  return fecharPercentuais(resultadoFinal)
 }
 
 async function buildMPContextParaAnalise(formula: Record<string, unknown>): Promise<string> {
