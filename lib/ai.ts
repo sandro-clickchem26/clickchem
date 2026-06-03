@@ -577,48 +577,107 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     throw new Error('FORMULA_NAO_ENCONTRADA')
   }
 
-  // ⚠️ VALIDAÇÃO FINAL OBRIGATÓRIA: Segunda chamada à IA para validar e ajustar
-  console.log(`[gerarFormulacao] Iniciando VALIDAÇÃO FINAL da formulação...`)
+  // ⚠️ VALIDAÇÃO REAL OBRIGATÓRIA COM LÓGICA DE CÓDIGO E LOOP DE AJUSTE
+  console.log(`[gerarFormulacao] Iniciando VALIDAÇÃO ESTRUTURAL e AJUSTE OBRIGATÓRIO...`)
 
-  const validacaoPrompt = `VALIDAÇÃO E AJUSTE FINAL DE FORMULAÇÃO
+  // EXTRAI componentes-chave do pedido do usuário
+  const descricaoLower = descricao.toLowerCase()
+  const componentesPedidos: string[] = []
 
-Você gerou esta formulação:
-${JSON.stringify(resultado, null, 2)}
+  // Palavras-chave para identificar componentes solicitados
+  const palavrasChave = [
+    'óleo de mamona', 'carbonato de propileno', 'carbonatação',
+    'óleo de soja', 'óleo de palma', 'biodiesel', 'terpeno',
+    'alcool', 'acetona', 'metanol', 'etanol'
+  ]
 
-PEDIDO ORIGINAL DO USUÁRIO:
+  for (const palavra of palavrasChave) {
+    if (descricaoLower.includes(palavra)) {
+      componentesPedidos.push(palavra)
+    }
+  }
+
+  console.log(`[gerarFormulacao] Componentes pedidos detectados: ${componentesPedidos.join(', ')}`)
+
+  // FUNÇÃO: Valida se componentes estão na fórmula
+  function validarComponentes(formulacao: Record<string, unknown>, pedidos: string[]): { valido: boolean; faltando: string[] } {
+    const composicao = (formulacao.formulacao as Record<string, unknown>)?.composicao as Array<{ materia_prima: string }> | undefined
+    const mpsNaFormula = composicao?.map(c => String(c.materia_prima).toLowerCase()) || []
+
+    const faltando = pedidos.filter(pedido =>
+      !mpsNaFormula.some(mp => mp.includes(pedido) || pedido.split(' ').some(palavra => mp.includes(palavra)))
+    )
+
+    return { valido: faltando.length === 0, faltando }
+  }
+
+  // LOOP DE VALIDAÇÃO E AJUSTE (máx 3 tentativas)
+  let resultadoFinal: unknown = resultado
+  let tentativas = 0
+  const maxTentativas = 3
+
+  while (tentativas < maxTentativas) {
+    tentativas++
+    console.log(`[gerarFormulacao] Tentativa ${tentativas}/${maxTentativas} de validação...`)
+
+    const validacao = validarComponentes(resultadoFinal as Record<string, unknown>, componentesPedidos)
+
+    if (validacao.valido) {
+      console.log(`[gerarFormulacao] ✅ VALIDAÇÃO OK - Fórmula atende aos requisitos!`)
+      break
+    }
+
+    if (tentativas >= maxTentativas) {
+      console.log(`[gerarFormulacao] ❌ Máximo de tentativas atingido. Componentes faltando: ${validacao.faltando.join(', ')}`)
+      throw new Error('FORMULA_NAO_ENCONTRADA')
+    }
+
+    // IA REFAZ a fórmula (ordem OBRIGATÓRIA e explícita)
+    console.log(`[gerarFormulacao] ⚠️ Faltando: ${validacao.faltando.join(', ')}. IA vai REFAZER a formulação...`)
+
+    const ajustePrompt = `REFAÇA A FORMULAÇÃO - OBRIGATORIAMENTE INCLUINDO COMPONENTES SOLICITADOS
+
+Fórmula anterior (INCORRETA):
+${JSON.stringify(resultadoFinal, null, 2)}
+
+PEDIDO DO USUÁRIO:
 ${descricao}
 
-EXECUTE ESTE PROCEDIMENTO RIGOROSAMENTE:
-1. ANALISE se a formulação gerada é coerente com o pedido original
-2. VERIFIQUE se os componentes principais solicitados estão presentes e em proporções adequadas
-3. VALIDE se a fórmula é tecnicamente viável baseada nos artigos científicos
-4. Se houver QUALQUER INCOERÊNCIA:
-   - IDENTIFIQUE exatamente qual é o problema
-   - AJUSTE a fórmula para ser 100% coerente com o pedido
-   - MANTENHA os percentuais somando 100%
-   - JUSTIFIQUE cada componente com base nos artigos
+COMPONENTES QUE ESTÃO FALTANDO E DEVEM SER INCLUÍDOS OBRIGATORIAMENTE:
+${validacao.faltando.map(c => `- ${c}`).join('\n')}
 
-5. RETORNE a fórmula VALIDADA E AJUSTADA em JSON, exatamente no mesmo schema
+VOCÊ DEVE:
+1. INCLUIR OBRIGATORIAMENTE todos os componentes acima listados
+2. Manter percentuais somando 100%
+3. Manter justificativas baseadas em artigos científicos
+4. RETORNAR JSON válido no mesmo schema
 
-⚠️ REGRA CRÍTICA: Se a fórmula NÃO for coerente com o pedido, CORRIJA-A. Não retorne fórmulas genéricas ou desalinhadas com o pedido.`
+SE NÃO CONSEGUIR INCLUIR OS COMPONENTES OBRIGATÓRIOS:
+- Preencha "viabilidade": "nao_encontrada" no analise_critica
+- Explique NO RESUMO por que não é possível`
 
-  const validacaoMessage = await getClient().messages.create({
-    model: getModel(),
-    max_tokens: 6000,
-    temperature: 0,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: validacaoPrompt }],
-  })
+    const ajusteMessage = await getClient().messages.create({
+      model: getModel(),
+      max_tokens: 6000,
+      temperature: 0,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: ajustePrompt }],
+    })
 
-  const validacaoText = validacaoMessage.content[0].type === 'text' ? validacaoMessage.content[0].text : ''
-  let resultadoFinal: unknown
+    const ajusteText = ajusteMessage.content[0].type === 'text' ? ajusteMessage.content[0].text : ''
 
-  try {
-    resultadoFinal = extractJSON(validacaoText)
-    console.log(`[gerarFormulacao] ✅ Validação concluída - Fórmula ajustada se necessário`)
-  } catch (err) {
-    console.log(`[gerarFormulacao] ⚠️ Validação retornou JSON inválido, usando resultado original`)
-    resultadoFinal = resultado
+    try {
+      resultadoFinal = extractJSON(ajusteText)
+      const analiseAjuste = (resultadoFinal as Record<string, unknown>)?.analise_critica as Record<string, unknown> | undefined
+
+      if (analiseAjuste?.viabilidade === 'nao_encontrada') {
+        console.log(`[gerarFormulacao] ❌ IA sinalizou viabilidade nao_encontrada após ajuste`)
+        throw new Error('FORMULA_NAO_ENCONTRADA')
+      }
+    } catch (err) {
+      console.log(`[gerarFormulacao] ❌ Erro ao processar ajuste: ${err}`)
+      throw new Error('FORMULA_NAO_ENCONTRADA')
+    }
   }
 
   // MPs obrigatórias definidas pelo usuário têm prioridade máxima
