@@ -170,7 +170,7 @@ Para BIOSOLVENTES E BIOLUBRIFICANTES: a solução é 100% baseada em Artigos Cie
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 
 PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
-${obrigatorias}${proibidas}${secaoMPs}${ordemBusca}${analiseObrigatoria}`
+${obrigatorias}${proibidas}${secaoMPs}${ordemBusca}${analiseObrigatoria}
 
 ⚠️ REGRA MATEMÁTICA ABSOLUTA — FECHAMENTO EM 100%:
 A soma de TODOS os valores "percentual_recomendado" da composição DEVE ser EXATAMENTE 100,0%.

@@ -368,6 +368,51 @@ function enforcarMPsObrigatorias(resultado: unknown, obrigatorias: string[]): un
   }
 }
 
+// Enriquece a fórmula com CAS Numbers do banco de dados
+async function enriquecerComCASNumbers(resultado: unknown): Promise<unknown> {
+  try {
+    const r = resultado as Record<string, unknown>
+    const formulacao = r.formulacao as Record<string, unknown>
+    if (!formulacao) return resultado
+
+    const composicao = formulacao.composicao as Array<Record<string, unknown>>
+    if (!Array.isArray(composicao) || composicao.length === 0) return resultado
+
+    // Busca CAS Numbers para cada MP
+    const composicaoComCAS = await Promise.all(
+      composicao.map(async (comp) => {
+        const nomeMp = String(comp.materia_prima || '')
+        try {
+          // Busca no banco por nome comercial ou nome químico
+          const mp = await prisma.materiaPrima.findFirst({
+            where: {
+              OR: [
+                { nome_comercial: { contains: nomeMp, mode: 'insensitive' } },
+                { nome_quimico: { contains: nomeMp, mode: 'insensitive' } },
+              ],
+            },
+            select: { numero_cas: true },
+          })
+          return { ...comp, numero_cas: mp?.numero_cas || 'N/A' }
+        } catch {
+          return { ...comp, numero_cas: 'N/A' }
+        }
+      })
+    )
+
+    return {
+      ...r,
+      formulacao: {
+        ...formulacao,
+        composicao: composicaoComCAS,
+      },
+    }
+  } catch (err) {
+    console.warn(`[enriquecerComCASNumbers] Erro ao buscar CAS Numbers:`, err)
+    return resultado
+  }
+}
+
 // Garante que a soma dos percentual_recomendado fecha EXATAMENTE em 100%
 // O componente com maior percentual (normalmente o solvente/veículo base) absorve a diferença
 function fecharPercentuais(resultado: unknown): unknown {
@@ -679,6 +724,9 @@ SE NÃO CONSEGUIR INCLUIR OS COMPONENTES OBRIGATÓRIOS:
       throw new Error('FORMULA_NAO_ENCONTRADA')
     }
   }
+
+  // Enriquece a fórmula com CAS Numbers ANTES de fechar os percentuais
+  resultadoFinal = await enriquecerComCASNumbers(resultadoFinal)
 
   // MPs obrigatórias definidas pelo usuário têm prioridade máxima
   if (userObrigatorias.length > 0) {
