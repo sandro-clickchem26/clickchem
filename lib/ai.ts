@@ -368,7 +368,7 @@ function enforcarMPsObrigatorias(resultado: unknown, obrigatorias: string[]): un
   }
 }
 
-// Enriquece a fórmula com CAS Numbers do banco de dados
+// Enriquece a fórmula com CAS Numbers do banco de dados (otimizado com single query)
 async function enriquecerComCASNumbers(resultado: unknown): Promise<unknown> {
   try {
     const r = resultado as Record<string, unknown>
@@ -378,27 +378,48 @@ async function enriquecerComCASNumbers(resultado: unknown): Promise<unknown> {
     const composicao = formulacao.composicao as Array<Record<string, unknown>>
     if (!Array.isArray(composicao) || composicao.length === 0) return resultado
 
-    // Busca CAS Numbers para cada MP
-    const composicaoComCAS = await Promise.all(
-      composicao.map(async (comp) => {
-        const nomeMp = String(comp.materia_prima || '')
-        try {
-          // Busca no banco por nome comercial ou nome químico
-          const mp = await prisma.materiaPrima.findFirst({
-            where: {
-              OR: [
-                { nome_comercial: { contains: nomeMp, mode: 'insensitive' } },
-                { nome_quimico: { contains: nomeMp, mode: 'insensitive' } },
-              ],
-            },
-            select: { numero_cas: true },
-          })
-          return { ...comp, numero_cas: mp?.numero_cas || 'N/A' }
-        } catch {
-          return { ...comp, numero_cas: 'N/A' }
+    // Extrai nomes das MPs
+    const nomesMp = composicao
+      .map(c => String(c.materia_prima || '').trim())
+      .filter(Boolean)
+
+    if (nomesMp.length === 0) return resultado
+
+    // Single query: busca TODAS as MPs de uma vez (com timeout protection)
+    let mpsMap: Map<string, string> = new Map()
+    try {
+      const mpsBanco = await Promise.race([
+        prisma.materiaPrima.findMany({
+          where: {
+            OR: nomesMp.flatMap(nome => [
+              { nome_comercial: { contains: nome, mode: 'insensitive' } },
+              { nome_quimico: { contains: nome, mode: 'insensitive' } },
+            ]),
+          },
+          select: { nome_comercial: true, numero_cas: true },
+        }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout buscando CAS Numbers')), 5000)
+        ),
+      ])
+
+      // Cria mapa de nome -> CAS para lookup rápido
+      for (const mp of mpsBanco) {
+        if (mp.numero_cas) {
+          mpsMap.set(String(mp.nome_comercial).toLowerCase(), mp.numero_cas)
         }
-      })
-    )
+      }
+    } catch (err) {
+      console.warn(`[enriquecerComCASNumbers] Aviso ao buscar CAS Numbers:`, err)
+      // Continua sem CAS Numbers em vez de falhar
+    }
+
+    // Enriquece composição com CAS Numbers encontrados
+    const composicaoComCAS = composicao.map(comp => {
+      const nomeMp = String(comp.materia_prima || '').trim().toLowerCase()
+      const casBuscado = mpsMap.get(nomeMp) || 'N/A'
+      return { ...comp, numero_cas: casBuscado }
+    })
 
     return {
       ...r,
@@ -408,8 +429,8 @@ async function enriquecerComCASNumbers(resultado: unknown): Promise<unknown> {
       },
     }
   } catch (err) {
-    console.warn(`[enriquecerComCASNumbers] Erro ao buscar CAS Numbers:`, err)
-    return resultado
+    console.warn(`[enriquecerComCASNumbers] Erro crítico ao enriquecer:`, err)
+    return resultado // Fallback: retorna sem CAS Numbers em vez de quebrar
   }
 }
 
