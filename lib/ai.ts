@@ -668,34 +668,24 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   console.log(`[gerarFormulacao] Componentes pedidos detectados: ${componentesPedidos.join(', ')}`)
 
-  // FUNÇÃO: Valida se componentes estão na fórmula E se não há componentes extras não solicitados
-  function validarComponentes(formulacao: Record<string, unknown>, pedidos: string[], descricao: string): { valido: boolean; faltando: string[]; extras: string[] } {
-    const composicao = (formulacao.formulacao as Record<string, unknown>)?.composicao as Array<{ materia_prima: string }> | undefined
+  // FUNÇÃO: Valida se componentes SOLICITADOS estão na fórmula (não bloqueia aditivos necessários)
+  function validarComponentes(formulacao: Record<string, unknown>, pedidos: string[]): { valido: boolean; faltando: string[] } {
+    const composicao = (formulacao.formulacao as Record<string, unknown>)?.composicao as Array<{ materia_prima: string; justificativa?: string }> | undefined
     const mpsNaFormula = composicao?.map(c => String(c.materia_prima).toLowerCase()) || []
-    const descricaoLower = descricao.toLowerCase()
 
-    // Verifica componentes faltando
+    // Verifica se componentes SOLICITADOS estão presentes
     const faltando = pedidos.filter(pedido =>
       !mpsNaFormula.some(mp => mp.includes(pedido) || pedido.split(' ').some(palavra => mp.includes(palavra)))
     )
 
-    // Verifica componentes EXTRAS não solicitados (LISTA FECHADA)
-    // Palavras permitidas sempre (solventes universais básicos)
-    const palavrasPermitidas = ['água', 'agua', 'water', 'h2o']
+    // Verifica se todos os componentes têm justificativa (mesmo os adicionados)
+    const semJustificativa = (composicao || []).filter(c => !c.justificativa || String(c.justificativa).trim().length === 0)
 
-    const extras = mpsNaFormula.filter(mp => {
-      const ehPermitida = palavrasPermitidas.some(pal => mp.includes(pal))
-      if (ehPermitida) return false
-
-      // Verifica se esta MP foi mencionada na descrição
-      const foiMencionada = pedidos.some(ped => mp.includes(ped.toLowerCase())) ||
-                           descricaoLower.split(/[,.\s]+/).some(palavra =>
-                             palavra.length > 3 && mp.includes(palavra)
-                           )
-      return !foiMencionada
-    })
-
-    return { valido: faltando.length === 0 && extras.length === 0, faltando, extras }
+    // Válido se: (1) tem todos os solicitados E (2) todos têm justificativa
+    return {
+      valido: faltando.length === 0 && semJustificativa.length === 0,
+      faltando
+    }
   }
 
   // LOOP DE VALIDAÇÃO E AJUSTE (máx 3 tentativas)
@@ -707,7 +697,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     tentativas++
     console.log(`[gerarFormulacao] Tentativa ${tentativas}/${maxTentativas} de validação...`)
 
-    const validacao = validarComponentes(resultadoFinal as Record<string, unknown>, componentesPedidos, descricao)
+    const validacao = validarComponentes(resultadoFinal as Record<string, unknown>, componentesPedidos)
 
     if (validacao.valido) {
       console.log(`[gerarFormulacao] ✅ VALIDAÇÃO OK - Fórmula atende aos requisitos!`)
@@ -715,43 +705,34 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     }
 
     if (tentativas >= maxTentativas) {
-      const problemas = [...validacao.faltando, ...validacao.extras]
-      console.log(`[gerarFormulacao] ❌ Máximo de tentativas atingido. Problemas: ${problemas.join(', ')}`)
+      console.log(`[gerarFormulacao] ❌ Máximo de tentativas atingido. Componentes faltando: ${validacao.faltando.join(', ')}`)
       throw new Error('FORMULA_NAO_ENCONTRADA')
     }
 
-    // Monta mensagem de erro com faltando E extras
-    const msgFaltando = validacao.faltando.length > 0
-      ? `\nCOMPONENTES FALTANDO (OBRIGATÓRIO INCLUIR):\n${validacao.faltando.map(c => `- ${c}`).join('\n')}`
-      : ''
+    // IA REFAZ a fórmula
+    console.log(`[gerarFormulacao] ⚠️ Faltando: ${validacao.faltando.join(', ')}. IA vai REFAZER a formulação...`)
 
-    const msgExtras = validacao.extras.length > 0
-      ? `\nCOMPONENTES EXTRAS NÃO SOLICITADOS (REMOVA):\n${validacao.extras.map(c => `- ${c}`).join('\n')}`
-      : ''
+    const ajustePrompt = `REFAÇA A FORMULAÇÃO - INCLUA COMPONENTES SOLICITADOS COM JUSTIFICATIVA
 
-    // IA REFAZ a fórmula (ordem OBRIGATÓRIA e explícita)
-    console.log(`[gerarFormulacao] ⚠️ Problemas encontrados. IA vai REFAZER a formulação...`)
-
-    const ajustePrompt = `REFAÇA A FORMULAÇÃO - LISTA FECHADA OBRIGATÓRIA
-
-Fórmula anterior (INCORRETA):
+Fórmula anterior (INCOMPLETA):
 ${JSON.stringify(resultadoFinal, null, 2)}
 
 PEDIDO DO USUÁRIO:
 ${descricao}
-${msgFaltando}${msgExtras}
 
-REGRA ABSOLUTA — LISTA FECHADA:
-- A composição deve conter APENAS os componentes solicitados pelo usuário
-- Não adicione nada que não foi explicitamente pedido
-- Se componentes faltando, INCLUA-OS
-- Se componentes extras, REMOVA-OS
+COMPONENTES FALTANDO (OBRIGATÓRIO INCLUIR):
+${validacao.faltando.map(c => `- ${c}`).join('\n')}
 
-VOCÊ DEVE:
-1. ${validacao.faltando.length > 0 ? 'INCLUIR OBRIGATORIAMENTE todos os componentes faltando' : 'Manter os componentes corretos'}
-2. ${validacao.extras.length > 0 ? 'REMOVER os componentes extras não solicitados' : 'Não adicionar nada novo'}
-3. Manter percentuais somando 100%
-4. RETORNAR JSON válido no mesmo schema
+REGRA: Composição Inteligente com Justificativa
+1. INCLUA OBRIGATORIAMENTE todos os componentes acima
+2. ADICIONE aditivos TECNICAMENTE NECESSÁRIOS (com justificativa citando referências)
+3. JUSTIFIQUE CADA componente no campo "justificativa"
+4. Exemplo correto:
+   - Componente solicitado: "Ácido sulfônico" → justificativa: "Ácido primário conforme solicitado pelo usuário"
+   - Componente necessário: "Tensoativo" → justificativa: "Essencial para redução de tensão superficial e remoção de óleos (referência: artigos científicos fornecidos)"
+
+5. Manter percentuais somando 100%
+6. RETORNAR JSON válido no mesmo schema
 
 SE NÃO CONSEGUIR INCLUIR OS COMPONENTES OBRIGATÓRIOS:
 - Preencha "viabilidade": "nao_encontrada" no analise_critica
