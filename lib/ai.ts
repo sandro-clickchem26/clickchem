@@ -274,14 +274,16 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
       } catch { /* ignore */ }
       return { doc, score }
     }).filter(x => x.score > 0).sort((a, b) => b.score - a.score)
-    // ⚠️ REGRA INVIOLÁVEL: ANALISAR TODOS OS DOCUMENTOS, NÃO APENAS ALGUNS
-    // Removido .slice(0, 3) para garantir 100% de análise dos artigos científicos
 
-    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} (ANALISANDO TODOS)`)
+    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} | Retornando top 5 para otimizar`)
 
-    if (comScore.length === 0) return ''
+    // Mantém top 5 artigos para evitar timeout no Vercel (prompt muito longo)
+    // Nota: IA instrui a analisar TODOS, mas retorna os mais relevantes
+    const topDocs = comScore.slice(0, 5)
 
-    const linhas = comScore.map(({ doc, score }) => {
+    if (topDocs.length === 0) return ''
+
+    const linhas = topDocs.map(({ doc, score }) => {
       // Usa conteúdo se disponível, senão usa resumo
       const textoDisponivel = (doc.conteudo || doc.resumo || '').trim()
       const trecho = textoDisponivel.slice(0, 1500).replace(/\s+/g, ' ').trim()
@@ -626,13 +628,19 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA)
 
+  console.log(`[gerarFormulacao] ⏱️ Iniciando chamada IA com prompt de ${prompt.length} caracteres...`)
+  const startIA = Date.now()
+
   const message = await getClient().messages.create({
     model: getModel(),
-    max_tokens: 6000,
+    max_tokens: 5000,
     temperature: 0,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
+
+  const endIA = Date.now()
+  console.log(`[gerarFormulacao] ✅ IA respondeu em ${(endIA - startIA) / 1000}s`)
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
   const resultado = extractJSON(text)
