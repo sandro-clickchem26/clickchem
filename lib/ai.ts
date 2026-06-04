@@ -590,16 +590,14 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     ? (dados.materias_obrigatorias as string[])
     : []).flatMap(mp => mp.split(',').map(s => s.trim()).filter(Boolean))
 
-  const isTintasVernizes = segmento === 'Tintas e Vernizes'
   const isBiosolventes = segmento.includes('Biosolventes e Biolubrificantes')
 
   // Todas as consultas em paralelo — reduz tempo total antes da chamada à IA
   console.log(`[gerarFormulacao] Chamando buildDocumentosContext para segmento: "${segmento}"`)
 
-  // Para Biosolventes: NÃO chama Tavily (sem acesso a internet)
-  // Para Tintas e Vernizes: NÃO chama Tavily (formulação determinística)
-  // Outros segmentos: chama Tavily como fallback
-  const shouldCallTavily = !isTintasVernizes && !isBiosolventes
+  // Para Biosolventes: NÃO chama Tavily (sem acesso a internet, somente artigos científicos)
+  // Para todos os outros (Tintas, Resinas, Cosmético): chama Tavily como fallback
+  const shouldCallTavily = !isBiosolventes
 
   const [contexto, proprietaryResult, docsContext, webContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
