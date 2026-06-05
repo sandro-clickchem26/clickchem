@@ -159,34 +159,63 @@ A qualidade depende de análise profunda, comparativa e otimizada dos artigos.\n
 
 FONTE ÚNICA: DOCUMENTAÇÃO CIENTÍFICA (15 artigos de máxima relevância)
 
-🔬 ANÁLISE MINUCIOSA OBRIGATÓRIA (99% de acerto):
-1. LEIA E ANALISE PROFUNDAMENTE todos os 15 artigos fornecidos
-   - Extraia dados técnicos completos de CADA artigo
-   - Identifique padrões, convergências e divergências entre artigos
-   - Mapeie as MPs mais recomendadas nos artigos
-   - Identifique os processos e condições ideais
+🔬 PROTOCOLO DE EXTRAÇÃO DE DADOS ESPECÍFICOS (99% de acerto):
 
-2. COMPARE E SELECIONE A MELHOR SOLUÇÃO
-   - Qual abordagem é mais eficaz nos artigos?
-   - Qual combinação de MPs é MAIS comprovada?
-   - Qual processo tem MELHOR desempenho nos estudos?
-   - SELECIONE A SOLUÇÃO COM MAIOR CONSENSO entre os artigos
+PASSO 1: EXTRAIR DADOS BRUTOS DOS ARTIGOS
+Para CADA artigo fornecido, extraia:
+  ✓ Componentes mencionados (nomes específicos, não genéricos)
+  ✓ CONCENTRAÇÕES/PROPORÇÕES (ex: "10-15% de antioxidante", "80% óleo puro")
+  ✓ TIPOS específicos (ex: "castor oil puro" vs "castor oil epoxidado")
+  ✓ Propriedades mensuráveis (viscosidade, índice viscosidade, TAN, ponto fulgor)
+  ✓ Condições operacionais (temperatura, tempo de teste, normas ASTM/ISO)
+  ✓ Desempenho observado (resultados quantitativos)
+  ✓ Referência: [Autor, Ano, Página/Tabela]
 
-3. JUSTIFIQUE COM RIGOR CIENTÍFICO
-   - CITE artigos específicos: [Autor, Ano] para CADA decisão
-   - Explique POR QUE esta é a solução mais adequada
-   - Indique dados de desempenho ou propriedades mencionadas nos artigos
+PASSO 2: CONSOLIDAR DADOS EXTRAÍDOS
+  - Organize em tabela mental: componente → concentração mínima → máxima → artigos que mencionam
+  - Identifique CONVERGÊNCIAS (3+ artigos mencionam a mesma concentração?)
+  - Identifique DIVERGÊNCIAS (por quê são diferentes?)
+  - Peso maior para dados que aparecem em MÚLTIPLOS artigos
 
-4. VALIDAÇÃO FINAL
-   - Todos os componentes estão nos artigos? ✓
-   - As justificativas citam fontes científicas? ✓
-   - A fórmula é viável baseada nos dados? ✓
+PASSO 3: CONSTRUIR FÓRMULA BASEADA RIGOROSAMENTE NOS DADOS
+  ⚠️ NÃO use "conhecimento geral de biolubrificantes"
+  ⚠️ NÃO crie proporções que não estão nos artigos
+  ✓ USE concentrações que aparecem nos artigos
+  ✓ USE tipos de componentes mencionados nos artigos
+  ✓ USE composições que foram TESTADAS nos artigos
 
-❌ NUNCA: P&D Proprietário | Internet | Conhecimento geral
-✓ APENAS: Artigos Científicos fornecidos
+  EXEMPLO CORRETO:
+    Se artigos mencionam "castor oil puro 85-90%" → USE essa faixa
+    Se artigos mencionam "sem diluente" → NÃO ADICIONE solvente
+    Se artigos testaram com "antioxidante X 1-2%" → USE 1-2%, não outro valor
 
-⚠️ REGRA ABSOLUTA: Se NENHUM artigo descrever uma solução compatível:
-   → Retorne "viabilidade": "nao_encontrada" (NÃO invente)\n`
+PASSO 4: JUSTIFICAR CADA NÚMERO COM REFERÊNCIA CIENTÍFICA
+  Para CADA componente da fórmula final:
+    - Componente: [nome exato]
+    - Concentração: [X%]
+    - Fonte: [Autor, Ano, Tabela/Seção]
+    - Razão: [O artigo menciona propriedade Y alcançada com essa concentração]
+
+PASSO 5: VALIDAÇÃO DE COERÊNCIA
+  ✓ A somatória de % = 100%?
+  ✓ CADA componente está mencionado em artigo?
+  ✓ CADA % vem de dados dos artigos?
+  ✓ NENHUM componente foi "inventado" ou adicionado por lógica geral?
+
+❌ PROHIBIDO:
+  - Adicionar componentes não mencionados nos artigos
+  - Usar proporções que não aparecem nos artigos
+  - Montar template genérico e depois justificar
+  - Usar "conhecimento sobre biolubrificantes" em vez de dados dos artigos
+
+✓ OBRIGATÓRIO:
+  - Extrair concentrações específicas mencionadas
+  - Usar tipos exatos (puro, epoxidado, modificado, etc)
+  - Citar artigo para CADA número da fórmula
+  - Se artigo diz "óleo puro 85%", não usar "óleo epoxidado 82%"
+
+⚠️ REGRA ABSOLUTA: Se não conseguir extrair dados suficientes dos artigos:
+   → Retorne "viabilidade": "nao_encontrada"\n`
     : `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
 1. BASE TÉCNICA P&D PROPRIETÁRIO — Use como referência principal
 2. BUSCA EXTERNA (internet) — Use como complemento se P&D for insuficiente
