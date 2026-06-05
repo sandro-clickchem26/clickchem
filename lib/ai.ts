@@ -655,11 +655,32 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   // ⚠️ VALIDAÇÃO REAL OBRIGATÓRIA COM LÓGICA DE CÓDIGO E LOOP DE AJUSTE
   console.log(`[gerarFormulacao] Iniciando VALIDAÇÃO ESTRUTURAL e AJUSTE OBRIGATÓRIO...`)
 
-  // EXTRAI componentes-chave do pedido do usuário (palavras genéricas + específicas)
   const descricaoLower = descricao.toLowerCase()
+
+  // PASSO 1: EXTRAI REQUISITOS ESPECÍFICOS (bicomponente, branco, rápida secagem, etc.)
+  const requisitosEspecificos = [
+    'bicomponente', 'monocomponente', 'dois componentes', 'a+b',
+    'branco', 'preto', 'vermelho', 'azul', 'verde', 'amarelo', 'cinza', 'transparente',
+    'brilhante', 'fosco', 'semi-brilho', 'semi-fosco',
+    'rápida secagem', 'secagem rápida', 'seco em', 'flash off',
+    'longa durabilidade', 'durável', 'resistente', 'durabilidade',
+    'esmalte', 'verniz', 'tinta', 'primer', 'fundo',
+    'sintético', 'acrílico', 'alquídica', 'epóxi', 'poliuretano', 'pu',
+    'baixo voc', 'voc', 'sustentável', 'ecológico', 'bio', 'água'
+  ]
+
+  const requisitosDetectados: string[] = []
+  for (const req of requisitosEspecificos) {
+    if (descricaoLower.includes(req)) {
+      requisitosDetectados.push(req)
+    }
+  }
+
+  console.log(`[gerarFormulacao] ⚡ Requisitos detectados: ${requisitosDetectados.join(', ') || 'nenhum específico'}`)
+
+  // PASSO 2: EXTRAI COMPONENTES-CHAVE do pedido
   const componentesPedidos: string[] = []
 
-  // Palavras-chave para identificar componentes solicitados
   const palavrasChave = [
     'óleo de mamona', 'carbonato de propileno', 'carbonatação',
     'óleo de soja', 'óleo de palma', 'biodiesel', 'terpeno',
@@ -675,9 +696,9 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     }
   }
 
-  console.log(`[gerarFormulacao] Componentes pedidos detectados: ${componentesPedidos.join(', ')}`)
+  console.log(`[gerarFormulacao] Componentes pedidos detectados: ${componentesPedidos.join(', ') || 'nenhum específico'}`)
 
-  // FUNÇÃO: Valida se componentes SOLICITADOS estão na fórmula (não bloqueia aditivos necessários)
+  // FUNÇÃO: Valida se componentes SOLICITADOS estão na fórmula
   function validarComponentes(formulacao: Record<string, unknown>, pedidos: string[]): { valido: boolean; faltando: string[] } {
     const composicao = (formulacao.formulacao as Record<string, unknown>)?.composicao as Array<{ materia_prima: string; justificativa?: string }> | undefined
     const mpsNaFormula = composicao?.map(c => String(c.materia_prima).toLowerCase()) || []
@@ -687,13 +708,36 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
       !mpsNaFormula.some(mp => mp.includes(pedido) || pedido.split(' ').some(palavra => mp.includes(palavra)))
     )
 
-    // Verifica se todos os componentes têm justificativa (mesmo os adicionados)
+    // Verifica se todos os componentes têm justificativa
     const semJustificativa = (composicao || []).filter(c => !c.justificativa || String(c.justificativa).trim().length === 0)
 
-    // Válido se: (1) tem todos os solicitados E (2) todos têm justificativa
     return {
       valido: faltando.length === 0 && semJustificativa.length === 0,
       faltando
+    }
+  }
+
+  // FUNÇÃO: Valida se requisitos específicos são atendidos
+  function validarRequisitos(formulacao: Record<string, unknown>, requisitos: string[], descricao: string): { valido: boolean; naoAtendidos: string[] } {
+    if (requisitos.length === 0) return { valido: true, naoAtendidos: [] }
+
+    const descFormula = JSON.stringify(formulacao).toLowerCase()
+    const naoAtendidos: string[] = []
+
+    for (const req of requisitos) {
+      const reqNorm = req.toLowerCase()
+      // Verifica se o requisito está descrito na fórmula (em justificativas, nome, etc)
+      if (!descFormula.includes(reqNorm)) {
+        // Exceção: cores podem estar apenas como pigmento
+        if (!['branco', 'preto', 'vermelho', 'azul', 'verde', 'amarelo', 'cinza'].includes(reqNorm)) {
+          naoAtendidos.push(req)
+        }
+      }
+    }
+
+    return {
+      valido: naoAtendidos.length === 0,
+      naoAtendidos
     }
   }
 
@@ -707,45 +751,65 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     console.log(`[gerarFormulacao] Tentativa ${tentativas}/${maxTentativas} de validação...`)
 
     const validacao = validarComponentes(resultadoFinal as Record<string, unknown>, componentesPedidos)
+    const validacaoRequisitos = validarRequisitos(resultadoFinal as Record<string, unknown>, requisitosDetectados, descricao)
 
-    if (validacao.valido) {
-      console.log(`[gerarFormulacao] ✅ VALIDAÇÃO OK - Fórmula atende aos requisitos!`)
+    if (validacao.valido && validacaoRequisitos.valido) {
+      console.log(`[gerarFormulacao] ✅ VALIDAÇÃO OK - Fórmula atende a TODOS os componentes e requisitos!`)
       break
     }
 
     if (tentativas >= maxTentativas) {
-      console.log(`[gerarFormulacao] ❌ Máximo de tentativas atingido. Componentes faltando: ${validacao.faltando.join(', ')}`)
+      const problemas = [
+        ...validacao.faltando.map(c => `componente: ${c}`),
+        ...validacaoRequisitos.naoAtendidos.map(r => `requisito: ${r}`)
+      ]
+      console.log(`[gerarFormulacao] ❌ Máximo de tentativas atingido. Problemas: ${problemas.join(', ')}`)
       throw new Error('FORMULA_NAO_ENCONTRADA')
     }
 
     // IA REFAZ a fórmula
-    console.log(`[gerarFormulacao] ⚠️ Faltando: ${validacao.faltando.join(', ')}. IA vai REFAZER a formulação...`)
+    const msgProblemas = [
+      validacao.faltando.length > 0 ? `Componentes faltando: ${validacao.faltando.join(', ')}` : '',
+      validacaoRequisitos.naoAtendidos.length > 0 ? `Requisitos não atendidos: ${validacaoRequisitos.naoAtendidos.join(', ')}` : ''
+    ].filter(Boolean).join(' | ')
 
-    const ajustePrompt = `REFAÇA A FORMULAÇÃO - INCLUA COMPONENTES SOLICITADOS COM JUSTIFICATIVA
+    console.log(`[gerarFormulacao] ⚠️ ${msgProblemas}. IA vai REFAZER a formulação...`)
 
-Fórmula anterior (INCOMPLETA):
+    const secaoRequisitos = requisitosDetectados.length > 0
+      ? `\nREQUISITOS ESPECÍFICOS SOLICITADOS (OBRIGATÓRIO ATENDER):\n${requisitosDetectados.map(r => `✓ ${r}`).join('\n')}\n`
+      : ''
+
+    const secaoRequisitosNaoAtendidos = validacaoRequisitos.naoAtendidos.length > 0
+      ? `\nREQUISITOS NÃO ATENDIDOS NA FÓRMULA ANTERIOR:\n${validacaoRequisitos.naoAtendidos.map(r => `✗ ${r}`).join('\n')}\n\nVOCÊ DEVE CORRIGIR ISSO!\n`
+      : ''
+
+    const ajustePrompt = `REFAÇA A FORMULAÇÃO - ATENDA TODOS OS REQUISITOS E COMPONENTES
+
+Fórmula anterior (INCOMPLETA/INCORRETA):
 ${JSON.stringify(resultadoFinal, null, 2)}
 
 PEDIDO DO USUÁRIO:
 ${descricao}
-
+${secaoRequisitos}${secaoRequisitosNaoAtendidos}
 COMPONENTES FALTANDO (OBRIGATÓRIO INCLUIR):
-${validacao.faltando.map(c => `- ${c}`).join('\n')}
+${validacao.faltando.length > 0 ? validacao.faltando.map(c => `- ${c}`).join('\n') : '(nenhum específico além dos requisitos acima)'}
 
 REGRA: Composição Inteligente com Justificativa
-1. INCLUA OBRIGATORIAMENTE todos os componentes acima
-2. ADICIONE aditivos TECNICAMENTE NECESSÁRIOS (com justificativa citando referências)
-3. JUSTIFIQUE CADA componente no campo "justificativa"
-4. Exemplo correto:
-   - Componente solicitado: "Ácido sulfônico" → justificativa: "Ácido primário conforme solicitado pelo usuário"
-   - Componente necessário: "Tensoativo" → justificativa: "Essencial para redução de tensão superficial e remoção de óleos (referência: artigos científicos fornecidos)"
-
+1. INCLUA OBRIGATORIAMENTE todos os componentes específicos acima
+2. GARANTA que a fórmula atende a TODOS os requisitos específicos listados acima
+   Exemplos:
+   - Se pediu "bicomponente" → DEVE ter Componente A + Componente B (não monocomponente)
+   - Se pediu "branco" → DEVE conter pigmento branco (TiO2 ou similar)
+   - Se pediu "rápida secagem" → DEVE mencionar tempo de secagem baixo
+3. ADICIONE aditivos TECNICAMENTE NECESSÁRIOS (com justificativa citando referências)
+4. JUSTIFIQUE CADA componente no campo "justificativa"
 5. Manter percentuais somando 100%
 6. RETORNAR JSON válido no mesmo schema
 
-SE NÃO CONSEGUIR INCLUIR OS COMPONENTES OBRIGATÓRIOS:
-- Preencha "viabilidade": "nao_encontrada" no analise_critica
-- Explique NO RESUMO por que não é possível`
+SE NÃO CONSEGUIR:
+- Atender TODOS os componentes obrigatórios, OU
+- Atender TODOS os requisitos específicos
+→ Preencha "viabilidade": "nao_encontrada" no analise_critica`
 
     const ajusteMessage = await getClient().messages.create({
       model: getModel(),
