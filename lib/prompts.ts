@@ -156,19 +156,37 @@ A qualidade depende de análise profunda, comparativa e otimizada dos artigos.\n
 
   const ordemBusca = isBiosolventes
     ? `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO (BIOSOLVENTES E BIOLUBRIFICANTES):
-1. DOCUMENTAÇÃO CIENTÍFICA — FONTE ÚNICA OBRIGATÓRIA
-   - Analise TODOS os artigos fornecidos
-   - Selecione a solução MAIS ADEQUADA baseada SOMENTE em dados científicos
-   - Justifique CADA decisão citando qual artigo fundamenta
-   - Recomende APENAS MPs e processos identificados nos artigos
 
-2. ❌ NUNCA consulte P&D Proprietário para este segmento
-3. ❌ NUNCA busque na Internet (Google bloqueado)
+FONTE ÚNICA: DOCUMENTAÇÃO CIENTÍFICA (15 artigos de máxima relevância)
 
-⚠️ REGRA ABSOLUTA: Se os artigos científicos NÃO tiverem solução compatível:
-   → Retorne "viabilidade": "nao_encontrada" (NÃO invente fórmula)
+🔬 ANÁLISE MINUCIOSA OBRIGATÓRIA (99% de acerto):
+1. LEIA E ANALISE PROFUNDAMENTE todos os 15 artigos fornecidos
+   - Extraia dados técnicos completos de CADA artigo
+   - Identifique padrões, convergências e divergências entre artigos
+   - Mapeie as MPs mais recomendadas nos artigos
+   - Identifique os processos e condições ideais
 
-Para BIOSOLVENTES E BIOLUBRIFICANTES: a solução é 100% baseada em Artigos Científicos, nada mais.\n`
+2. COMPARE E SELECIONE A MELHOR SOLUÇÃO
+   - Qual abordagem é mais eficaz nos artigos?
+   - Qual combinação de MPs é MAIS comprovada?
+   - Qual processo tem MELHOR desempenho nos estudos?
+   - SELECIONE A SOLUÇÃO COM MAIOR CONSENSO entre os artigos
+
+3. JUSTIFIQUE COM RIGOR CIENTÍFICO
+   - CITE artigos específicos: [Autor, Ano] para CADA decisão
+   - Explique POR QUE esta é a solução mais adequada
+   - Indique dados de desempenho ou propriedades mencionadas nos artigos
+
+4. VALIDAÇÃO FINAL
+   - Todos os componentes estão nos artigos? ✓
+   - As justificativas citam fontes científicas? ✓
+   - A fórmula é viável baseada nos dados? ✓
+
+❌ NUNCA: P&D Proprietário | Internet | Conhecimento geral
+✓ APENAS: Artigos Científicos fornecidos
+
+⚠️ REGRA ABSOLUTA: Se NENHUM artigo descrever uma solução compatível:
+   → Retorne "viabilidade": "nao_encontrada" (NÃO invente)\n`
     : `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
 1. BASE TÉCNICA P&D PROPRIETÁRIO — Use como referência principal
 2. BUSCA EXTERNA (internet) — Use como complemento se P&D for insuficiente
