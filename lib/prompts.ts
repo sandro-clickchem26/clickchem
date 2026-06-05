@@ -155,7 +155,7 @@ A qualidade depende de análise profunda, comparativa e otimizada dos artigos.\n
   const isBiosolventes = String(dados.segmento || '').includes('Biosolventes e Biolubrificantes')
 
   const ordemBusca = isBiosolventes
-    ? `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
+    ? `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO (BIOSOLVENTES E BIOLUBRIFICANTES):
 1. DOCUMENTAÇÃO CIENTÍFICA — FONTE ÚNICA OBRIGATÓRIA
    - Analise TODOS os artigos fornecidos
    - Selecione a solução MAIS ADEQUADA baseada SOMENTE em dados científicos
@@ -171,8 +171,9 @@ A qualidade depende de análise profunda, comparativa e otimizada dos artigos.\n
 Para BIOSOLVENTES E BIOLUBRIFICANTES: a solução é 100% baseada em Artigos Científicos, nada mais.\n`
     : `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
 1. BASE TÉCNICA P&D PROPRIETÁRIO — Use como referência principal
-2. DOCUMENTAÇÃO CIENTÍFICA — Use como embasamento técnico complementar
-3. BUSCA EXTERNA (internet) — Use apenas se P&D for insuficiente\n`
+2. BUSCA EXTERNA (internet) — Use como complemento se P&D for insuficiente
+
+IMPORTANTE: Não há Artigos Científicos neste contexto. Use APENAS P&D e internet.\n`
 
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 

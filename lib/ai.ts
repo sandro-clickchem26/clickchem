@@ -593,16 +593,17 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const isBiosolventes = segmento.includes('Biosolventes e Biolubrificantes')
 
   // Todas as consultas em paralelo — reduz tempo total antes da chamada à IA
-  console.log(`[gerarFormulacao] Chamando buildDocumentosContext para segmento: "${segmento}"`)
+  console.log(`[gerarFormulacao] Segmento: "${segmento}" | isBiosolventes: ${isBiosolventes}`)
 
-  // Para Biosolventes: NÃO chama Tavily (sem acesso a internet, somente artigos científicos)
-  // Para todos os outros (Tintas, Resinas, Cosmético): chama Tavily como fallback
+  // Para Biosolventes: SOMENTE Artigos Científicos (sem P&D, sem Google)
+  // Para outros (Tintas, Resinas, Cosmético): P&D → Google (sem Artigos Científicos)
   const shouldCallTavily = !isBiosolventes
+  const shouldCallDocumentos = isBiosolventes // SOMENTE para Biosolventes
 
   const [contexto, proprietaryResult, docsContext, webContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
-    buildProprietaryContext(segmento),
-    buildDocumentosContext(segmento, descricao),
+    !isBiosolventes ? buildProprietaryContext(segmento) : Promise.resolve({ context: '', hasFormulas: false }),
+    shouldCallDocumentos ? buildDocumentosContext(segmento, descricao) : Promise.resolve(''),
     shouldCallTavily
       ? buildWebContext(segmento, descricao, proibidas).catch(() => '')
       : Promise.resolve(''),
@@ -613,15 +614,17 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const dadosFinais: Record<string, unknown> = { ...dados }
   if (webContext) dadosFinais.pesquisa_internet_ativa = true
 
-  // Para Biosolventes: SOMENTE Artigos Científicos (remove TUDO que não seja artigos)
+  // Construir contexto conforme segmento
   let contextosParaIA: string
   if (isBiosolventes) {
-    // ⚠️ REGRA INVIOLÁVEL: Biosolventes = SOMENTE docsContext (artigos científicos)
-    // Remove matérias-primas genéricas, P&D, e internet
+    // ⚠️ REGRA INVIOLÁVEL: Biosolventes = SOMENTE Artigos Científicos
+    // Sem P&D, sem Google, sem contexto de MPs genéricas
     contextosParaIA = docsContext || ''
+    console.log(`[gerarFormulacao] Biosolventes: usando SOMENTE artigos científicos`)
   } else {
-    // Outros segmentos: ordem normal
-    contextosParaIA = contexto + proprietaryResult.context + docsContext + webContext
+    // Tintas, Resinas, Cosmético: P&D → Google (SEM Artigos Científicos)
+    contextosParaIA = contexto + proprietaryResult.context + webContext
+    console.log(`[gerarFormulacao] ${segmento}: P&D + Google (sem artigos científicos)`)
   }
 
   const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA)
