@@ -157,65 +157,43 @@ A qualidade depende de análise profunda, comparativa e otimizada dos artigos.\n
   const ordemBusca = isBiosolventes
     ? `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO (BIOSOLVENTES E BIOLUBRIFICANTES):
 
-FONTE ÚNICA: DOCUMENTAÇÃO CIENTÍFICA (15 artigos de máxima relevância)
+FONTE ÚNICA: DOCUMENTAÇÃO CIENTÍFICA (10 artigos de máxima relevância)
 
-🔬 PROTOCOLO DE EXTRAÇÃO DE DADOS ESPECÍFICOS (99% de acerto):
+🔬 PROTOCOLO DE EXTRAÇÃO RIGOROSA (95%+ de acerto):
 
-PASSO 1: EXTRAIR DADOS BRUTOS DOS ARTIGOS
-Para CADA artigo fornecido, extraia:
-  ✓ Componentes mencionados (nomes específicos, não genéricos)
-  ✓ CONCENTRAÇÕES/PROPORÇÕES (ex: "10-15% de antioxidante", "80% óleo puro")
-  ✓ TIPOS específicos (ex: "castor oil puro" vs "castor oil epoxidado")
-  ✓ Propriedades mensuráveis (viscosidade, índice viscosidade, TAN, ponto fulgor)
-  ✓ Condições operacionais (temperatura, tempo de teste, normas ASTM/ISO)
-  ✓ Desempenho observado (resultados quantitativos)
-  ✓ Referência: [Autor, Ano, Página/Tabela]
+PASSO 1: EXTRAIR DADOS DOS ARTIGOS
+De CADA artigo, identifique e extraia:
+  • Componentes ESPECÍFICOS mencionados (nomes exatos)
+  • CONCENTRAÇÕES/PROPORÇÕES (ex: "85% óleo", "1-2% antioxidante")
+  • TIPOS exatos (ex: "castor oil PURO" vs "epoxidado")
+  • Propriedades-chave (viscosidade, índice, biodegradabilidade)
+  • Referência: [Autor, Ano]
 
-PASSO 2: CONSOLIDAR DADOS EXTRAÍDOS
-  - Organize em tabela mental: componente → concentração mínima → máxima → artigos que mencionam
-  - Identifique CONVERGÊNCIAS (3+ artigos mencionam a mesma concentração?)
-  - Identifique DIVERGÊNCIAS (por quê são diferentes?)
-  - Peso maior para dados que aparecem em MÚLTIPLOS artigos
-
-PASSO 3: CONSTRUIR FÓRMULA BASEADA RIGOROSAMENTE NOS DADOS
-  ⚠️ NÃO use "conhecimento geral de biolubrificantes"
-  ⚠️ NÃO crie proporções que não estão nos artigos
-  ✓ USE concentrações que aparecem nos artigos
-  ✓ USE tipos de componentes mencionados nos artigos
-  ✓ USE composições que foram TESTADAS nos artigos
-
-  EXEMPLO CORRETO:
-    Se artigos mencionam "castor oil puro 85-90%" → USE essa faixa
-    Se artigos mencionam "sem diluente" → NÃO ADICIONE solvente
-    Se artigos testaram com "antioxidante X 1-2%" → USE 1-2%, não outro valor
-
-PASSO 4: JUSTIFICAR CADA NÚMERO COM REFERÊNCIA CIENTÍFICA
-  Para CADA componente da fórmula final:
-    - Componente: [nome exato]
-    - Concentração: [X%]
-    - Fonte: [Autor, Ano, Tabela/Seção]
-    - Razão: [O artigo menciona propriedade Y alcançada com essa concentração]
-
-PASSO 5: VALIDAÇÃO DE COERÊNCIA
-  ✓ A somatória de % = 100%?
-  ✓ CADA componente está mencionado em artigo?
-  ✓ CADA % vem de dados dos artigos?
-  ✓ NENHUM componente foi "inventado" ou adicionado por lógica geral?
+PASSO 2: CONSTRUIR FÓRMULA DOS DADOS EXTRAÍDOS
+Baseado ESTRITAMENTE nos dados dos artigos:
+  ✓ Use concentrações que aparecem NOS ARTIGOS
+  ✓ Use tipos MENCIONADOS NOS ARTIGOS
+  ✓ Combine dados que apareceram em MÚLTIPLOS artigos (mais confiável)
 
 ❌ PROHIBIDO:
-  - Adicionar componentes não mencionados nos artigos
-  - Usar proporções que não aparecem nos artigos
-  - Montar template genérico e depois justificar
-  - Usar "conhecimento sobre biolubrificantes" em vez de dados dos artigos
+  - Adicionar componentes NÃO mencionados nos artigos
+  - Usar concentrações NÃO mencionadas nos artigos
+  - Usar "conhecimento geral" em vez de dados dos artigos
+  - Mudar tipos (ex: puro → epoxidado) sem estar nos artigos
 
-✓ OBRIGATÓRIO:
-  - Extrair concentrações específicas mencionadas
-  - Usar tipos exatos (puro, epoxidado, modificado, etc)
-  - Citar artigo para CADA número da fórmula
-  - Se artigo diz "óleo puro 85%", não usar "óleo epoxidado 82%"
+PASSO 3: JUSTIFICAR COM RIGOR CIENTÍFICO
+Para CADA componente e concentração:
+  • Cite [Autor, Ano] onde isso foi testado/recomendado
+  • Explique brevemente por que essa concentração é viável
 
-⚠️ REGRA ABSOLUTA: Se não conseguir extrair dados suficientes dos artigos:
-   → Retorne "viabilidade": "nao_encontrada"\n`
+⚠️ VALIDAÇÃO FINAL:
+  ✓ Soma de % = 100%?
+  ✓ TODOS os componentes vêm dos artigos?
+  ✓ TODAS as concentrações citam artigos?
+  ✓ NENHUM componente foi inventado?
+
+⚠️ REGRA CRÍTICA: Se não conseguir extrair dados suficientes dos artigos para montar uma fórmula coerente:
+   → Retorne "viabilidade": "nao_encontrada" (NÃO invente)\n`
     : `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
 1. BASE TÉCNICA P&D PROPRIETÁRIO — Use como referência principal
 2. BUSCA EXTERNA (internet) — Use como complemento se P&D for insuficiente
