@@ -155,45 +155,18 @@ A qualidade depende de análise profunda, comparativa e otimizada dos artigos.\n
   const isBiosolventes = String(dados.segmento || '').includes('Biosolventes e Biolubrificantes')
 
   const ordemBusca = isBiosolventes
-    ? `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO (BIOSOLVENTES E BIOLUBRIFICANTES):
+    ? `\n⚠️ BIOSOLVENTES E BIOLUBRIFICANTES — FONTE ÚNICA: ARTIGOS CIENTÍFICOS (7 artigos)
 
-FONTE ÚNICA: DOCUMENTAÇÃO CIENTÍFICA (10 artigos de máxima relevância)
+🔬 PROTOCOLO DIRETO (90%+ acerto):
 
-🔬 PROTOCOLO DE EXTRAÇÃO RIGOROSA (95%+ de acerto):
+1. EXTRAIR: De cada artigo, pegue componentes, concentrações, tipos exatos
+2. CONSTRUIR: Fórmula SOMENTE com dados dos artigos (sem inventos)
+3. JUSTIFICAR: Cite [Autor, Ano] para cada concentração
 
-PASSO 1: EXTRAIR DADOS DOS ARTIGOS
-De CADA artigo, identifique e extraia:
-  • Componentes ESPECÍFICOS mencionados (nomes exatos)
-  • CONCENTRAÇÕES/PROPORÇÕES (ex: "85% óleo", "1-2% antioxidante")
-  • TIPOS exatos (ex: "castor oil PURO" vs "epoxidado")
-  • Propriedades-chave (viscosidade, índice, biodegradabilidade)
-  • Referência: [Autor, Ano]
+❌ Proibido: componentes não mencionados, concentrações não nos artigos, conhecimento geral
+✓ Obrigatório: Use dados dos artigos, cite fontes, soma = 100%
 
-PASSO 2: CONSTRUIR FÓRMULA DOS DADOS EXTRAÍDOS
-Baseado ESTRITAMENTE nos dados dos artigos:
-  ✓ Use concentrações que aparecem NOS ARTIGOS
-  ✓ Use tipos MENCIONADOS NOS ARTIGOS
-  ✓ Combine dados que apareceram em MÚLTIPLOS artigos (mais confiável)
-
-❌ PROHIBIDO:
-  - Adicionar componentes NÃO mencionados nos artigos
-  - Usar concentrações NÃO mencionadas nos artigos
-  - Usar "conhecimento geral" em vez de dados dos artigos
-  - Mudar tipos (ex: puro → epoxidado) sem estar nos artigos
-
-PASSO 3: JUSTIFICAR COM RIGOR CIENTÍFICO
-Para CADA componente e concentração:
-  • Cite [Autor, Ano] onde isso foi testado/recomendado
-  • Explique brevemente por que essa concentração é viável
-
-⚠️ VALIDAÇÃO FINAL:
-  ✓ Soma de % = 100%?
-  ✓ TODOS os componentes vêm dos artigos?
-  ✓ TODAS as concentrações citam artigos?
-  ✓ NENHUM componente foi inventado?
-
-⚠️ REGRA CRÍTICA: Se não conseguir extrair dados suficientes dos artigos para montar uma fórmula coerente:
-   → Retorne "viabilidade": "nao_encontrada" (NÃO invente)\n`
+⚠️ Se não conseguir extrair dados: retorne "viabilidade": "nao_encontrada"\n`
     : `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
 1. BASE TÉCNICA P&D PROPRIETÁRIO — Use como referência principal
 2. BUSCA EXTERNA (internet) — Use como complemento se P&D for insuficiente

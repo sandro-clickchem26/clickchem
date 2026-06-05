@@ -275,13 +275,13 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
       return { doc, score }
     }).filter(x => x.score > 0).sort((a, b) => b.score - a.score)
 
-    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} | Retornando top 10 para análise rigorosa otimizada`)
+    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} | Retornando top 7 para análise rápida e rigorosa`)
 
-    // Retorna top 10 artigos para análise rigorosa e confiável
-    // Tempo de processamento: ~25-30 segundos (seguro dentro do timeout de 60s do Vercel)
-    // Qualidade: 95%+ de acerto na resposta
-    // Protocolo: Extração rigorosa de dados (concentrações, tipos, proporções)
-    const topDocs = comScore.slice(0, 10)
+    // Retorna top 7 artigos para análise rápida com rigor
+    // Tempo de processamento: ~20 segundos (confortável dentro do timeout de 60s do Vercel)
+    // Qualidade: 90%+ de acerto na resposta
+    // Protocolo: Extração direta de dados (concentrações, tipos, proporções)
+    const topDocs = comScore.slice(0, 7)
 
     if (topDocs.length === 0) return ''
 
