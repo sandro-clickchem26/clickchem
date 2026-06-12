@@ -308,6 +308,7 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
       return resultado.trim() || texto.slice(0, 4000)
     }
 
+    let totalContextoChars = 0
     const linhas = topDocs.map(({ doc, score }) => {
       const textoDisponivel = (doc.conteudo || doc.resumo || '').trim()
 
@@ -318,9 +319,13 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
         ? extrairSecoesMarkdown(textoDisponivel)
         : textoDisponivel.slice(0, 2500)
 
+      totalContextoChars += trecho.length
       const ref = [doc.autores, doc.ano, doc.fonte].filter(Boolean).join(', ')
-      return `📄 "${doc.titulo}" [SCORE: ${score}]${ref ? ` (${ref})` : ''}${trecho ? `\n${trecho}` : ''}`
+      const tipo = isMarkdown ? '[MD]' : '[TXT]'
+      return `📄 ${tipo} "${doc.titulo}" [SCORE: ${score}][${trecho.length} chars]${ref ? ` (${ref})` : ''}${trecho ? `\n${trecho}` : ''}`
     }).join('\n\n---\n\n')
+
+    console.log(`[buildDocumentosContext] ✅ Contexto total: ${totalContextoChars} caracteres em ${topDocs.length} documentos (média ${Math.round(totalContextoChars / topDocs.length)} chars/doc)`)
 
     return `\n📚 DOCUMENTAÇÃO CIENTÍFICA RELEVANTE (banco interno Astana Química — use como embasamento técnico):\n${linhas}\n`
   } catch (err) {
@@ -614,6 +619,7 @@ ${partes.join('\n\n')}${metadados}
 }
 
 export async function gerarFormulacao(dados: Record<string, unknown>) {
+  const startTotal = Date.now()
   const segmento = String(dados.segmento || '')
   const descricao = String(dados.descricao || '')
   const proibidas = Array.isArray(dados.materias_proibidas) ? (dados.materias_proibidas as string[]) : []
@@ -624,7 +630,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const isBiosolventes = segmento.includes('Biosolventes e Biolubrificantes')
 
   // Todas as consultas em paralelo — reduz tempo total antes da chamada à IA
-  console.log(`[gerarFormulacao] Segmento: "${segmento}" | isBiosolventes: ${isBiosolventes}`)
+  console.log(`[gerarFormulacao] ⏱️ INÍCIO | Segmento: "${segmento}" | isBiosolventes: ${isBiosolventes}`)
 
   // Para Biosolventes: SOMENTE Artigos Científicos (sem P&D, sem Google)
   // Para outros (Tintas, Resinas, Cosmético): P&D → Google (sem Artigos Científicos)
@@ -659,6 +665,8 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   }
 
   const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA)
+  const totalContextoSize = contextosParaIA.length
+  console.log(`[gerarFormulacao] 📊 CONTEXTO TOTAL: ${totalContextoSize} caracteres (P&D: ${proprietaryResult.context.length} | Web: ${webContext.length} | Docs: ${docsContext.length})`)
 
   console.log(`[gerarFormulacao] ⏱️ Iniciando chamada IA com prompt de ${prompt.length} caracteres...`)
   const startIA = Date.now()
@@ -868,6 +876,10 @@ SE NÃO CONSEGUIR:
 
   // Enriquece a fórmula com CAS Numbers ANTES de fechar os percentuais
   resultadoFinal = await enriquecerComCASNumbers(resultadoFinal)
+
+  const endTotal = Date.now()
+  const tempoTotal = ((endTotal - startTotal) / 1000).toFixed(2)
+  console.log(`[gerarFormulacao] ✅ CONCLUSÃO | Tempo total: ${tempoTotal}s`)
 
   // MPs obrigatórias definidas pelo usuário têm prioridade máxima
   if (userObrigatorias.length > 0) {
