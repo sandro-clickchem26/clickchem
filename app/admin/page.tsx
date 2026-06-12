@@ -98,45 +98,87 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
   const [sucesso, setSucesso] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  async function processar(file: File) {
+  async function processarArquivo(file: File): Promise<{ formulas: FormulaPreview[]; arquivo: string; aviso?: string }> {
     const ext = file.name.split('.').pop()?.toLowerCase()
     if (!['pdf', 'docx', 'doc', 'xlsx', 'xls', 'md'].includes(ext || '')) {
-      setErro('Formato não suportado. Use PDF, Word (.docx), Excel (.xlsx) ou Markdown (.md).')
-      return
+      throw new Error(`${file.name}: Formato não suportado. Use PDF, Word (.docx), Excel (.xlsx) ou Markdown (.md).`)
     }
     if (file.size > 4 * 1024 * 1024) {
-      setErro(`Arquivo muito grande (${(file.size / 1024 / 1024).toFixed(1)} MB). Limite: 4 MB. Comprima o PDF ou divida o documento.`)
-      return
+      throw new Error(`${file.name}: Arquivo muito grande (${(file.size / 1024 / 1024).toFixed(1)} MB). Limite: 4 MB.`)
     }
+
+    const fd = new FormData()
+    fd.append('file', file)
+
+    const res = await fetch('/api/admin/import', {
+      method: 'POST',
+      headers: { 'x-admin-pin': pin },
+      body: fd,
+    })
+    const raw = await res.text()
+    let data: Record<string, unknown> = {}
+    try { data = JSON.parse(raw) } catch { throw new Error(`Erro no servidor: ${raw.slice(0, 120)}`) }
+    if (!res.ok) throw new Error(String(data.error || 'Erro ao processar arquivo'))
+
+    const formulas: FormulaPreview[] = ((data.formulas as Omit<FormulaPreview, 'segmento'>[]) || []).map((f) => ({
+      ...f,
+      segmento: SEGMENTOS[0],
+      _expandido: false,
+    }))
+
+    return {
+      formulas,
+      arquivo: String(data.arquivo || file.name),
+      aviso: data.aviso ? String(data.aviso) : undefined,
+    }
+  }
+
+  async function processar(files: FileList | File[]) {
+    if (files.length === 0) return
     setLoading(true)
     setErro(null)
     setPreview(null)
     setAviso(null)
 
-    const fd = new FormData()
-    fd.append('file', file)
-
     try {
-      const res = await fetch('/api/admin/import', {
-        method: 'POST',
-        headers: { 'x-admin-pin': pin },
-        body: fd,
-      })
-      const raw = await res.text()
-      let data: Record<string, unknown> = {}
-      try { data = JSON.parse(raw) } catch { throw new Error(`Erro no servidor: ${raw.slice(0, 120)}`) }
-      if (!res.ok) throw new Error(String(data.error || 'Erro ao processar arquivo'))
-      if (data.aviso) setAviso(String(data.aviso))
+      // Processa todos os arquivos em paralelo
+      const resultados = await Promise.allSettled(
+        Array.from(files).map(f => processarArquivo(f))
+      )
 
-      const formulas: FormulaPreview[] = ((data.formulas as Omit<FormulaPreview, 'segmento'>[]) || []).map((f) => ({
-        ...f,
-        segmento: SEGMENTOS[0],
-        _expandido: false,
-      }))
-      setPreview(formulas)
-      setArquivo(String(data.arquivo || file.name))
+      // Coleta fórmulas e erros
+      const todasFormulas: FormulaPreview[] = []
+      const erros: string[] = []
+      const avisos: string[] = []
+      const arquivos: string[] = []
+
+      for (const resultado of resultados) {
+        if (resultado.status === 'fulfilled') {
+          todasFormulas.push(...resultado.value.formulas)
+          arquivos.push(resultado.value.arquivo)
+          if (resultado.value.aviso) avisos.push(resultado.value.aviso)
+        } else {
+          erros.push(resultado.reason instanceof Error ? resultado.reason.message : String(resultado.reason))
+        }
+      }
+
+      if (erros.length > 0 && todasFormulas.length === 0) {
+        setErro(erros.join('\n'))
+        return
+      }
+
+      if (erros.length > 0) {
+        setAviso(`⚠️ Alguns arquivos tiveram erros:\n${erros.join('\n')}`)
+      }
+
+      if (avisos.length > 0) {
+        setAviso((prev) => (prev ? prev + '\n\n' : '') + avisos.join('\n'))
+      }
+
+      setPreview(todasFormulas)
+      setArquivo(arquivos.join(', '))
     } catch (e) {
-      setErro(e instanceof Error ? e.message : 'Erro ao processar arquivo.')
+      setErro(e instanceof Error ? e.message : 'Erro ao processar arquivos.')
     } finally {
       setLoading(false)
     }
@@ -145,13 +187,11 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
   function onDrop(e: React.DragEvent) {
     e.preventDefault()
     setDragging(false)
-    const file = e.dataTransfer.files[0]
-    if (file) processar(file)
+    if (e.dataTransfer.files.length > 0) processar(e.dataTransfer.files)
   }
 
   function onInput(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) processar(file)
+    if (e.target.files && e.target.files.length > 0) processar(e.target.files)
   }
 
   function updatePreview(i: number, field: keyof FormulaPreview, value: unknown) {
@@ -329,7 +369,7 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
         onClick={() => inputRef.current?.click()}
         className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all ${dragging ? 'border-[#D4A017] bg-[#D4A017]/10' : 'border-[#1B3A6B] hover:border-[#D4A017]/50 hover:bg-white/3'}`}
       >
-        <input ref={inputRef} type="file" accept=".pdf,.docx,.doc,.xlsx,.xls,.md" className="hidden" onChange={onInput} />
+        <input ref={inputRef} type="file" accept=".pdf,.docx,.doc,.xlsx,.xls,.md" multiple className="hidden" onChange={onInput} />
         <Upload size={40} className={`mx-auto mb-4 ${dragging ? 'text-[#D4A017]' : 'text-gray-600'}`} />
         <p className="text-white font-medium mb-1">Arraste o arquivo aqui ou clique para selecionar</p>
         <p className="text-gray-500 text-sm">Suporta PDF, Word (.docx), Excel (.xlsx) e Markdown (.md)</p>
