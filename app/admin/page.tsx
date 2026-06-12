@@ -120,9 +120,9 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
     try { data = JSON.parse(raw) } catch { throw new Error(`Erro no servidor: ${raw.slice(0, 120)}`) }
     if (!res.ok) throw new Error(String(data.error || 'Erro ao processar arquivo'))
 
-    const formulas: FormulaPreview[] = ((data.formulas as Omit<FormulaPreview, 'segmento'>[]) || []).map((f) => ({
-      ...f,
-      segmento: SEGMENTOS[0],
+    const formulas: FormulaPreview[] = ((data.formulas as Record<string, unknown>[]) || []).map((f) => ({
+      ...(f as Omit<FormulaPreview, 'segmento'>),
+      segmento: String(f.segmento || SEGMENTOS[0]),
       _expandido: false,
     }))
 
