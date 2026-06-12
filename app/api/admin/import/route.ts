@@ -21,7 +21,7 @@ Retorne APENAS este JSON (sem texto fora do JSON):
   "formulas": [
     {
       "nome_interno": "nome ou código da fórmula",
-      "segmento": "um dos valores exatos: Limpeza e Manutenção Industrial | Automotivo | Saneantes e Domissanitários | Tintas, Vernizes, Resinas e Polímeros | Biossolventes e Biolubrificantes",
+      "segmento": "um dos valores exatos: Limpeza e Manutenção Industrial | Automotivo | Saneantes e Domissanitários | Tintas e Vernizes | Resinas e Polímeros | Biosolventes e Biolubrificantes | Cosmético",
       "aplicacao": "descrição do produto e sua aplicação",
       "composicao": [
         {"materia_prima": "nome exato da MP", "percentual": 0.0, "funcao": "função técnica"}
@@ -41,7 +41,14 @@ Regras:
 - Se um ingrediente aparece sem percentual definido, use 0
 - Inclua TODAS as fórmulas encontradas no documento
 - Se houver apenas uma fórmula, ainda assim coloque em array
-- Para segmento: analise a aplicação e escolha o mais adequado dos 5 valores permitidos
+- Para segmento: analise a aplicação e escolha o mais adequado:
+  • "Tintas e Vernizes": se menciona tinta, verniz, esmalte, pintura, acabamento decorativo
+  • "Resinas e Polímeros": se menciona resina, polímero, composto (sem ser tinta)
+  • "Limpeza e Manutenção Industrial": se é detergente, limpador, desengordurante
+  • "Saneantes e Domissanitários": se é sanitizante, desinfetante, higiene
+  • "Biosolventes e Biolubrificantes": se é solvente verde, biolubrificante, biossolvente
+  • "Automotivo": se é fluido de motor, lubrificante automotivo, produto automotivo
+  • "Cosmético": se é creme, loção, shampoo, produto de beleza
 ${extra ? `\nDOCUMENTO (${fileName}):\n${extra}` : `\nArquivo: ${fileName}`}`
 
 async function extractText(file: File): Promise<string> {
