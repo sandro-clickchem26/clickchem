@@ -287,7 +287,7 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
 
     const extrairSecoesMarkdown = (texto: string): string => {
       // Para Markdown: extrai seções-chave (Resultados + Conclusão)
-      // Se não encontrar seções, retorna primeiros 3000 chars
+      // Se não encontrar seções, retorna primeiros 4000 chars
       const secoes = ['resultados', 'conclusão', 'conclusion', 'findings', 'results']
       const linhas = texto.split('\n')
       let resultado = ''
@@ -305,7 +305,7 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
         }
       }
 
-      return resultado.trim() || texto.slice(0, 3000)
+      return resultado.trim() || texto.slice(0, 4000)
     }
 
     const linhas = topDocs.map(({ doc, score }) => {
