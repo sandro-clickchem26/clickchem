@@ -63,9 +63,11 @@ async function extractText(file: File): Promise<string> {
       text += XLSX.utils.sheet_to_csv(sheet)
     }
     return text
+  } else if (ext === 'md') {
+    return buffer.toString('utf-8')
   }
 
-  throw new Error('Formato não suportado. Use PDF, Word (.docx) ou Excel (.xlsx).')
+  throw new Error('Formato não suportado. Use PDF, Word (.docx), Excel (.xlsx) ou Markdown (.md).')
 }
 
 export async function POST(req: NextRequest) {
