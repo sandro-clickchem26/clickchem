@@ -19,6 +19,10 @@ async function extrairTextoWord(buffer: Buffer): Promise<string> {
   return result.value || ''
 }
 
+function extrairTextoMarkdown(buffer: Buffer): string {
+  return buffer.toString('utf-8')
+}
+
 function limitarConteudo(texto: string, maxChars = 15000): string {
   if (texto.length <= maxChars) return texto
   return texto.slice(0, maxChars) + '\n\n[... conteúdo truncado para armazenamento ...]'
@@ -54,8 +58,10 @@ export async function POST(req: NextRequest) {
       conteudo = await extrairTextoPDF(buffer)
     } else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
       conteudo = await extrairTextoWord(buffer)
+    } else if (fileName.endsWith('.md')) {
+      conteudo = extrairTextoMarkdown(buffer)
     } else {
-      return NextResponse.json({ error: 'Formato não suportado. Use PDF ou Word (.docx)' }, { status: 400 })
+      return NextResponse.json({ error: 'Formato não suportado. Use PDF, Word (.docx) ou Markdown (.md)' }, { status: 400 })
     }
 
     conteudo = limitarConteudo(conteudo)

@@ -100,8 +100,8 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
 
   async function processar(file: File) {
     const ext = file.name.split('.').pop()?.toLowerCase()
-    if (!['pdf', 'docx', 'doc', 'xlsx', 'xls'].includes(ext || '')) {
-      setErro('Formato não suportado. Use PDF, Word (.docx) ou Excel (.xlsx).')
+    if (!['pdf', 'docx', 'doc', 'xlsx', 'xls', 'md'].includes(ext || '')) {
+      setErro('Formato não suportado. Use PDF, Word (.docx), Excel (.xlsx) ou Markdown (.md).')
       return
     }
     if (file.size > 4 * 1024 * 1024) {
