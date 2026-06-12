@@ -285,10 +285,39 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
 
     if (topDocs.length === 0) return ''
 
+    const extrairSecoesMarkdown = (texto: string): string => {
+      // Para Markdown: extrai seções-chave (Resultados + Conclusão)
+      // Se não encontrar seções, retorna primeiros 3000 chars
+      const secoes = ['resultados', 'conclusão', 'conclusion', 'findings', 'results']
+      const linhas = texto.split('\n')
+      let resultado = ''
+      let coletando = false
+
+      for (const linha of linhas) {
+        const linhaLower = linha.toLowerCase()
+        if (secoes.some(s => linhaLower.includes(s))) {
+          coletando = true
+          resultado += linha + '\n'
+        } else if (coletando && linha.startsWith('#')) {
+          break // Fim da seção
+        } else if (coletando) {
+          resultado += linha + '\n'
+        }
+      }
+
+      return resultado.trim() || texto.slice(0, 3000)
+    }
+
     const linhas = topDocs.map(({ doc, score }) => {
-      // Usa conteúdo se disponível, senão usa resumo
       const textoDisponivel = (doc.conteudo || doc.resumo || '').trim()
-      const trecho = textoDisponivel.slice(0, 1500).replace(/\s+/g, ' ').trim()
+
+      // Para Markdown: extrai seções-chave (mais eficiente)
+      // Para outros: aumenta limite de 1500 para 2500
+      const isMarkdown = doc.arquivo_nome?.toLowerCase().endsWith('.md')
+      const trecho = isMarkdown
+        ? extrairSecoesMarkdown(textoDisponivel)
+        : textoDisponivel.slice(0, 2500)
+
       const ref = [doc.autores, doc.ano, doc.fonte].filter(Boolean).join(', ')
       return `📄 "${doc.titulo}" [SCORE: ${score}]${ref ? ` (${ref})` : ''}${trecho ? `\n${trecho}` : ''}`
     }).join('\n\n---\n\n')
@@ -743,10 +772,10 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     }
   }
 
-  // LOOP DE VALIDAÇÃO E AJUSTE (máx 3 tentativas)
+  // LOOP DE VALIDAÇÃO E AJUSTE (máx 2 tentativas para velocidade)
   let resultadoFinal: unknown = resultado
   let tentativas = 0
-  const maxTentativas = 3
+  const maxTentativas = 2
 
   while (tentativas < maxTentativas) {
     tentativas++
