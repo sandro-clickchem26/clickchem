@@ -329,10 +329,10 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
         onClick={() => inputRef.current?.click()}
         className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all ${dragging ? 'border-[#D4A017] bg-[#D4A017]/10' : 'border-[#1B3A6B] hover:border-[#D4A017]/50 hover:bg-white/3'}`}
       >
-        <input ref={inputRef} type="file" accept=".pdf,.docx,.doc,.xlsx,.xls" className="hidden" onChange={onInput} />
+        <input ref={inputRef} type="file" accept=".pdf,.docx,.doc,.xlsx,.xls,.md" className="hidden" onChange={onInput} />
         <Upload size={40} className={`mx-auto mb-4 ${dragging ? 'text-[#D4A017]' : 'text-gray-600'}`} />
         <p className="text-white font-medium mb-1">Arraste o arquivo aqui ou clique para selecionar</p>
-        <p className="text-gray-500 text-sm">Suporta PDF, Word (.docx) e Excel (.xlsx)</p>
+        <p className="text-gray-500 text-sm">Suporta PDF, Word (.docx), Excel (.xlsx) e Markdown (.md)</p>
         <p className="text-gray-600 text-xs mt-3">O Claude vai ler o documento e extrair as fórmulas automaticamente</p>
       </div>
 
@@ -344,11 +344,12 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
       )}
 
       {/* Dicas */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-3">
         {[
           { icon: '📄', tipo: 'PDF', desc: 'Laudos, relatórios, fichas técnicas — o Claude extrai os dados automaticamente.' },
           { icon: '📝', tipo: 'Word (.docx)', desc: 'Documentos com tabelas de composição, procedimentos e especificações.' },
           { icon: '📊', tipo: 'Excel (.xlsx)', desc: 'Planilhas com listas de ingredientes, percentuais e parâmetros.' },
+          { icon: '📋', tipo: 'Markdown (.md)', desc: 'Artigos científicos estruturados com seções, resultados e referências.' },
         ].map(({ icon, tipo, desc }) => (
           <div key={tipo} className="bg-[#111f3a] border border-white/8 rounded-xl p-4">
             <div className="text-2xl mb-2">{icon}</div>
