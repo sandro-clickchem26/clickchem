@@ -244,6 +244,34 @@ PASSO 3: ADICIONE APENAS componentes TECNICAMENTE NECESSÁRIOS
     - Aditivos necessários: tensoativos + estabilizantes (se needed)
     - Solvente base: água (essencial em 99% dos casos)
 
+⚠️ REGRA CRÍTICA DE VARIAÇÃO — OBRIGATÓRIA:
+VOCÊ DEVE SEMPRE BUSCAR VARIAÇÕES DE TENSOATIVOS E SOLVENTES:
+
+Para TENSOATIVOS — NUNCA use sempre o mesmo:
+  ✓ Se banco tem: BIO-SOFT, STEPAN, SULFOBETAÍNA, ALQUIL-ÉTER, experimente DIFERENTES em gerações diferentes
+  ✓ Procure por alternativas técnicas compatíveis: aniônicos, não-iônicos, mistos
+  ✓ SEMPRE cite 2-3 opções diferentes quando há escolha
+
+Para SOLVENTES — NUNCA use sempre STEPOSOL + d-Limoneno:
+  ✓ Se banco tem: STEPOSOL, TOLUENO, XILENO, NAFTA, LIMONENO, USE DIFERENTES COMBINAÇÕES
+  ✓ VARIE entre solventes alifáticos, aromáticos, naturais
+  ✓ EXEMPLO ERRADO: Sempre STEPOSOL (58%) + STEPOSOL SB-W (24%) + Limoneno (8%)
+  ✓ EXEMPLO CORRETO: Usar Tolueno + Xileno, ou Nafta + Alquilbenzeno, ou STEPOSOL + Butanol, etc.
+
+PROCEDIMENTO OBRIGATÓRIO:
+1. Identifique TODAS as opções de tensoativos no banco P&D para este segmento
+2. Identifique TODAS as opções de solventes no banco P&D para este segmento
+3. SELECIONE DIFERENTES combinações a cada geração (não repetir)
+4. Se há 3+ opções, ALTERNE entre elas: Opção A → Opção B → Opção C → Opção A
+5. JUSTIFIQUE por que escolheu aquele tensoativo/solvente específico
+
+VALIDAÇÃO — Sua resposta será REJEITADA se:
+  ❌ Usar SEMPRE as mesmas 4 MPs (STEPOSOL SC + SB-W + BIO-SOFT + Limoneno)
+  ❌ Não variar entre desengraxantes diferentes
+  ❌ Não explorar alternativas disponíveis no banco P&D
+
+Se há pouca variação no banco (menos de 2 opções), cite isso explicitamente.
+
 PASSO 4: JUSTIFIQUE CADA COMPONENTE ADICIONADO
   - Campo "justificativa": cite POR QUÊ este componente é necessário
   - Exemplo: "Tensoativo essencial para reduzir tensão superficial e remover óleos (referência: artigo XYZ, 2020)"
