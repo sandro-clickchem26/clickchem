@@ -113,3 +113,16 @@ model DocumentoCientifico {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model FormulacaoGerada {
+  id                String   @id @default(cuid())
+  usuarioEmail      String?  // email do usuário que recebeu a fórmula
+  formulaBaseId     String?  // referência à FormulaProprietaria
+  segmento          String   // para buscar rapidamente por segmento
+  composicaoGerada  String   // JSON com ingredientes + concentrações (a variação gerada)
+  hash              String   @unique // hash SHA256 da composição para evitar duplicatas
+  metadata          String?  // informações adicionais se necessário
+  createdAt         DateTime @default(now())
+
+  @@index([usuarioEmail, segmento]) // índice para buscar rápido por usuário+segmento
+}
