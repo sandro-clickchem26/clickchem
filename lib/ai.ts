@@ -96,24 +96,33 @@ async function buildProprietaryContext(segmento: string): Promise<ProprietaryRes
       where: { ativa: true },
       orderBy: { createdAt: 'desc' },
     })
+    console.log(`[buildProprietaryContext] Total de fórmulas ativas no banco: ${formulas.length}`)
     if (formulas.length === 0) return vazio
 
     // Filtra primeiro por segmento (pré-filtro amplo para não sobrecarregar o contexto)
     // Compatível com segmentos renomeados (ex: "Tintas e Vernizes" ↔ "Tintas, Vernizes, Resinas e Polímeros")
     const norm = (s: string) => removeAccents(s.toLowerCase())
     const segNorm = norm(segmento)
+    console.log(`[buildProprietaryContext] Segmento solicitado NORMALIZADO: "${segNorm}" (original: "${segmento}")`)
 
     const relevantes = formulas.filter(f => {
       const fSeg = norm(f.segmento)
       // Match direto ou palavras em comum
-      return fSeg.includes(segNorm) || segNorm.includes(fSeg) ||
+      const matches = fSeg.includes(segNorm) || segNorm.includes(fSeg) ||
         segNorm.split(/\s+/).some(w => w.length > 3 && fSeg.includes(w)) ||
         fSeg.split(/\s+/).some(w => w.length > 3 && segNorm.includes(w))
+
+      if (matches) console.log(`[buildProprietaryContext] ✅ MATCH: "${f.nome_interno}" (${f.segmento})`)
+      return matches
     })
 
+    console.log(`[buildProprietaryContext] Fórmulas relevantes encontradas: ${relevantes.length}`)
     // Se não há fórmulas relevantes para o segmento, retorna sem contexto
     // para que o Tavily seja acionado como segunda camada
-    if (relevantes.length === 0) return vazio
+    if (relevantes.length === 0) {
+      console.log(`[buildProprietaryContext] ⚠️ NENHUMA fórmula encontrada — Tavily será usado`)
+      return vazio
+    }
 
     // Limita a 8 fórmulas para evitar contexto excessivo e timeout
     const pool = relevantes.slice(0, 8)
