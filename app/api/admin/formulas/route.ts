@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
   try {
     const body = await req.json()
-    const { nome_interno, segmento, aplicacao, composicao, ph_final, viscosidade, processo, performance_chake, tags } = body
+    const { nome_interno, segmento, aplicacao, composicao, ph_final, viscosidade, processo, performance_chake, tags, arquivo_origem } = body
 
     if (!nome_interno || !segmento || !aplicacao || !composicao) {
       return NextResponse.json({ error: 'Campos obrigatórios: nome_interno, segmento, aplicacao, composicao' }, { status: 400 })
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
         processo: processo || null,
         performance_chave: performance_chake || null,
         tags: tags || null,
+        arquivo_origem: arquivo_origem || null,
         ativa: true, // reativa se estava desativada
       },
       create: {
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
         processo: processo || null,
         performance_chave: performance_chake || null,
         tags: tags || null,
+        arquivo_origem: arquivo_origem || null,
         ativa: true,
       },
     })

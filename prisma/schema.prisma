@@ -80,6 +80,7 @@ model FormulaProprietaria {
   processo          String?
   performance_chave String?
   tags              String?
+  arquivo_origem    String?
   ativa             Boolean  @default(true)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt

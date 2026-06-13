@@ -175,8 +175,23 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
         setAviso((prev) => (prev ? prev + '\n\n' : '') + avisos.join('\n'))
       }
 
+      // Verifica se o arquivo já foi anexado antes
+      const nomeArquivo = arquivos.join(', ')
+      try {
+        const res = await fetch('/api/admin/check-arquivo', {
+          method: 'POST',
+          headers: { 'x-admin-pin': pin, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ arquivo_nome: nomeArquivo })
+        })
+        const data = await res.json() as { count: number; data?: { createdAt: string } }
+        if (res.ok && data.count > 0) {
+          const dataFormatada = data.data?.createdAt ? new Date(data.data.createdAt).toLocaleDateString('pt-BR') : 'desconhecida'
+          setAviso((prev) => (prev ? prev + '\n\n' : '') + `⚠️ Este arquivo já foi processado em ${dataFormatada} com ${data.count} fórmula(s). Será atualizado.`)
+        }
+      } catch { /* ignora */ }
+
       setPreview(todasFormulas)
-      setArquivo(arquivos.join(', '))
+      setArquivo(nomeArquivo)
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao processar arquivos.')
     } finally {
@@ -208,7 +223,7 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
         await fetch('/api/admin/formulas', {
           method: 'POST',
           headers: { 'x-admin-pin': pin, 'Content-Type': 'application/json' },
-          body: JSON.stringify(f),
+          body: JSON.stringify({ ...f, arquivo_origem: arquivo }),
         })
         salvos++
       } catch { /* continua */ }
