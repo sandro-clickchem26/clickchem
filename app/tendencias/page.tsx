@@ -13,7 +13,7 @@ const SEGMENTOS = [
   { value: 'Automotivo', label: 'Automotivo' },
   { value: 'Saneantes e Domissanitários', label: 'Saneantes e Domissanitários' },
   { value: 'Tintas, Vernizes, Resinas e Polímeros', label: 'Tintas, Vernizes, Resinas e Polímeros' },
-  { value: 'Biosolventes e Biolubrificantes', label: 'Biosolventes e Biolubrificantes' },
+  { value: 'Biosolventes, Biolubrificantes e Biodiesel', label: 'Biosolventes, Biolubrificantes e Biodiesel' },
   { value: 'Geral / Múltiplos segmentos', label: 'Geral / Múltiplos segmentos' },
 ]
 

@@ -12,7 +12,7 @@ const SEG_CORES: Record<string, string> = {
   'Automotivo': 'text-orange-400 bg-orange-500/10 border-orange-500/30',
   'Saneantes e Domissanitários': 'text-green-400 bg-green-500/10 border-green-500/30',
   'Tintas, Vernizes, Resinas e Polímeros': 'text-purple-400 bg-purple-500/10 border-purple-500/30',
-  'Biosolventes e Biolubrificantes': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+  'Biosolventes, Biolubrificantes e Biodiesel': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
 }
 
 const SEG_EMOJI: Record<string, string> = {
@@ -20,7 +20,7 @@ const SEG_EMOJI: Record<string, string> = {
   'Automotivo': '🚗',
   'Saneantes e Domissanitários': '🧴',
   'Tintas, Vernizes, Resinas e Polímeros': '🎨',
-  'Biosolventes e Biolubrificantes': '🌿',
+  'Biosolventes, Biolubrificantes e Biodiesel': '🌿',
 }
 
 interface FormulaSalva {

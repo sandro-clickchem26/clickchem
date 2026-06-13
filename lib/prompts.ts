@@ -152,7 +152,7 @@ A qualidade depende de análise profunda, comparativa e otimizada dos artigos.\n
     : ''
 
   // Ordem de busca dinâmica por segmento
-  const isBiosolventes = String(dados.segmento || '').includes('Biosolventes e Biolubrificantes')
+  const isBiosolventes = String(dados.segmento || '').includes('Biosolventes, Biolubrificantes e Biodiesel')
 
   const ordemBusca = isBiosolventes
     ? `\n⚠️ BIOSOLVENTES E BIOLUBRIFICANTES — FONTE ÚNICA: ARTIGOS CIENTÍFICOS (7 artigos)

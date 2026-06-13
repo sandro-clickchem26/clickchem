@@ -12,7 +12,7 @@ const SEGMENTOS = [
   { value: 'Automotivo', label: 'Automotivo' },
   { value: 'Saneantes e Domissanitários', label: 'Saneantes e Domissanitários' },
   { value: 'Tintas, Vernizes, Resinas e Polímeros', label: 'Tintas, Vernizes, Resinas e Polímeros' },
-  { value: 'Biossolventes, Biopolímeros e Biolubrificantes', label: 'Biosolventes e Biolubrificantes' },
+  { value: 'Biossolventes, Biopolímeros e Biolubrificantes', label: 'Biosolventes, Biolubrificantes e Biodiesel' },
 ]
 
 const VISCOSIDADES = [

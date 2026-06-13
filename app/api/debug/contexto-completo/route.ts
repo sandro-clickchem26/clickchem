@@ -53,7 +53,7 @@ async function buildDocumentosContextDebug(segmento: string, descricao: string =
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
-  const segmento = url.searchParams.get('segmento') || 'Biosolventes e Biolubrificantes'
+  const segmento = url.searchParams.get('segmento') || 'Biosolventes, Biolubrificantes e Biodiesel'
   const descricao = url.searchParams.get('descricao') || 'biolubrificante carbonatação óleo de mamona'
 
   const { contexto, count } = await buildDocumentosContextDebug(segmento, descricao)

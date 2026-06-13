@@ -13,14 +13,14 @@ export async function POST(req: NextRequest) {
   try {
     // Corrigir Documentos Científicos
     const docsAtualizados = await prisma.documentoCientifico.updateMany({
-      where: { segmento: 'Biosolventes e Biolubrificantes' },
-      data: { segmento: 'Biosolventes e Biolubrificantes' },
+      where: { segmento: 'Biosolventes, Biolubrificantes e Biodiesel' },
+      data: { segmento: 'Biosolventes, Biolubrificantes e Biodiesel' },
     })
 
     // Corrigir Fórmulas Proprietárias
     const formulasAtualizadas = await prisma.formulaProprietaria.updateMany({
-      where: { segmento: 'Biosolventes e Biolubrificantes' },
-      data: { segmento: 'Biosolventes e Biolubrificantes' },
+      where: { segmento: 'Biosolventes, Biolubrificantes e Biodiesel' },
+      data: { segmento: 'Biosolventes, Biolubrificantes e Biodiesel' },
     })
 
     return NextResponse.json({

@@ -21,7 +21,7 @@ Retorne APENAS este JSON (sem texto fora do JSON):
   "formulas": [
     {
       "nome_interno": "nome ou código da fórmula",
-      "segmento": "um dos valores exatos: Limpeza e Manutenção Industrial | Automotivo | Saneantes e Domissanitários | Tintas e Vernizes | Resinas e Polímeros | Biosolventes e Biolubrificantes | Cosmético",
+      "segmento": "um dos valores exatos: Limpeza e Manutenção Industrial | Automotivo | Saneantes e Domissanitários | Tintas e Vernizes | Resinas e Polímeros | Biosolventes, Biolubrificantes e Biodiesel | Cosmético",
       "aplicacao": "descrição do produto e sua aplicação",
       "composicao": [
         {"materia_prima": "nome exato da MP", "percentual": 0.0, "funcao": "função técnica"}
@@ -46,7 +46,7 @@ Regras:
   • "Resinas e Polímeros": se menciona resina, polímero, composto (sem ser tinta)
   • "Limpeza e Manutenção Industrial": se é detergente, limpador, desengordurante
   • "Saneantes e Domissanitários": se é sanitizante, desinfetante, higiene
-  • "Biosolventes e Biolubrificantes": se é solvente verde, biolubrificante, biossolvente
+  • "Biosolventes, Biolubrificantes e Biodiesel": se é solvente verde, biolubrificante, biossolvente
   • "Automotivo": se é fluido de motor, lubrificante automotivo, produto automotivo
   • "Cosmético": se é creme, loção, shampoo, produto de beleza
 ${extra ? `\nDOCUMENTO (${fileName}):\n${extra}` : `\nArquivo: ${fileName}`}`

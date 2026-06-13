@@ -692,7 +692,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     ? (dados.materias_obrigatorias as string[])
     : []).flatMap(mp => mp.split(',').map(s => s.trim()).filter(Boolean))
 
-  const isBiosolventes = segmento.includes('Biosolventes e Biolubrificantes')
+  const isBiosolventes = segmento.includes('Biosolventes, Biolubrificantes e Biodiesel')
 
   // Todas as consultas em paralelo — reduz tempo total antes da chamada à IA
   console.log(`[gerarFormulacao] ⏱️ INÍCIO | Segmento: "${segmento}" | isBiosolventes: ${isBiosolventes}`)
