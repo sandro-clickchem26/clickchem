@@ -22,14 +22,27 @@ export async function POST(req: NextRequest) {
   }
   try {
     const body = await req.json()
-    const { nome_interno, segmento, aplicacao, composicao, ph_final, viscosidade, processo, performance_chave, tags } = body
+    const { nome_interno, segmento, aplicacao, composicao, ph_final, viscosidade, processo, performance_chake, tags } = body
 
     if (!nome_interno || !segmento || !aplicacao || !composicao) {
       return NextResponse.json({ error: 'Campos obrigatórios: nome_interno, segmento, aplicacao, composicao' }, { status: 400 })
     }
 
-    const formula = await prisma.formulaProprietaria.create({
-      data: {
+    // UPSERT: se já existe (mesmo nome + segmento), atualiza; senão, cria
+    // Previne duplicação ao anexar o mesmo arquivo duas vezes
+    const formula = await prisma.formulaProprietaria.upsert({
+      where: { nome_interno_segmento: { nome_interno, segmento } },
+      update: {
+        aplicacao,
+        composicao: JSON.stringify(composicao),
+        ph_final: ph_final || null,
+        viscosidade: viscosidade || null,
+        processo: processo || null,
+        performance_chave: performance_chake || null,
+        tags: tags || null,
+        ativa: true, // reativa se estava desativada
+      },
+      create: {
         nome_interno,
         segmento,
         aplicacao,
@@ -37,8 +50,9 @@ export async function POST(req: NextRequest) {
         ph_final: ph_final || null,
         viscosidade: viscosidade || null,
         processo: processo || null,
-        performance_chave: performance_chave || null,
+        performance_chave: performance_chake || null,
         tags: tags || null,
+        ativa: true,
       },
     })
     return NextResponse.json(formula, { status: 201 })
