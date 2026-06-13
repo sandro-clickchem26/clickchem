@@ -171,85 +171,88 @@ async function buildProprietaryContext(segmento: string, descricao: string = '')
       return vazio
     }
 
-    ranqueadas.slice(0, 5).forEach(({ f, score }) =>
-      console.log(`[buildProprietaryContext] 📊 Score ${score}: "${f.nome_interno}"`))
+    // ⭐ ANÁLISE AQUI (não delega para IA): seleciona A MELHOR fórmula, verifica compatibilidade
+    const melhor = ranqueadas[0]
+    if (!melhor) {
+      console.log(`[buildProprietaryContext] ⚠️ Sem fórmulas ranqueadas`)
+      return vazio
+    }
 
-    // Analisa até 5 arquivos de fórmulas mais relevantes ao produto
-    const pool = ranqueadas.slice(0, 5).map(({ f }) => f)
+    console.log(`[buildProprietaryContext] 🎯 SELECIONADA: "${melhor.f.nome_interno}" (score ${melhor.score})`)
+    console.log(`[buildProprietaryContext] 📊 Top 5 ranking:`)
+    ranqueadas.slice(0, 5).forEach(({ f, score }, i) =>
+      console.log(`[buildProprietaryContext]   ${i + 1}. Score ${score}: "${f.nome_interno}"`))
 
-    const formulasStr = pool.map((f, idx) => {
-      let composicao: Array<{ materia_prima: string; funcao?: string; percentual?: number | string }> = []
-      try { composicao = JSON.parse(f.composicao) } catch { /* ignora */ }
+    const f = melhor.f
+    let composicao: Array<{ materia_prima: string; funcao?: string; percentual?: number | string }> = []
+    try { composicao = JSON.parse(f.composicao) } catch { /* ignora */ }
 
-      // COMPOSIÇÃO COMPLETA: a IA precisa de TODOS os componentes com função e
-      // percentual para derivar uma fórmula real. O resumo compacto anterior
-      // (5 nomes sem %) impedia a derivação — a IA respondia "não é possível
-      // sintetizar com a lista fornecida".
-      const linhasComposicao = composicao
-        .filter(c => c.materia_prima)
-        .slice(0, 20)
-        .map(c => `  │    - ${c.materia_prima}${c.funcao ? ` (${c.funcao})` : ''}: ~${c.percentual ?? '?'}%`)
-        .join('\n')
+    // Análise de compatibilidade: tipo, aplicação, características técnicas
+    const textoTipo = norm(`${f.nome_interno} ${f.aplicacao}`)
+    const tipoCombina = tiposPedidos.length === 0 || tiposPedidos.some(t => textoTipo.includes(t))
+    const aplicacaoCombina = norm(f.aplicacao).includes('tintas') || norm(f.aplicacao).includes('verniz') || norm(f.aplicacao).includes('revestimento')
 
-      return `  ┌─ REFERÊNCIA TÉCNICA ${String.fromCharCode(65 + idx)}
-  │  Aplicação: ${f.aplicacao}
-  │  Composição (componente, função, % aproximado):
-${linhasComposicao}
-  │  ${f.ph_final ? `pH: ${f.ph_final}` : ''}
-  │  ${f.viscosidade ? `Viscosidade: ${f.viscosidade}` : ''}
-  │  ${f.processo ? `Processo: ${String(f.processo).slice(0, 300)}` : ''}
-  │  ${f.performance_chave ? `Performance: ${f.performance_chave}` : ''}
-  └─────────────────────────────`
-    }).join('\n\n')
+    const linhasComposicao = composicao
+      .filter(c => c.materia_prima)
+      .map(c => `  │    • ${c.materia_prima}${c.funcao ? ` (${c.funcao})` : ''}: ~${c.percentual ?? '?'}%`)
+      .join('\n')
 
     const context = `
-BASE TÉCNICA INTERNA P&D — REFERÊNCIAS ASTANA QUÍMICA (${pool.length} referência(s) para este segmento):
+BASE TÉCNICA INTERNA P&D — FÓRMULA SELECIONADA PELA ANÁLISE ASTANA QUÍMICA:
 
-${formulasStr}
+╔══════════════════════════════════════════════════════════════════╗
+║  FÓRMULA: ${f.nome_interno}
+║  Compatibilidade: TIPO ✓${tipoCombina ? '✓' : '✗'} | APLICAÇÃO ✓${aplicacaoCombina ? '✓' : '✗'}
+╚══════════════════════════════════════════════════════════════════╝
+
+APLICAÇÃO:
+  ${f.aplicacao}
+
+COMPOSIÇÃO TÉCNICA (use EXATAMENTE estes componentes):
+${linhasComposicao}
+
+CARACTERÍSTICAS TÉCNICAS:
+  ${f.ph_final ? `pH: ${f.ph_final}` : ''}
+  ${f.viscosidade ? `Viscosidade: ${f.viscosidade}` : ''}
+  ${f.processo ? `Processo: ${String(f.processo).slice(0, 500)}` : ''}
+  ${f.performance_chave ? `Performance: ${f.performance_chave}` : ''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-INSTRUÇÕES OBRIGATÓRIAS — BASE TÉCNICA INTERNA:
+INSTRUÇÕES OBRIGATÓRIAS — REFINE ESTA FÓRMULA:
 
-PASSO 1 — VERIFICAR COMPATIBILIDADE TÉCNICA:
-Analise CADA referência acima. Verifique compatibilidade real com o pedido considerando:
-segmento, tipo, função, base química, sistema/resina, substrato, mecanismo de ação,
-propriedades desejadas, restrições de toxicidade/custo/desempenho e condições de aplicação.
+⭐ VOCÊ NÃO ESTÁ GERANDO DO ZERO: esta fórmula já existe no P&D e foi selecionada por análise.
+Sua tarefa é REFINAR para o pedido específico do usuário, respeitando:
 
-  SE UMA OU MAIS REFERÊNCIAS FOREM COMPATÍVEIS: execute o PASSO 2.
-  SE NENHUMA FOR COMPATÍVEL TECNICAMENTE: execute o PASSO 3.
+PASSO 1 — VALIDAR A BASE:
+Confirme que a fórmula selecionada atende:
+  • Tipo químico: ${tiposPedidos.length > 0 ? tiposPedidos.join(', ') : '(qualquer um)'}
+  • Aplicação: ${descricao}
+  • Compatibilidade técnica com pedido do usuário
 
-PASSO 2 — GERAR SUGESTÃO FORMULATIVA DERIVADA:
-Use as referências compatíveis APENAS como base técnica. Gere uma fórmula NOVA e DERIVADA:
-  1. Identifique componentes recorrentes entre as versões compatíveis
-  2. Compare as faixas percentuais entre as versões
-  3. Avalie a função técnica de cada componente
-  4. Preserve a lógica técnica do sistema (mecanismo de cura, compatibilidade, função de cada fase)
-  5. Mescle tecnicamente: ajuste percentuais, selecione componentes mais recorrentes e coerentes,
-     adapte às restrições do usuário, exclua componentes incompatíveis
-  6. Otimize as proporções para o pedido específico do usuário
+  SE COMPATÍVEL: execute PASSO 2.
+  SE NÃO COMPATÍVEL: sinalize "Fórmula Compatível Não Encontrada".
 
-  ⛔ RESTRIÇÃO CRÍTICA — LISTA FECHADA DE MATÉRIAS-PRIMAS:
-  Você SÓ pode usar as matérias-primas que aparecem nas composições das referências técnicas acima.
-  Extraia EXATAMENTE os nomes dos componentes listados nas composições.
-  Se uma MP não aparece nas referências, você ABSOLUTAMENTE NÃO pode incluir na fórmula.
-  Exemplo proibido: se ureia-formaldeído só tem [ureia, paraformol, catalisador ácido],
-  você NÃO pode adicionar [ácido cítrico, benzoico, silicato, conservantes genéricos].
+PASSO 2 — REFINAR (ajustar percentuais, otimizar para pedido específico):
+Use APENAS os componentes listados na composição acima.
+  1. Preserve os componentes essenciais e suas funções técnicas
+  2. Ajuste percentuais dentro das variações naturais (±10-15%)
+  3. Adapte à descrição específica do usuário
+  4. Otimize propriedades mencionadas (desempenho, custo, aplicação)
+  5. Garanta que o total fecha em 100%
 
-  PROIBICOES ABSOLUTAS:
-  - NUNCA invente ou adicione MPs usando conhecimento geral de química
-  - NUNCA use MPs que não estejam EXPLICITAMENTE listadas nas referências técnicas acima
-  - NUNCA reproduza percentuais idênticos — use as faixas como guia
-  - NUNCA revele nomes internos, códigos ou percentuais exatos originais
-  - NUNCA mencione "Referência Técnica A/B/C" — use apenas termos técnicos
+⛔ RESTRIÇÃO CRÍTICA — LISTA FECHADA ABSOLUTA:
+  VOCÊ SÓ PODE USAR os ${composicao.length} componentes listados na composição acima.
+  NUNCA adicione MPs que não apareçam aqui — nem mesmo de "conhecimento geral".
+  NUNCA reproduza os percentuais originais exatamente — isso é cópia.
+  NUNCA mencione "fórmula original" ou a fonte — refira-se por termos técnicos.
 
-  "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa derivada."
+  "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa refinada."
   "formula_referencia": null
 
-PASSO 3 — REFERÊNCIAS EXTERNAS (somente se nenhuma referência interna for compatível):
-  "fonte": "Busca Externa Técnica"
+SE A FÓRMULA SELECIONADA NÃO FOR COMPATÍVEL TECNICAMENTE:
+  Retorne: "viabilidade": "nao_encontrada"
+  Não gere fórmula genérica — é melhor sinalizar incompatibilidade do que fornecer algo inadequado.
 
-PASSO 4 — SEM BASE TÉCNICA SUFICIENTE:
-  "viabilidade": "nao_encontrada" — NÃO gere fórmula genérica
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `
 
