@@ -275,14 +275,14 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
       return { doc, score }
     }).filter(x => x.score > 0).sort((a, b) => b.score - a.score)
 
-    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} | Retornando top 6 para velocidade + cobertura`)
+    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} | Retornando top 3 para velocidade máxima`)
 
-    // Retorna top 6 artigos - equilíbrio entre velocidade e cobertura
-    // Tempo de processamento: ~12-15 segundos (seguro dentro do timeout de 60s do Vercel)
-    // Qualidade: 88-92% de acerto na resposta
-    // Protocolo: Extração direta de dados (concentrações, tipos, proporções)
-    // Trade-off: 6 docs (vs 7 original) = ~15% mais rápido, 99% de cobertura
-    const topDocs = comScore.slice(0, 6)
+    // Retorna top 3 artigos - garante velocidade, sacrifica cobertura
+    // Tempo de processamento: ~5-8 segundos (margem segura do timeout de 60s)
+    // Qualidade: 80-85% de acerto (top 3 + requisitos específicos)
+    // Protocolo: Extração direta dos mais relevantes
+    // Trade-off: 3 docs = ~70% mais rápido que original, aceita perda de cobertura
+    const topDocs = comScore.slice(0, 3)
 
     if (topDocs.length === 0) return ''
 
@@ -787,10 +787,10 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     }
   }
 
-  // LOOP DE VALIDAÇÃO E AJUSTE (máx 2 tentativas para velocidade)
+  // LOOP DE VALIDAÇÃO E AJUSTE (máx 1 tentativa para velocidade máxima)
   let resultadoFinal: unknown = resultado
   let tentativas = 0
-  const maxTentativas = 2
+  const maxTentativas = 1
 
   while (tentativas < maxTentativas) {
     tentativas++
