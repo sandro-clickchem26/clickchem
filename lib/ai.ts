@@ -126,7 +126,21 @@ async function buildProprietaryContext(segmento: string, descricao: string = '')
 
     // Ranqueia pela relevância ao PRODUTO pedido (descrição), não só pelo segmento:
     // a IA analisa as 5 fórmulas mais parecidas com o que o usuário digitou
-    const palavrasBusca = norm(descricao).split(/\s+/).filter(w => w.length > 3)
+    const descNorm = norm(descricao)
+    const palavrasBusca = descNorm.split(/\s+/).filter(w => w.length > 3)
+
+    // TIPOS QUÍMICOS são decisivos: se o usuário pede "poliéster", uma fórmula
+    // alquídica NÃO serve — palavras genéricas (resina, tinta, verniz) não podem
+    // empatar com o tipo. Radicais sem acento para casar variações (alquídica/alquídico).
+    const TIPOS_QUIMICOS = [
+      'poliester', 'polyester', 'alquidic', 'epoxi', 'acril', 'poliuretan',
+      'vinil', 'fenolic', 'melamin', 'silicone', 'nitrocelulose', 'estiren'
+    ]
+    const tiposPedidos = TIPOS_QUIMICOS.filter(t => descNorm.includes(t))
+    if (tiposPedidos.length > 0) {
+      console.log(`[buildProprietaryContext] 🎯 Tipo químico exigido na busca: ${tiposPedidos.join(', ')}`)
+    }
+
     const ranqueadas = relevantes
       .map(f => {
         const textoFormula = norm(`${f.nome_interno} ${f.aplicacao} ${f.tags || ''} ${f.composicao}`)
@@ -134,9 +148,28 @@ async function buildProprietaryContext(segmento: string, descricao: string = '')
         for (const palavra of palavrasBusca) {
           if (textoFormula.includes(palavra)) score += 1
         }
+        if (tiposPedidos.length > 0) {
+          // O tipo da fórmula é o que o NOME e a APLICAÇÃO declaram — tags e composição
+          // são ruidosas (ex: alquídicas com "poliéster" nas tags ou "poliesterificação"
+          // na composição ganhavam o bônus indevidamente)
+          const textoTipo = norm(`${f.nome_interno} ${f.aplicacao}`)
+          const temTipoPedido = tiposPedidos.some(t => textoTipo.includes(t))
+          const temTipoConflitante = TIPOS_QUIMICOS.some(t => !tiposPedidos.includes(t) && textoTipo.includes(t))
+          if (temTipoPedido) {
+            score += 10 // tipo certo domina qualquer empate de palavras genéricas
+          } else if (temTipoConflitante) {
+            score = -1 // tipo errado (ex: alquídica quando pediu poliéster) é excluído
+          }
+        }
         return { f, score }
       })
+      .filter(x => x.score >= 0)
       .sort((a, b) => b.score - a.score)
+
+    if (ranqueadas.length === 0) {
+      console.log(`[buildProprietaryContext] ⚠️ Nenhuma fórmula do tipo químico pedido — Tavily será usado`)
+      return vazio
+    }
 
     ranqueadas.slice(0, 5).forEach(({ f, score }) =>
       console.log(`[buildProprietaryContext] 📊 Score ${score}: "${f.nome_interno}"`))
