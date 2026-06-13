@@ -146,16 +146,20 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
         Array.from(files).map(f => processarArquivo(f))
       )
 
-      // Coleta fórmulas e erros
-      const todasFormulas: FormulaPreview[] = []
+      // Coleta fórmulas e erros — CADA FÓRMULA RASTREIA SEU ARQUIVO ORIGINAL
+      const todasFormulas: (FormulaPreview & { _arquivo_origem?: string })[] = []
       const erros: string[] = []
       const avisos: string[] = []
-      const arquivos: string[] = []
+      const arquivosProcessados: string[] = []
 
       for (const resultado of resultados) {
         if (resultado.status === 'fulfilled') {
-          todasFormulas.push(...resultado.value.formulas)
-          arquivos.push(resultado.value.arquivo)
+          const nomeArquivo = resultado.value.arquivo
+          // Adiciona arquivo_origem a cada fórmula para rastrear qual arquivo a originou
+          resultado.value.formulas.forEach(f => {
+            todasFormulas.push({ ...f, _arquivo_origem: nomeArquivo })
+          })
+          arquivosProcessados.push(nomeArquivo)
           if (resultado.value.aviso) avisos.push(resultado.value.aviso)
         } else {
           erros.push(resultado.reason instanceof Error ? resultado.reason.message : String(resultado.reason))
@@ -175,23 +179,28 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
         setAviso((prev) => (prev ? prev + '\n\n' : '') + avisos.join('\n'))
       }
 
-      // Verifica se o arquivo já foi anexado antes
-      const nomeArquivo = arquivos.join(', ')
-      try {
-        const res = await fetch('/api/admin/check-arquivo', {
-          method: 'POST',
-          headers: { 'x-admin-pin': pin, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ arquivo_nome: nomeArquivo })
-        })
-        const data = await res.json() as { count: number; data?: { createdAt: string } }
-        if (res.ok && data.count > 0) {
-          const dataFormatada = data.data?.createdAt ? new Date(data.data.createdAt).toLocaleDateString('pt-BR') : 'desconhecida'
-          setAviso((prev) => (prev ? prev + '\n\n' : '') + `⚠️ Este arquivo já foi processado em ${dataFormatada} com ${data.count} fórmula(s). Será atualizado.`)
-        }
-      } catch { /* ignora */ }
+      // Verifica se cada arquivo já foi anexado antes
+      const aviosArquivos: string[] = []
+      for (const nomeArquivo of arquivosProcessados) {
+        try {
+          const res = await fetch('/api/admin/check-arquivo', {
+            method: 'POST',
+            headers: { 'x-admin-pin': pin, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ arquivo_nome: nomeArquivo })
+          })
+          const data = await res.json() as { count: number; data?: { createdAt: string } }
+          if (res.ok && data.count > 0) {
+            const dataFormatada = data.data?.createdAt ? new Date(data.data.createdAt).toLocaleDateString('pt-BR') : 'desconhecida'
+            aviosArquivos.push(`⚠️ "${nomeArquivo}" já foi processado em ${dataFormatada} com ${data.count} fórmula(s). Será atualizado.`)
+          }
+        } catch { /* ignora */ }
+      }
+      if (aviosArquivos.length > 0) {
+        setAviso((prev) => (prev ? prev + '\n\n' : '') + aviosArquivos.join('\n'))
+      }
 
-      setPreview(todasFormulas)
-      setArquivo(nomeArquivo)
+      setPreview(todasFormulas as FormulaPreview[])
+      setArquivo(arquivosProcessados.join(', '))
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao processar arquivos.')
     } finally {
@@ -220,10 +229,17 @@ function ImportarArquivo({ pin, onImportou }: { pin: string; onImportou: () => v
     let salvos = 0
     for (const f of preview) {
       try {
+        // Usa _arquivo_origem adicionado durante processamento (nome do arquivo exato)
+        const f_any = f as unknown as Record<string, unknown> & { _arquivo_origem?: string }
+        const payload = {
+          ...f,
+          arquivo_origem: f_any._arquivo_origem
+        }
+
         await fetch('/api/admin/formulas', {
           method: 'POST',
           headers: { 'x-admin-pin': pin, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...f, arquivo_origem: arquivo }),
+          body: JSON.stringify(payload),
         })
         salvos++
       } catch { /* continua */ }
