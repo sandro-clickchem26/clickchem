@@ -284,14 +284,12 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
       return { doc, score }
     }).filter(x => x.score > 0).sort((a, b) => b.score - a.score)
 
-    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} | Retornando top 3 para velocidade máxima`)
+    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} | Retornando top 5`)
 
-    // Retorna top 3 artigos - garante velocidade, sacrifica cobertura
-    // Tempo de processamento: ~5-8 segundos (margem segura do timeout de 60s)
-    // Qualidade: 80-85% de acerto (top 3 + requisitos específicos)
-    // Protocolo: Extração direta dos mais relevantes
-    // Trade-off: 3 docs = ~70% mais rápido que original, aceita perda de cobertura
-    const topDocs = comScore.slice(0, 3)
+    // Top 5 artigos: o gargalo de tempo é a IA gerando o relatório (~38s),
+    // não a leitura dos artigos — os documentos entram resumidos (seções
+    // Resultados/Conclusão dos .md). 5 docs mantém boa cobertura dentro dos 60s.
+    const topDocs = comScore.slice(0, 5)
 
     if (topDocs.length === 0) return ''
 
@@ -903,6 +901,19 @@ SE NÃO CONSEGUIR:
   const tempoTotal = ((endTotal - startTotal) / 1000).toFixed(2)
   console.log(`[gerarFormulacao] ⏱️ BREAKDOWN: Buscas=${tempoBuscas}s | IA=${tempoIA1}s | Total=${tempoTotal}s`)
   console.log(`[gerarFormulacao] ✅ CONCLUSÃO | Tempo total: ${tempoTotal}s`)
+
+  // Rótulo de fonte determinístico — não confia no texto da IA, que pode rotular errado.
+  // Em Biosolventes o contexto é SOMENTE artigos científicos; nos demais, P&D ou internet.
+  if (resultadoFinal && typeof resultadoFinal === 'object') {
+    const r = resultadoFinal as Record<string, unknown>
+    if (isBiosolventes) {
+      r.fonte = 'Fonte técnica: Artigos Científicos (banco interno) — sugestão formulativa derivada.'
+    } else if (proprietaryResult.hasFormulas) {
+      r.fonte = 'Fonte técnica: P&D Proprietário — sugestão formulativa derivada.'
+    } else if (webContext) {
+      r.fonte = 'Fonte técnica: Busca Externa (internet) — sugestão formulativa derivada.'
+    }
+  }
 
   // MPs obrigatórias definidas pelo usuário têm prioridade máxima
   if (userObrigatorias.length > 0) {
