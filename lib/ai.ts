@@ -89,7 +89,7 @@ interface ProprietaryResult {
 
 // Monta o contexto do banco P&D para a IA avaliar compatibilidade
 // A IA — não um algoritmo de score — decide qual fórmula usar e se é compatível
-async function buildProprietaryContext(segmento: string): Promise<ProprietaryResult> {
+async function buildProprietaryContext(segmento: string, descricao: string = ''): Promise<ProprietaryResult> {
   const vazio: ProprietaryResult = { context: '', hasFormulas: false }
   try {
     const formulas = await prisma.formulaProprietaria.findMany({
@@ -124,8 +124,25 @@ async function buildProprietaryContext(segmento: string): Promise<ProprietaryRes
       return vazio
     }
 
-    // Limita a 8 fórmulas para evitar contexto excessivo e timeout
-    const pool = relevantes.slice(0, 8)
+    // Ranqueia pela relevância ao PRODUTO pedido (descrição), não só pelo segmento:
+    // a IA analisa as 5 fórmulas mais parecidas com o que o usuário digitou
+    const palavrasBusca = norm(descricao).split(/\s+/).filter(w => w.length > 3)
+    const ranqueadas = relevantes
+      .map(f => {
+        const textoFormula = norm(`${f.nome_interno} ${f.aplicacao} ${f.tags || ''} ${f.composicao}`)
+        let score = 0
+        for (const palavra of palavrasBusca) {
+          if (textoFormula.includes(palavra)) score += 1
+        }
+        return { f, score }
+      })
+      .sort((a, b) => b.score - a.score)
+
+    ranqueadas.slice(0, 5).forEach(({ f, score }) =>
+      console.log(`[buildProprietaryContext] 📊 Score ${score}: "${f.nome_interno}"`))
+
+    // Analisa até 5 arquivos de fórmulas mais relevantes ao produto
+    const pool = ranqueadas.slice(0, 5).map(({ f }) => f)
 
     const formulasStr = pool.map((f, idx) => {
       let composicao: Array<{ materia_prima: string; funcao: string; percentual?: string }> = []
@@ -649,7 +666,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const [contexto, proprietaryResult, docsContext, webContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
-    !isBiosolventes ? buildProprietaryContext(segmento) : Promise.resolve({ context: '', hasFormulas: false }),
+    !isBiosolventes ? buildProprietaryContext(segmento, descricao) : Promise.resolve({ context: '', hasFormulas: false }),
     shouldCallDocumentos ? buildDocumentosContext(segmento, descricao) : Promise.resolve(''),
     shouldCallTavily
       ? buildWebContext(segmento, descricao, proibidas).catch(() => '')
