@@ -736,13 +736,16 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   // PASSO 2: EXTRAI COMPONENTES-CHAVE do pedido
   const componentesPedidos: string[] = []
 
+  // SOMENTE substâncias/matérias-primas reais.
+  // NUNCA incluir tipos de produto (desengraxante, detergente...) nem categorias
+  // genéricas (solvente, tensoativo, ácido) — isso causava falso "FORMULA_NAO_ENCONTRADA"
+  // porque nenhuma MP da composição se chama "desengraxante".
   const palavrasChave = [
-    'óleo de mamona', 'carbonato de propileno', 'carbonatação',
+    'óleo de mamona', 'carbonato de propileno',
     'óleo de soja', 'óleo de palma', 'biodiesel', 'terpeno',
-    'alcool', 'acetona', 'metanol', 'etanol',
+    'limoneno', 'acetona', 'metanol', 'etanol',
     'ácido sulfônico', 'sulfônico', 'muriático', 'ácido clorídrico',
-    'ácido fluorídrico', 'fluorídrico', 'ácido', 'desengraxante',
-    'água', 'solvente', 'tensoativo', 'surfactante'
+    'ácido fluorídrico', 'fluorídrico'
   ]
 
   for (const palavra of palavrasChave) {
@@ -818,8 +821,11 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
         ...validacao.faltando.map(c => `componente: ${c}`),
         ...validacaoRequisitos.naoAtendidos.map(r => `requisito: ${r}`)
       ]
-      console.log(`[gerarFormulacao] ❌ Máximo de tentativas atingido. Problemas: ${problemas.join(', ')}`)
-      throw new Error('FORMULA_NAO_ENCONTRADA')
+      // Validação heurística (palavras detectadas na descrição) NÃO descarta a fórmula:
+      // descartar aqui causava falso "Fórmula Não Encontrada" mesmo com fórmula válida do P&D.
+      // MPs obrigatórias explícitas do usuário já são garantidas por enforcarMPsObrigatorias.
+      console.log(`[gerarFormulacao] ⚠️ Validação heurística incompleta (${problemas.join(', ')}) — retornando fórmula mesmo assim`)
+      break
     }
 
     // IA REFAZ a fórmula
