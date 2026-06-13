@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { gerarFormulacao } from '@/lib/ai'
 import { prisma } from '@/lib/db'
 import { gerarVariacaoFormula } from '@/lib/analise-combinatoria'
+import { createHash } from 'crypto'
 
 // Aumenta o timeout máximo da função para 60s (limite do plano Hobby da Vercel)
 // A geração de fórmula pela IA pode levar 30-45 segundos
@@ -16,89 +17,86 @@ export async function POST(req: NextRequest) {
     }
 
     const resultado = await gerarFormulacao(body)
-
-    // Tentar aplicar análise combinatória se houver formulaId de referência
     const usuarioEmail = body.usuario_email || null
-    const formulaReferenciaId = body.formula_referencia_id || null
+    const segmento = String(body.segmento)
 
-    if (formulaReferenciaId && usuarioEmail) {
+    // SEMPRE aplicar análise combinatória automaticamente
+    // Extrair composição da resposta da IA
+    const formulacao = (resultado as Record<string, unknown>)?.formulacao as Record<string, unknown> | undefined
+    const composicao = formulacao?.composicao as Array<{ materia_prima: string; percentual: number }> | undefined
+
+    if (composicao && Array.isArray(composicao) && composicao.length > 0) {
       try {
-        // Buscar a fórmula de referência
-        const formulaReferencia = await prisma.formulaProprietaria.findUnique({
-          where: { id: formulaReferenciaId }
-        })
-
-        if (formulaReferencia) {
-          let composicaoBase: Record<string, number>
-          try {
-            composicaoBase = JSON.parse(formulaReferencia.composicao)
-          } catch {
-            composicaoBase = {}
+        // Converter para formato que análise combinatória entende
+        const composicaoBase: Record<string, number> = {}
+        for (const comp of composicao) {
+          const mp = String(comp.materia_prima || '')
+          const perc = Number(comp.percentual || 0)
+          if (mp && perc > 0) {
+            composicaoBase[mp] = perc
           }
+        }
 
-          if (Object.keys(composicaoBase).length > 0) {
-            // Gerar variação única para este usuário
-            const variacao = gerarVariacaoFormula(composicaoBase, body.segmento, {
-              variacao: 20,
-              tentativas: 10
+        if (Object.keys(composicaoBase).length > 0) {
+          // Gerar variação SEMPRE (não condicional)
+          const variacao = gerarVariacaoFormula(composicaoBase, segmento, {
+            variacao: 25, // Aumentar variação para mais diferença
+            tentativas: 15 // Mais tentativas para encontrar boa variação
+          })
+
+          if (variacao) {
+            // Identificador de usuário/sessão para rastreamento
+            const identificador = usuarioEmail || `session-${createHash('sha256').update(req.headers.get('user-agent') || '').digest('hex').slice(0, 16)}`
+
+            // Verificar se já foi dada
+            const jaDada = await prisma.formulacaoGerada.findFirst({
+              where: {
+                usuarioEmail: identificador,
+                segmento,
+                hash: variacao.hash
+              }
             })
 
-            if (variacao) {
-              // Verificar se já foi dada ao usuário
-              const jaDada = await prisma.formulacaoGerada.findFirst({
-                where: {
-                  usuarioEmail,
-                  segmento: body.segmento,
-                  hash: variacao.hash
+            if (!jaDada) {
+              // Armazenar variação gerada
+              await prisma.formulacaoGerada.create({
+                data: {
+                  usuarioEmail: identificador,
+                  formulaBaseId: null, // Não há fórmula de referência, é da IA
+                  segmento,
+                  composicaoGerada: JSON.stringify(variacao.ingredientes),
+                  hash: variacao.hash,
+                  metadata: JSON.stringify({
+                    fonte: 'IA',
+                    descricaoPedido: body.descricao,
+                    notas: variacao.notas
+                  })
                 }
               })
 
-              if (!jaDada) {
-                // Armazenar a variação gerada
-                await prisma.formulacaoGerada.create({
-                  data: {
-                    usuarioEmail,
-                    formulaBaseId: formulaReferenciaId,
-                    segmento: body.segmento,
-                    composicaoGerada: JSON.stringify(variacao.ingredientes),
-                    hash: variacao.hash,
-                    metadata: JSON.stringify({
-                      formulaBaseNome: formulaReferencia.nome_interno,
-                      notas: variacao.notas
-                    })
-                  }
-                })
+              // SUBSTITUIR a composição da IA com a variação
+              if (resultado && typeof resultado === 'object') {
+                const r = resultado as Record<string, unknown>
+                const form = r.formulacao as Record<string, unknown> | undefined
 
-                // Enriquecer resultado com informação de variação
-                if (resultado && typeof resultado === 'object') {
-                  const r = resultado as Record<string, unknown>
-                  r.analise_combinatoria = {
-                    original: composicaoBase,
-                    variada: variacao.ingredientes,
-                    hash: variacao.hash,
-                    notas: variacao.notas,
-                    diferenças: Object.entries(variacao.ingredientes)
-                      .map(([ing, conc]) => {
-                        const orig = composicaoBase[ing] || 0
-                        const diff = conc - orig
-                        if (Math.abs(diff) < 0.1) return null
-                        return {
-                          ingrediente: ing,
-                          original: orig.toFixed(2),
-                          variada: conc.toFixed(2),
-                          diferenca: diff > 0 ? `+${diff.toFixed(2)}%` : `${diff.toFixed(2)}%`
-                        }
-                      })
-                      .filter(Boolean)
-                  }
+                if (form && typeof form === 'object') {
+                  // Atualizar composição com valores variados
+                  const novaComposicao = Object.entries(variacao.ingredientes).map(([mp, perc]) => ({
+                    materia_prima: mp,
+                    percentual: perc,
+                    justificativa: `Variação automatizada via análise combinatória - ${perc.toFixed(2)}%`
+                  }))
+
+                  form.composicao = novaComposicao
+                  r.formulacao = form
                 }
               }
             }
           }
         }
       } catch (err) {
-        // Log mas não falha — análise combinatória é optional
-        console.warn('[formulacao/route] Erro ao aplicar análise combinatória:', err)
+        // Log mas não falha — análise combinatória é automática mas opcional
+        console.warn('[formulacao/route] Erro ao aplicar análise combinatória automática:', err)
       }
     }
 
