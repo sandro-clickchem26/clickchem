@@ -178,22 +178,26 @@ async function buildProprietaryContext(segmento: string, descricao: string = '')
     const pool = ranqueadas.slice(0, 5).map(({ f }) => f)
 
     const formulasStr = pool.map((f, idx) => {
-      let composicao: Array<{ materia_prima: string; funcao: string; percentual?: string }> = []
+      let composicao: Array<{ materia_prima: string; funcao?: string; percentual?: number | string }> = []
       try { composicao = JSON.parse(f.composicao) } catch { /* ignora */ }
 
-      // RESUMO COMPACTO: apenas nomes de componentes-chave (sem faixas, sem funções detalhadas)
-      const componentesChave = composicao
-        .filter(c => c.materia_prima) // remove vazios
-        .map(c => c.materia_prima)
-        .slice(0, 5) // máximo 5 componentes no resumo
-        .join(', ')
+      // COMPOSIÇÃO COMPLETA: a IA precisa de TODOS os componentes com função e
+      // percentual para derivar uma fórmula real. O resumo compacto anterior
+      // (5 nomes sem %) impedia a derivação — a IA respondia "não é possível
+      // sintetizar com a lista fornecida".
+      const linhasComposicao = composicao
+        .filter(c => c.materia_prima)
+        .slice(0, 20)
+        .map(c => `  │    - ${c.materia_prima}${c.funcao ? ` (${c.funcao})` : ''}: ~${c.percentual ?? '?'}%`)
+        .join('\n')
 
-      // Resumo técnico sem composição detalhada
       return `  ┌─ REFERÊNCIA TÉCNICA ${String.fromCharCode(65 + idx)}
   │  Aplicação: ${f.aplicacao}
-  │  Componentes-chave: ${componentesChave}
+  │  Composição (componente, função, % aproximado):
+${linhasComposicao}
   │  ${f.ph_final ? `pH: ${f.ph_final}` : ''}
   │  ${f.viscosidade ? `Viscosidade: ${f.viscosidade}` : ''}
+  │  ${f.processo ? `Processo: ${String(f.processo).slice(0, 300)}` : ''}
   │  ${f.performance_chave ? `Performance: ${f.performance_chave}` : ''}
   └─────────────────────────────`
     }).join('\n\n')
@@ -225,8 +229,8 @@ Use as referências compatíveis APENAS como base técnica. Gere uma fórmula NO
   6. Otimize as proporções para o pedido específico do usuário
 
   ⛔ RESTRIÇÃO CRÍTICA — LISTA FECHADA DE MATÉRIAS-PRIMAS:
-  Você SÓ pode usar as matérias-primas que aparecem nas referências técnicas acima.
-  Extraia EXATAMENTE os nomes dos componentes-chave listados.
+  Você SÓ pode usar as matérias-primas que aparecem nas composições das referências técnicas acima.
+  Extraia EXATAMENTE os nomes dos componentes listados nas composições.
   Se uma MP não aparece nas referências, você ABSOLUTAMENTE NÃO pode incluir na fórmula.
   Exemplo proibido: se ureia-formaldeído só tem [ureia, paraformol, catalisador ácido],
   você NÃO pode adicionar [ácido cítrico, benzoico, silicato, conservantes genéricos].
@@ -721,10 +725,16 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     // Sem P&D, sem Google, sem contexto de MPs genéricas
     contextosParaIA = docsContext || ''
     console.log(`[gerarFormulacao] Biosolventes: usando SOMENTE artigos científicos`)
+  } else if (proprietaryResult.hasFormulas) {
+    // Há referências P&D: a LISTA FECHADA são as composições das referências.
+    // A lista genérica de MPs (banco de matérias-primas) NÃO entra — ela poluía
+    // a fórmula com aditivos alheios ao produto (ex: tensoativos numa resina).
+    contextosParaIA = proprietaryResult.context + webContext
+    console.log(`[gerarFormulacao] ${segmento}: P&D (composições completas) + Google — sem lista genérica de MPs`)
   } else {
-    // Tintas, Resinas, Cosmético: P&D → Google (SEM Artigos Científicos)
-    contextosParaIA = contexto + proprietaryResult.context + webContext
-    console.log(`[gerarFormulacao] ${segmento}: P&D + Google (sem artigos científicos)`)
+    // Sem P&D: Google + lista de MPs como apoio
+    contextosParaIA = contexto + webContext
+    console.log(`[gerarFormulacao] ${segmento}: Google + lista de MPs (P&D sem fórmulas compatíveis)`)
   }
 
   const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA)
