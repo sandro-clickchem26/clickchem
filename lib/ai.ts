@@ -341,48 +341,65 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
       return { doc, score }
     }).filter(x => x.score > 0).sort((a, b) => b.score - a.score)
 
-    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} | Retornando top 5`)
+    console.log(`[buildDocumentosContext] Artigos com score > 0: ${comScore.length} | Retornando top 10 com análise minuciosa`)
 
-    // Top 5 artigos: o gargalo de tempo é a IA gerando o relatório (~38s),
-    // não a leitura dos artigos — os documentos entram resumidos (seções
-    // Resultados/Conclusão dos .md). 5 docs mantém boa cobertura dentro dos 60s.
-    const topDocs = comScore.slice(0, 5)
+    // Top 10 artigos com análise completa: a IA PRECISA de contexto profundo
+    // para fazer análise minuciosa e trazer fórmulas corretas correspondentes ao pedido
+    const topDocs = comScore.slice(0, 10)
 
     if (topDocs.length === 0) return ''
 
     const extrairSecoesMarkdown = (texto: string): string => {
-      // Para Markdown: extrai seções-chave (Resultados + Conclusão)
-      // Se não encontrar seções, retorna primeiros 4000 chars
-      const secoes = ['resultados', 'conclusão', 'conclusion', 'findings', 'results']
+      // ANÁLISE MINUCIOSA: extrai TODAS as seções relevantes
+      // Inclui: Introdução, Métodos, Materiais, Resultados, Conclusão, Formulação, Composição
+      const secoesRelevantes = [
+        'introdução', 'introduction', 'intro',
+        'métodos', 'methods', 'methodology', 'metodologia',
+        'materiais', 'materials', 'reagentes', 'composição',
+        'resultados', 'results', 'findings',
+        'conclusão', 'conclusion', 'conclusões',
+        'formulação', 'formulation', 'formula',
+        'composição', 'composition', 'ingredients'
+      ]
+
       const linhas = texto.split('\n')
       let resultado = ''
-      let coletando = false
+      let emSecaoRelevante = false
 
-      for (const linha of linhas) {
+      for (let i = 0; i < linhas.length; i++) {
+        const linha = linhas[i]
         const linhaLower = linha.toLowerCase()
-        if (secoes.some(s => linhaLower.includes(s))) {
-          coletando = true
+
+        // Detecta início de seção relevante
+        if (secoesRelevantes.some(s => linhaLower.includes(s))) {
+          emSecaoRelevante = true
           resultado += linha + '\n'
-        } else if (coletando && linha.startsWith('#')) {
-          break // Fim da seção
-        } else if (coletando) {
+        }
+        // Detecta fim de seção (próximo heading de nível superior)
+        else if (emSecaoRelevante && linha.match(/^#{1,2}\s/)) {
+          emSecaoRelevante = false
+        }
+        // Coleta conteúdo da seção
+        else if (emSecaoRelevante) {
           resultado += linha + '\n'
         }
       }
 
-      return resultado.trim() || texto.slice(0, 4000)
+      // Se não encontrou seções estruturadas, retorna conteúdo completo (até 8000 chars)
+      return resultado.trim() || texto.slice(0, 8000)
     }
 
     let totalContextoChars = 0
     const linhas = topDocs.map(({ doc, score }) => {
       const textoDisponivel = (doc.conteudo || doc.resumo || '').trim()
 
-      // Para Markdown: extrai seções-chave (mais eficiente)
-      // Para outros: aumenta limite de 1500 para 2500
+      // ANÁLISE COMPLETA: extrai conteúdo integral para análise minuciosa
+      // Markdown: todas as seções relevantes
+      // Outros: até 5000 caracteres (análise profunda)
       const isMarkdown = doc.arquivo_nome?.toLowerCase().endsWith('.md')
       const trecho = isMarkdown
         ? extrairSecoesMarkdown(textoDisponivel)
-        : textoDisponivel.slice(0, 2500)
+        : textoDisponivel.slice(0, 5000)
 
       totalContextoChars += trecho.length
       const ref = [doc.autores, doc.ano, doc.fonte].filter(Boolean).join(', ')
