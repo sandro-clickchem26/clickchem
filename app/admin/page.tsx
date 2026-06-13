@@ -1073,7 +1073,7 @@ function DocsCientificos({ pin }: { pin: string }) {
           onClick={() => inputRef.current?.click()}
           className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all mb-4 ${dragging ? 'border-blue-400 bg-blue-500/10' : arquivo ? 'border-green-500/50 bg-green-500/5' : 'border-white/15 hover:border-white/30'}`}
         >
-          <input ref={inputRef} type="file" accept=".pdf,.docx,.doc" className="hidden"
+          <input ref={inputRef} type="file" accept=".pdf,.docx,.doc,.md" className="hidden"
             onChange={e => { if (e.target.files?.[0]) aplicarArquivo(e.target.files[0]); e.target.value = '' }} />
           {arquivo ? (
             <div className="flex items-center justify-center gap-2">
@@ -1087,7 +1087,7 @@ function DocsCientificos({ pin }: { pin: string }) {
             <>
               <FileText size={24} className="mx-auto mb-2 text-gray-600" />
               <p className="text-sm text-gray-400">Arraste ou clique para selecionar</p>
-              <p className="text-xs text-gray-600 mt-1">PDF ou Word (.docx) — máx. 10MB</p>
+              <p className="text-xs text-gray-600 mt-1">PDF, Word (.docx) ou Markdown (.md) — máx. 4 MB</p>
             </>
           )}
         </div>

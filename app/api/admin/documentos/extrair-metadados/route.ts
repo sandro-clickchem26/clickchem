@@ -18,6 +18,10 @@ async function extrairTextoWord(buffer: Buffer): Promise<string> {
   return result.value || ''
 }
 
+function extrairTextoMarkdown(buffer: Buffer): string {
+  return buffer.toString('utf-8')
+}
+
 export async function POST(req: NextRequest) {
   if (req.headers.get('x-admin-pin') !== ADMIN_PIN) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -37,6 +41,8 @@ export async function POST(req: NextRequest) {
       texto = await extrairTextoPDF(buffer)
     } else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
       texto = await extrairTextoWord(buffer)
+    } else if (fileName.endsWith('.md')) {
+      texto = extrairTextoMarkdown(buffer)
     }
 
     const trecho = texto.slice(0, 3000).replace(/\s+/g, ' ').trim()
