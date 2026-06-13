@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { jsonrepair } from 'jsonrepair'
 import { SYSTEM_PROMPT, buildFormulacaoPrompt, buildAnalisePrompt, buildTendenciasPrompt } from './prompts'
 import { prisma } from './db'
+import { buscarVariacoesMPs, formatarVariacoesParaPrompt } from './buscar-variacoes'
 import fs from 'fs'
 import path from 'path'
 
@@ -738,6 +739,11 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const dadosFinais: Record<string, unknown> = { ...dados }
   if (webContext) dadosFinais.pesquisa_internet_ativa = true
 
+  // BUSCAR VARIAÇÕES DE MPs DISPONÍVEIS NO BANCO P&D
+  const variacoes = await buscarVariacoesMPs(segmento)
+  const variacoesPrompt = formatarVariacoesParaPrompt(variacoes)
+  console.log(`[gerarFormulacao] 📦 Variações encontradas - Tensoativos: ${variacoes.tensoativos.length} | Solventes: ${variacoes.solventes.length}`)
+
   // Construir contexto conforme segmento
   let contextosParaIA: string
   if (isBiosolventes) {
@@ -757,7 +763,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     console.log(`[gerarFormulacao] ${segmento}: Google + lista de MPs (P&D sem fórmulas compatíveis)`)
   }
 
-  const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA)
+  const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA, variacoesPrompt)
   const totalContextoSize = contextosParaIA.length
   console.log(`[gerarFormulacao] 📊 CONTEXTO TOTAL: ${totalContextoSize} caracteres (P&D: ${proprietaryResult.context.length} | Web: ${webContext.length} | Docs: ${docsContext.length})`)
 

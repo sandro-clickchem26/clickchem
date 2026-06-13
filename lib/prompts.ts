@@ -85,7 +85,7 @@ SE NÃO houver base técnica compatível (nem no P&D nem em referências externa
   • Use "viabilidade": "nao_encontrada"
   • NÃO gere uma fórmula genérica ou adaptada — isso seria tecnicamente desonesto`
 
-export function buildFormulacaoPrompt(dados: Record<string, unknown>, contextoMPs: string): string {
+export function buildFormulacaoPrompt(dados: Record<string, unknown>, contextoMPs: string, variacoesMPs: string = ''): string {
   const temObrigatorias = Array.isArray(dados.materias_obrigatorias) && (dados.materias_obrigatorias as string[]).length > 0
   const nMPs = temObrigatorias ? (dados.materias_obrigatorias as string[]).length : 0
   const obrigatorias = temObrigatorias
@@ -223,7 +223,7 @@ IMPORTANTE: Não há Artigos Científicos neste contexto. Use APENAS P&D e inter
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 
 PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
-${obrigatorias}${proibidas}${secaoMPs}${ordemBusca}${analiseObrigatoria}
+${obrigatorias}${proibidas}${secaoMPs}${variacoesMPs}${ordemBusca}${analiseObrigatoria}
 
 ⚠️ ESTRUTURA DA COMPOSIÇÃO — COMPONENTES SOLICITADOS + NECESSÁRIOS:
 
