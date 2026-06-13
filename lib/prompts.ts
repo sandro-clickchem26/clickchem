@@ -155,18 +155,51 @@ A qualidade depende de análise profunda, comparativa e otimizada dos artigos.\n
   const isBiosolventes = String(dados.segmento || '').includes('Biosolventes, Biolubrificantes e Biodiesel')
 
   const ordemBusca = isBiosolventes
-    ? `\n⚠️ BIOSOLVENTES E BIOLUBRIFICANTES — FONTE ÚNICA: ARTIGOS CIENTÍFICOS (7 artigos)
+    ? `\n⚠️ BIOSOLVENTES, BIOLUBRIFICANTES E BIODIESEL — FONTE ÚNICA: ARTIGOS CIENTÍFICOS
 
-🔬 PROTOCOLO DIRETO (90%+ acerto):
+🔬 PROTOCOLO DETALHADO (90%+ acerto):
 
-1. EXTRAIR: De cada artigo, pegue componentes, concentrações, tipos exatos
+1. EXTRAIR: De cada artigo, pegue componentes, concentrações, tipos exatos, temperaturas, tempos
 2. CONSTRUIR: Fórmula SOMENTE com dados dos artigos (sem inventos)
-3. JUSTIFICAR: Cite [Autor, Ano] para cada concentração
+3. JUSTIFICAR: Cite [Autor, Ano] para cada concentração e procedimento
 
 ❌ Proibido: componentes não mencionados, concentrações não nos artigos, conhecimento geral
 ✓ Obrigatório: Use dados dos artigos, cite fontes, soma = 100%
 
-⚠️ Se não conseguir extrair dados: retorne "viabilidade": "nao_encontrada"\n`
+⚠️ PROCESSO DE FABRICAÇÃO DEVE SER EXTREMAMENTE DETALHADO:
+Para Biosolventes/Biolubrificantes, o "processo_fabricacao" PRECISA conter:
+
+ORDEM DE ADIÇÃO:
+- MÍNIMO 5 etapas (não 2-3 superficiais)
+- Cada etapa: descrição PRECISA, temperatura EXATA, tempo ESPECÍFICO
+- Incluir: carregamento MPs, aquecimento, reação, agitação, resfriamento, tratamento pós-reação
+
+EXEMPLOS CORRETOS:
+✓ "Aquecimento a 60-70°C por 15-20 minutos com agitação mecânica a 300 rpm"
+✓ "Adição gota-a-gota de ácido sulfúrico concentrado (5 min para cada 10 mL) mantendo T < 50°C"
+✓ "Repouso 2-4 horas a temperatura ambiente para completa esterificação"
+✓ "Destilação a vácuo: 120-150°C sob 10-20 mmHg para recuperação de solvente"
+
+EQUIPAMENTO SUGERIDO:
+- Descrever DETALHADAMENTE: tipo de reator, volume, material, acessórios
+- Exemplo: "Reator de vidro borossilicato 50-100L com camisa aquecida, condensador com serpentina, termômetro digital"
+
+TEMPERATURA E TEMPO:
+- SEMPRE especificar faixas (não valores únicos)
+- Incluir tempo de aquecimento, tempo de reação, tempo de resfriamento
+
+PRECAUÇÕES:
+- MÍNIMO 5-7 precauções de segurança específicas
+- Incluir: EPIs, ventilação, velocidade máxima de aquecimento, procedimento em caso de exotérmica
+- Referências a compatibilidade com materiais
+
+TRATAMENTO PÓS-REAÇÃO:
+- Neutralização (se aplicável)
+- Lavagem/decantação
+- Secagem
+- Recuperação de solventes
+
+Se não conseguir extrair dados tão detalhados: retorne "viabilidade": "nao_encontrada"\n`
     : `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
 1. BASE TÉCNICA P&D PROPRIETÁRIO — Use como referência principal
 2. BUSCA EXTERNA (internet) — Use como complemento se P&D for insuficiente
