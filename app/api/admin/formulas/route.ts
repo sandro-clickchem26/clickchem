@@ -10,9 +10,16 @@ export async function GET(req: NextRequest) {
   if (!checkAdmin(req)) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
-  const formulas = await prisma.formulaProprietaria.findMany({
-    orderBy: [{ nome_interno: 'asc' }, { segmento: 'asc' }],
+  const formulas = await prisma.formulaProprietaria.findMany()
+
+  // Ordena alfabeticamente com collation portuguesa (trata acentos corretamente)
+  const collator = new Intl.Collator('pt-BR')
+  formulas.sort((a, b) => {
+    const nomeSort = collator.compare(a.nome_interno, b.nome_interno)
+    if (nomeSort !== 0) return nomeSort
+    return collator.compare(a.segmento, b.segmento)
   })
+
   return NextResponse.json(formulas)
 }
 
