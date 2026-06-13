@@ -166,40 +166,54 @@ A qualidade depende de análise profunda, comparativa e otimizada dos artigos.\n
 ❌ Proibido: componentes não mencionados, concentrações não nos artigos, conhecimento geral
 ✓ Obrigatório: Use dados dos artigos, cite fontes, soma = 100%
 
-⚠️ PROCESSO DE FABRICAÇÃO DEVE SER EXTREMAMENTE DETALHADO:
-Para Biosolventes/Biolubrificantes, o "processo_fabricacao" PRECISA conter:
+⚠️ PROCESSO DE FABRICAÇÃO DEVE SER O PROTOCOLO COMPLETO DO ARTIGO:
+Para Biosolventes/Biolubrificantes, você NÃO deve gerar uma fórmula de aditivos finais.
+Você DEVE extrair e reproduzir o PROTOCOLO DE SÍNTESE COMPLETO descrito no artigo científico.
 
-ORDEM DE ADIÇÃO:
-- MÍNIMO 5 etapas (não 2-3 superficiais)
-- Cada etapa: descrição PRECISA, temperatura EXATA, tempo ESPECÍFICO
-- Incluir: carregamento MPs, aquecimento, reação, agitação, resfriamento, tratamento pós-reação
+REGRA CRÍTICA — NÃO FAZER ISSO É INACEITÁVEL:
+❌ ERRADO: Gerar "Esteres Metílicos 96% + BHT 1% + aditivos"
+✅ CORRETO: Reproduzir o PROCESSO DE SÍNTESE: transesterificação → epoxidação → ring-opening
 
-EXEMPLOS CORRETOS:
-✓ "Aquecimento a 60-70°C por 15-20 minutos com agitação mecânica a 300 rpm"
-✓ "Adição gota-a-gota de ácido sulfúrico concentrado (5 min para cada 10 mL) mantendo T < 50°C"
-✓ "Repouso 2-4 horas a temperatura ambiente para completa esterificação"
-✓ "Destilação a vácuo: 120-150°C sob 10-20 mmHg para recuperação de solvente"
+ESTRUTURA DO PROCESSO DE SÍNTESE:
+O "processo_fabricacao" DEVE conter TODAS as etapas de síntese do artigo:
 
-EQUIPAMENTO SUGERIDO:
-- Descrever DETALHADAMENTE: tipo de reator, volume, material, acessórios
-- Exemplo: "Reator de vidro borossilicato 50-100L com camisa aquecida, condensador com serpentina, termômetro digital"
+1. EXTRAIR do artigo: TODAS as etapas sequenciais
+   - Etapa 1: Transesterificação (se houver)
+   - Etapa 2: Epoxidação (se houver)
+   - Etapa 3: Modificações químicas (ring-opening, sulfonação, etc.)
+   - Etapa 4+: Tratamentos pós-reação (neutralização, lavagem, secagem)
 
-TEMPERATURA E TEMPO:
-- SEMPRE especificar faixas (não valores únicos)
-- Incluir tempo de aquecimento, tempo de reação, tempo de resfriamento
+2. PARA CADA ETAPA, incluir OBRIGATORIAMENTE:
+   - Reagentes EXATOS com quantidades (g, mL, proporções)
+   - Temperatura PRECISA (ex: "60°C" não "aquecimento")
+   - Tempo EXATO (ex: "1 hora" não "até completo")
+   - Método de agitação (RPM se mencionado)
+   - Ordem de adição (lenta, gota-a-gota, etc.)
+   - Tipo de equipamento (balão de fundo chato, funil de adição, etc.)
 
-PRECAUÇÕES:
-- MÍNIMO 5-7 precauções de segurança específicas
-- Incluir: EPIs, ventilação, velocidade máxima de aquecimento, procedimento em caso de exotérmica
-- Referências a compatibilidade com materiais
+3. EXEMPLO CORRETO - Biolubrificante de óleo de palma:
+   Etapa 1 - Transesterificação: Óleo 100g + Metanol 18g + H₂SO₄ 1g, 60°C, 1h agitação
+   Etapa 2 - Pós-reação: Rotaevaporação, depois Metanol 25g + KOH 1g, 60°C, 1h agitação vigorosa
+   Etapa 3 - Epoxidação: Biodiesel 30g + Tolueno 100mL + Ácido fórmico 0,3g + H₂O₂ 100mL (lento), 18h agitação
+   Etapa 4 - Neutralização: NaHCO₃ 10% (~100mL), lavagem com água até pH 7, Na₂SO₄ anidro 5g, repouso 1h
+   Etapa 5 - Ring-opening: Ácido metanossulfônico 0,5g (2%), 80°C 1h, depois álcool isoamílico 6,25g lentamente, 90°C 3h
+   Etapa 6 - Isolamento: Separação, lavagem NaHCO₃ + H₂O, rotaevaporação
+   Resultado: ~29-30g biolubrificante
 
-TRATAMENTO PÓS-REAÇÃO:
-- Neutralização (se aplicável)
-- Lavagem/decantação
-- Secagem
-- Recuperação de solventes
+4. EQUIPAMENTO:
+   - Lista EXATA do equipamento usado no artigo
+   - Volumes dos balões/reatores
+   - Acessórios (funil de adição, condensador, termômetro, etc.)
 
-Se não conseguir extrair dados tão detalhados: retorne "viabilidade": "nao_encontrada"\n`
+5. PRECAUÇÕES:
+   - ESPECÍFICAS para cada etapa (não genéricas)
+   - Se artigo menciona "lentamente", "cuidado com exotérmica", reproduza exatamente
+
+⚠️ REGRA ABSOLUTA:
+Se o artigo descreve um processo de síntese detalhado, você DEVE reproduzir esse processo EXATAMENTE.
+Não invente fórmulas de aditivos genéricos. Não simplifique. Reproduza o artigo.
+
+Se não conseguir extrair o protocolo completo: retorne "viabilidade": "nao_encontrada"\n`
     : `\n⚠️ ORDEM DE BUSCA PARA ESTE SEGMENTO:
 1. BASE TÉCNICA P&D PROPRIETÁRIO — Use como referência principal
 2. BUSCA EXTERNA (internet) — Use como complemento se P&D for insuficiente
