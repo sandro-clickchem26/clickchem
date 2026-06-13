@@ -633,6 +633,8 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   // Todas as consultas em paralelo — reduz tempo total antes da chamada à IA
   console.log(`[gerarFormulacao] ⏱️ INÍCIO | Segmento: "${segmento}" | isBiosolventes: ${isBiosolventes}`)
 
+  const startBuscas = Date.now()
+
   // Para Biosolventes: SOMENTE Artigos Científicos (sem P&D, sem Google)
   // Para outros (Tintas, Resinas, Cosmético): P&D → Google (sem Artigos Científicos)
   const shouldCallTavily = !isBiosolventes
@@ -647,6 +649,9 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
       : Promise.resolve(''),
   ])
 
+  const endBuscas = Date.now()
+  const tempoBuscas = ((endBuscas - startBuscas) / 1000).toFixed(2)
+  console.log(`[gerarFormulacao] ⏱️ BUSCAS COMPLETAS em ${tempoBuscas}s | P&D: ${proprietaryResult.context.length} | Docs: ${docsContext.length} | Web: ${webContext.length}`)
   console.log(`[gerarFormulacao] docsContext length: ${docsContext.length} chars`)
 
   const dadosFinais: Record<string, unknown> = { ...dados }
@@ -669,8 +674,8 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const totalContextoSize = contextosParaIA.length
   console.log(`[gerarFormulacao] 📊 CONTEXTO TOTAL: ${totalContextoSize} caracteres (P&D: ${proprietaryResult.context.length} | Web: ${webContext.length} | Docs: ${docsContext.length})`)
 
-  console.log(`[gerarFormulacao] ⏱️ Iniciando chamada IA com prompt de ${prompt.length} caracteres...`)
-  const startIA = Date.now()
+  console.log(`[gerarFormulacao] ⏱️ Iniciando chamada IA (tentativa 1)...`)
+  const startIA1 = Date.now()
 
   const message = await getClient().messages.create({
     model: getModel(),
@@ -680,8 +685,9 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const endIA = Date.now()
-  console.log(`[gerarFormulacao] ✅ IA respondeu em ${(endIA - startIA) / 1000}s`)
+  const endIA1 = Date.now()
+  const tempoIA1 = ((endIA1 - startIA1) / 1000).toFixed(2)
+  console.log(`[gerarFormulacao] ✅ IA respondeu (tentativa 1) em ${tempoIA1}s`)
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
   const resultado = extractJSON(text)
@@ -880,6 +886,7 @@ SE NÃO CONSEGUIR:
 
   const endTotal = Date.now()
   const tempoTotal = ((endTotal - startTotal) / 1000).toFixed(2)
+  console.log(`[gerarFormulacao] ⏱️ BREAKDOWN: Buscas=${tempoBuscas}s | IA=${tempoIA1}s | Total=${tempoTotal}s`)
   console.log(`[gerarFormulacao] ✅ CONCLUSÃO | Tempo total: ${tempoTotal}s`)
 
   // MPs obrigatórias definidas pelo usuário têm prioridade máxima
