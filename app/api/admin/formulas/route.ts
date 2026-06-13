@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
   const formulas = await prisma.formulaProprietaria.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: [{ nome_interno: 'asc' }, { segmento: 'asc' }],
   })
   return NextResponse.json(formulas)
 }
