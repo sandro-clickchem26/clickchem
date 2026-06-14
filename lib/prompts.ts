@@ -30,6 +30,33 @@ PRINCÍPIOS INEGOCIÁVEIS:
 
 FORMATO DE SAÍDA: Retorne SEMPRE JSON válido no schema fornecido, sem texto fora do JSON.
 
+⚠️ ANÁLISE COMPARATIVA DE VARIAÇÕES — REGRA OBRIGATÓRIA:
+Quando há MÚLTIPLAS fórmulas similares no banco de dados para [produto]:
+
+PROCEDIMENTO:
+1. IDENTIFIQUE as 3 VARIAÇÕES MAIS DIFERENTES baseadas em:
+   - Custo total (uma barata, uma média, uma premium)
+   - Desempenho esperado (uma básica, uma otimizada, uma máxima)
+   - Sustentabilidade (uma convencional, uma eco-friendly, uma 100% natural)
+
+2. ANALISE cada variação:
+   - Nome/tipo descritivo
+   - Matérias-primas COMPLETAMENTE DIFERENTES das outras 2
+   - Porcentagens e proporções
+   - Custo estimado total
+   - Performance esperada
+   - Nível de sustentabilidade
+   - Quando/por que usar cada uma (caso de uso específico)
+
+3. RECOMENDE a MELHOR opção para o caso específico do usuário
+   - Explique por que é a melhor
+   - Cite custo vs desempenho vs sustentabilidade
+
+4. FORMATO DE RETORNO:
+   - Campo "variacoes_alternativas": array com 3 objetos
+   - Cada objeto: {nome, tipo, ingredientes[], porcentagens, custo_total, performance, sustentabilidade, quando_usar, por_que_escolher}
+   - Campo "recomendacao_principal": qual das 3 é melhor para o caso
+
 ANÁLISE TÉCNICA OBRIGATÓRIA — REGRA INVIOLÁVEL:
 Se houver DOCUMENTAÇÃO CIENTÍFICA FORNECIDA:
    - ⚠️ REGRA INVIOLÁVEL: ANALISE 100% DOS ARTIGOS. Não ignore nenhum documento.
@@ -363,7 +390,21 @@ Retorne APENAS JSON válido (sem markdown):
     "alternativas_sustentaveis": ["..."]
   },
   "proximos_passos": ["..."],
-  "classificacao_regulatoria": "..."
+  "classificacao_regulatoria": "...",
+  "variacoes_alternativas": [
+    {
+      "nome": "Nome descritivo da variação",
+      "tipo": "Barata|Desempenho|Eco-Friendly",
+      "ingredientes": ["MP1", "MP2", "MP3"],
+      "porcentagens": {"MP1": 50, "MP2": 30, "MP3": 20},
+      "custo_estimado_total": 0.0,
+      "performance_esperada": "alta|media|baixa",
+      "sustentabilidade_score": 0,
+      "quando_usar": "Descrição do caso de uso específico",
+      "por_que_escolher": "Razão técnica para escolher esta variação"
+    }
+  ],
+  "recomendacao_principal": "Qual das 3 variações é a melhor para o caso do usuário e por quê"
 }`
 }
 
