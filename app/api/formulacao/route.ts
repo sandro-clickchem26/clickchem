@@ -118,13 +118,16 @@ export async function POST(req: NextRequest) {
 
               // APLICAR FORÇA VARIAÇÃO para garantir MPs diferentes
               console.log('[formulacao] Aplicando FORÇA VARIAÇÃO...')
+              console.log('[formulacao] DEBUG - composicaoComJustificativa length:', composicaoComJustificativa.length)
+              console.log('[formulacao] DEBUG - composicaoComJustificativa[0]:', composicaoComJustificativa[0])
               const composicaoForçada = forcarVariacaoMPs(
                 composicaoComJustificativa,
                 variacoesMPs.tensoativos,
                 variacoesMPs.solventes,
-                [ultimasComposicoes],
+                ultimasComposicoes,  // ✅ Removido wrapping em array!
                 variacoesMPs.outros
               )
+              console.log('[formulacao] DEBUG - composicaoForçada returned:', composicaoForçada[0])
 
               const mpsVariados = composicaoForçada.filter(c => c.justificativa?.includes('Substituída')).length
               console.log('[formulacao] ✅ Força variação aplicada: ', mpsVariados, 'MPs foram substituídas')

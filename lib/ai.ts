@@ -762,7 +762,39 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     console.log(`[gerarFormulacao] ${segmento}: Google + lista de MPs (P&D sem fórmulas compatíveis)`)
   }
 
-  const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA)
+  // BUSCAR MPs já usados para FORÇAR VARIAÇÃO desde o prompt
+  let mpsJaUsados: string[] = []
+  const usuarioEmail = String(dados.usuario_email || '')
+  if (usuarioEmail) {
+    try {
+      const formulasAnteriores = await prisma.formulacaoGerada.findMany({
+        where: {
+          usuarioEmail,
+          segmento
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 3,
+        select: { composicaoGerada: true }
+      })
+
+      // Extrair todos os MPs das fórmulas anteriores
+      const mpsSet = new Set<string>()
+      for (const formula of formulasAnteriores) {
+        try {
+          const composicao = JSON.parse(formula.composicaoGerada) as Record<string, number>
+          Object.keys(composicao).forEach(mp => mpsSet.add(mp))
+        } catch {
+          // Ignorar parse errors
+        }
+      }
+      mpsJaUsados = Array.from(mpsSet)
+      console.log(`[gerarFormulacao] 🔄 MPs já usados (${mpsJaUsados.length}):`, mpsJaUsados.slice(0, 5))
+    } catch (err) {
+      console.warn('[gerarFormulacao] Erro ao buscar fórmulas anteriores:', err)
+    }
+  }
+
+  const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA, '', mpsJaUsados)
   const totalContextoSize = contextosParaIA.length
   console.log(`[gerarFormulacao] 📊 CONTEXTO TOTAL: ${totalContextoSize} caracteres (P&D: ${proprietaryResult.context.length} | Web: ${webContext.length} | Docs: ${docsContext.length})`)
 

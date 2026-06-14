@@ -172,8 +172,9 @@ function extrairMPsDeFórmulas(
 }
 
 /**
- * FORÇA AGRESSIVA substituição de MPs repetidas para garantir variação REAL
- * Substitui QUALQUER MP que já foi usada por alternativas diferentes
+ * FORÇA AGRESSIVA substituição de MPs para garantir variação REAL
+ * Se há fórmulas anteriores: substitui QUALQUER MP que já foi usada
+ * Se não há: força substituição ALEATÓRIA entre disponíveis
  */
 export function forcarVariacaoMPs(
   composicao: Array<{ materia_prima: string; percentual: number; justificativa?: string }>,
@@ -187,12 +188,16 @@ export function forcarVariacaoMPs(
 
   // Extrair base (marca) das MPs já usadas nas últimas fórmulas
   const basesJaUsadas = new Set<string>()
-  for (const comp of ultimasComposicoes.flat()) {
+  const ultimasComposAnidadas = ultimasComposicoes.flat()
+
+  for (const comp of ultimasComposAnidadas) {
     const base = extrairBaseMP(comp.materia_prima)
     basesJaUsadas.add(base)
   }
 
-  console.log(`[forcarVariacaoMPs] Bases já usadas:`, Array.from(basesJaUsadas))
+  const temFomulaAnterior = basesJaUsadas.size > 0
+  console.log(`[forcarVariacaoMPs] Fórmulas anteriores? ${temFomulaAnterior ? 'SIM' : 'NÃO'}`)
+  console.log(`[forcarVariacaoMPs] Bases já usadas (${basesJaUsadas.size}):`, Array.from(basesJaUsadas))
   console.log(`[forcarVariacaoMPs] Tensoativos disponíveis: ${tensoativosDisponiveis.length}`)
   console.log(`[forcarVariacaoMPs] Solventes disponíveis: ${solvEntesDisponiveis.length}`)
   console.log(`[forcarVariacaoMPs] Outros disponíveis: ${outrosDisponiveis.length}`)
@@ -205,13 +210,13 @@ export function forcarVariacaoMPs(
   }
 
   // Forçar substituição AGRESSIVA
-  const novaComposicao = composicao.map(comp => {
+  const novaComposicao = composicao.map((comp, index) => {
     const baseAtual = extrairBaseMP(comp.materia_prima)
     let mpSubstituida = false
     let mpNova = comp.materia_prima
 
-    // Se a base já foi usada, OBRIGATORIAMENTE substituir
-    if (basesJaUsadas.has(baseAtual)) {
+    // ESTRATÉGIA 1: Se há fórmulas anteriores E a base foi usada, substitui
+    if (temFomulaAnterior && basesJaUsadas.has(baseAtual)) {
       console.log(`[forcarVariacaoMPs] MP "${comp.materia_prima}" já foi usada (base: ${baseAtual}), procurando substituto...`)
 
       // Buscar alternativa que NÃO tenha a mesma base
@@ -236,7 +241,7 @@ export function forcarVariacaoMPs(
       }
 
       if (!mpSubstituida) {
-        // Se não conseguir encontrar alternativa SEM usar base conhecida, usar qualquer uma diferente
+        // Fallback: usar qualquer uma diferente
         const alternativasQualquer = [
           ...todosDisponiveis.tensoativos,
           ...todosDisponiveis.solventes,
@@ -244,7 +249,6 @@ export function forcarVariacaoMPs(
         ].filter(alt => extrairBaseMP(alt.mp) !== baseAtual)
 
         if (alternativasQualquer.length > 0) {
-          // Pegar a primeira que seja diferente
           mpNova = alternativasQualquer[0].mp
           mpSubstituida = true
           console.log(`[forcarVariacaoMPs] ✅ Substituída (fallback): "${comp.materia_prima}" → "${mpNova}"`)
@@ -252,8 +256,44 @@ export function forcarVariacaoMPs(
       }
     }
 
+    // ESTRATÉGIA 2: Se NÃO há fórmulas anteriores, força substituição ALEATÓRIA
+    // para cada MP, usa uma alternativa diferente
+    if (!temFomulaAnterior && !mpSubstituida) {
+      console.log(`[forcarVariacaoMPs] Nenhuma fórmula anterior. Forçando variação aleatória para "${comp.materia_prima}"...`)
+
+      // Buscar alternativas do TIPO correto desta MP
+      let alternativas: any[] = []
+
+      // Tentar identificar o tipo atual
+      const mpLower = comp.materia_prima.toLowerCase()
+      if (mpLower.includes('tensoativo') || mpLower.includes('surfactante') || mpLower.includes('bio-soft') || mpLower.includes('stepan')) {
+        alternativas = todosDisponiveis.tensoativos.filter(t => extrairBaseMP(t.mp) !== baseAtual)
+      } else if (mpLower.includes('solvente') || mpLower.includes('steposol') || mpLower.includes('limoneno') || mpLower.includes('álcool') || mpLower.includes('alcool')) {
+        alternativas = todosDisponiveis.solventes.filter(s => extrairBaseMP(s.mp) !== baseAtual)
+      } else {
+        alternativas = todosDisponiveis.outros.filter(o => extrairBaseMP(o.mp) !== baseAtual)
+      }
+
+      // Se não encontrou alternativa do tipo correto, busca em todos
+      if (alternativas.length === 0) {
+        alternativas = [
+          ...todosDisponiveis.tensoativos,
+          ...todosDisponiveis.solventes,
+          ...todosDisponiveis.outros
+        ].filter(alt => extrairBaseMP(alt.mp) !== baseAtual)
+      }
+
+      if (alternativas.length > 0) {
+        // Escolher alternativa ALEATÓRIA VERDADEIRA (não determinística)
+        // Usar Math.random() para garantir variação entre requisições
+        const indiceAleatorio = Math.floor(Math.random() * alternativas.length)
+        mpNova = alternativas[indiceAleatorio].mp
+        mpSubstituida = true
+        console.log(`[forcarVariacaoMPs] ✅ Variação FORÇADA (primeira): "${comp.materia_prima}" → "${mpNova}" (índice ${indiceAleatorio}/${alternativas.length})`)
+      }
+    }
+
     if (mpSubstituida) {
-      // Recalcular percentual para manter soma = 100%
       return {
         ...comp,
         materia_prima: mpNova,

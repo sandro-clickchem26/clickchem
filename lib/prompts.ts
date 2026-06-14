@@ -85,7 +85,7 @@ SE NÃO houver base técnica compatível (nem no P&D nem em referências externa
   • Use "viabilidade": "nao_encontrada"
   • NÃO gere uma fórmula genérica ou adaptada — isso seria tecnicamente desonesto`
 
-export function buildFormulacaoPrompt(dados: Record<string, unknown>, contextoMPs: string, variacoesMPs: string = ''): string {
+export function buildFormulacaoPrompt(dados: Record<string, unknown>, contextoMPs: string, variacoesMPs: string = '', mpsJaUsados: string[] = []): string {
   const temObrigatorias = Array.isArray(dados.materias_obrigatorias) && (dados.materias_obrigatorias as string[]).length > 0
   const nMPs = temObrigatorias ? (dados.materias_obrigatorias as string[]).length : 0
   const obrigatorias = temObrigatorias
@@ -107,6 +107,19 @@ Esta lista tem PRIORIDADE MÁXIMA sobre qualquer referência técnica, banco int
 NUNCA inclua estas MPs na composição. Se elas aparecerem em qualquer referência ou contexto, IGNORE-AS e use alternativas:
 ${(dados.materias_proibidas as string[]).map(mp => `  ❌ ${mp}`).join('\n')}
 Se não houver alternativa viável, formule com o que estiver disponível e sinalize na análise crítica.\n`
+    : ''
+
+  const jaUsadas = mpsJaUsados.length > 0
+    ? `\n⚠️ VARIAÇÃO OBRIGATÓRIA — MATÉRIAS-PRIMAS JÁ UTILIZADAS:
+O usuário já recebeu fórmulas anteriores para este mesmo tipo de produto usando estas matérias-primas:
+${mpsJaUsados.map(mp => `  • ${mp}`).join('\n')}
+
+REGRA INVIOLÁVEL PARA GARANTIR VARIAÇÃO:
+- NUNCA reutilize NENHUMA destas MPs na nova formulação
+- A nova fórmula DEVE usar matérias-primas COMPLETAMENTE DIFERENTES das listadas acima
+- Isto é CRÍTICO para o sucesso do produto — o usuário depende de você variar totalmente
+- Se não conseguir formular sem usar alguma destas MPs, sinalize na análise crítica
+- Priorize alternativas viáveis para cada função técnica\n`
     : ''
 
   const tipoProduto = String(dados.descricao || '').split(/[,.\n]/)[0].trim()
@@ -223,7 +236,7 @@ IMPORTANTE: Não há Artigos Científicos neste contexto. Use APENAS P&D e inter
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 
 PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
-${obrigatorias}${proibidas}${secaoMPs}${variacoesMPs}${ordemBusca}${analiseObrigatoria}
+${obrigatorias}${proibidas}${jaUsadas}${secaoMPs}${variacoesMPs}${ordemBusca}${analiseObrigatoria}
 
 ⚠️ ESTRUTURA DA COMPOSIÇÃO — COMPONENTES SOLICITADOS + NECESSÁRIOS:
 
