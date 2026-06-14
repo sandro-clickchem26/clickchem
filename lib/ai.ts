@@ -172,96 +172,115 @@ async function buildProprietaryContext(segmento: string, descricao: string = '')
       return vazio
     }
 
-    // ⭐ ANÁLISE AQUI (não delega para IA): seleciona A MELHOR fórmula, verifica compatibilidade
-    const melhor = ranqueadas[0]
-    if (!melhor) {
-      console.log(`[buildProprietaryContext] ⚠️ Sem fórmulas ranqueadas`)
-      return vazio
-    }
-
-    console.log(`[buildProprietaryContext] 🎯 SELECIONADA: "${melhor.f.nome_interno}" (score ${melhor.score})`)
+    // Seleciona as 3 fórmulas mais relevantes E mais diferentes entre si
     console.log(`[buildProprietaryContext] 📊 Top 5 ranking:`)
     ranqueadas.slice(0, 5).forEach(({ f, score }, i) =>
       console.log(`[buildProprietaryContext]   ${i + 1}. Score ${score}: "${f.nome_interno}"`))
 
-    const f = melhor.f
-    let composicao: Array<{ materia_prima: string; funcao?: string; percentual?: number | string }> = []
-    try { composicao = JSON.parse(f.composicao) } catch { /* ignora */ }
+    const parseComp = (formula: typeof ranqueadas[0]['f']) => {
+      try { return JSON.parse(formula.composicao) as Array<{ materia_prima: string; funcao?: string; percentual?: number | string }> }
+      catch { return [] }
+    }
 
-    // Análise de compatibilidade: tipo, aplicação, características técnicas
-    const textoTipo = norm(`${f.nome_interno} ${f.aplicacao}`)
-    const tipoCombina = tiposPedidos.length === 0 || tiposPedidos.some(t => textoTipo.includes(t))
-    const aplicacaoCombina = norm(f.aplicacao).includes('tintas') || norm(f.aplicacao).includes('verniz') || norm(f.aplicacao).includes('revestimento')
+    const getMPSet = (formula: typeof ranqueadas[0]['f']): Set<string> => {
+      const comp = parseComp(formula)
+      return new Set(comp.map(c => norm(c.materia_prima).slice(0, 8)))
+    }
 
-    const linhasComposicao = composicao
+    const mpOverlap = (setA: Set<string>, setB: Set<string>): number => {
+      let count = 0
+      setA.forEach(mp => { if ([...setB].some(b => b.includes(mp.slice(0, 6)) || mp.includes(b.slice(0, 6)))) count++ })
+      return count
+    }
+
+    // Formula 1: melhor match para o pedido
+    const f1 = ranqueadas[0].f
+    const mps1 = getMPSet(f1)
+    console.log(`[buildProprietaryContext] 🎯 Fórmula 1: "${f1.nome_interno}"`)
+
+    // Formula 2: maior diferença em relação à fórmula 1
+    let idx2 = 1
+    let maxDiff2 = -1
+    for (let i = 1; i < Math.min(ranqueadas.length, 8); i++) {
+      const overlap = mpOverlap(mps1, getMPSet(ranqueadas[i].f))
+      const diff = getMPSet(ranqueadas[i].f).size - overlap
+      if (diff > maxDiff2) { maxDiff2 = diff; idx2 = i }
+    }
+    const f2 = ranqueadas[idx2]?.f
+    const mps2 = f2 ? getMPSet(f2) : new Set<string>()
+    if (f2) console.log(`[buildProprietaryContext] 🎯 Fórmula 2: "${f2.nome_interno}" (diff=${maxDiff2})`)
+
+    // Formula 3: maior diferença em relação às fórmulas 1 e 2
+    let idx3 = idx2 === 1 ? 2 : 1
+    let maxDiff3 = -1
+    for (let i = 1; i < Math.min(ranqueadas.length, 8); i++) {
+      if (i === idx2) continue
+      const mps = getMPSet(ranqueadas[i].f)
+      const overlap1 = mpOverlap(mps1, mps)
+      const overlap2 = mpOverlap(mps2, mps)
+      const diff = mps.size - Math.max(overlap1, overlap2)
+      if (diff > maxDiff3) { maxDiff3 = diff; idx3 = i }
+    }
+    const f3 = ranqueadas[idx3]?.f
+    if (f3) console.log(`[buildProprietaryContext] 🎯 Fórmula 3: "${f3.nome_interno}" (diff=${maxDiff3})`)
+
+    const comp1 = parseComp(f1)
+    const comp2 = f2 ? parseComp(f2) : []
+    const comp3 = f3 ? parseComp(f3) : []
+
+    const linhasComp = (comp: typeof comp1) => comp
       .filter(c => c.materia_prima)
-      .map(c => `  │    • ${c.materia_prima}${c.funcao ? ` (${c.funcao})` : ''}: ~${c.percentual ?? '?'}%`)
+      .map(c => `    • ${c.materia_prima}${c.funcao ? ` (${c.funcao})` : ''}: ~${c.percentual ?? '?'}%`)
       .join('\n')
 
+    const textoTipo = norm(`${f1.nome_interno} ${f1.aplicacao}`)
+    const tipoCombina = tiposPedidos.length === 0 || tiposPedidos.some(t => textoTipo.includes(t))
+
     const context = `
-BASE TÉCNICA INTERNA P&D — FÓRMULA SELECIONADA PELA ANÁLISE ASTANA QUÍMICA:
-
-╔══════════════════════════════════════════════════════════════════╗
-║  FÓRMULA: ${f.nome_interno}
-║  Compatibilidade: TIPO ✓${tipoCombina ? '✓' : '✗'} | APLICAÇÃO ✓${aplicacaoCombina ? '✓' : '✗'}
-╚══════════════════════════════════════════════════════════════════╝
-
-APLICAÇÃO:
-  ${f.aplicacao}
-
-COMPOSIÇÃO TÉCNICA (use EXATAMENTE estes componentes):
-${linhasComposicao}
-
-CARACTERÍSTICAS TÉCNICAS:
-  ${f.ph_final ? `pH: ${f.ph_final}` : ''}
-  ${f.viscosidade ? `Viscosidade: ${f.viscosidade}` : ''}
-  ${f.processo ? `Processo: ${String(f.processo).slice(0, 500)}` : ''}
-  ${f.performance_chave ? `Performance: ${f.performance_chave}` : ''}
+BASE TÉCNICA INTERNA P&D — ${f2 || f3 ? '3 FÓRMULAS REAIS DO BANCO ASTANA QUÍMICA' : 'FÓRMULA SELECIONADA'}:
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-INSTRUÇÕES OBRIGATÓRIAS — REFINE ESTA FÓRMULA:
+📋 FÓRMULA PRINCIPAL — use para o campo "formulacao":
+  Nome: ${f1.nome_interno}
+  Aplicação: ${f1.aplicacao}
+  Compatibilidade: ${tipoCombina ? '✅ COMPATÍVEL' : '⚠️ VERIFICAR'}
+  Composição (use EXATAMENTE estes componentes):
+${linhasComp(comp1)}
+  ${f1.ph_final ? `pH: ${f1.ph_final}` : ''}  ${f1.performance_chave ? `| Performance: ${f1.performance_chave}` : ''}
+${f2 ? `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 VARIAÇÃO 1 DO BANCO — use para variacoes_alternativas[0]:
+  Nome: ${f2.nome_interno}
+  Aplicação: ${f2.aplicacao}
+  Composição (MPs DIFERENTES — use estas para a variação 1):
+${linhasComp(comp2)}
+  ${f2.ph_final ? `pH: ${f2.ph_final}` : ''}` : ''}
+${f3 ? `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 VARIAÇÃO 2 DO BANCO — use para variacoes_alternativas[1]:
+  Nome: ${f3.nome_interno}
+  Aplicação: ${f3.aplicacao}
+  Composição (MPs DIFERENTES — use estas para a variação 2):
+${linhasComp(comp3)}
+  ${f3.ph_final ? `pH: ${f3.ph_final}` : ''}` : ''}
 
-⭐ VOCÊ NÃO ESTÁ GERANDO DO ZERO: esta fórmula já existe no P&D e foi selecionada por análise.
-Sua tarefa é REFINAR para o pedido específico do usuário, respeitando:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INSTRUÇÕES OBRIGATÓRIAS:
 
-PASSO 1 — VALIDAR A BASE:
-Confirme que a fórmula selecionada atende:
-  • Tipo químico: ${tiposPedidos.length > 0 ? tiposPedidos.join(', ') : '(qualquer um)'}
-  • Aplicação: ${descricao}
-  • Compatibilidade técnica com pedido do usuário
-
-  SE COMPATÍVEL: execute PASSO 2.
-  SE NÃO COMPATÍVEL: sinalize "Fórmula Compatível Não Encontrada".
-
-PASSO 2 — REFINAR (ajustar percentuais, otimizar para pedido específico):
-Use APENAS os componentes listados na composição acima.
-  1. Preserve os componentes essenciais e suas funções técnicas
-  2. Ajuste percentuais dentro das variações naturais (±10-15%)
-  3. Adapte à descrição específica do usuário
-  4. Otimize propriedades mencionadas (desempenho, custo, aplicação)
-  5. Garanta que o total fecha em 100%
-
-⛔ RESTRIÇÃO CRÍTICA — FÓRMULA PRINCIPAL (campo "formulacao"):
-  VOCÊ SÓ PODE USAR os ${composicao.length} componentes listados na composição acima.
-  NUNCA adicione MPs que não apareçam aqui — nem mesmo de "conhecimento geral".
-  NUNCA reproduza os percentuais originais exatamente — isso é cópia.
-  NUNCA mencione "fórmula original" ou a fonte — refira-se por termos técnicos.
-
+⭐ FÓRMULA PRINCIPAL (campo "formulacao"):
+  Use APENAS os componentes da FÓRMULA PRINCIPAL acima.
+  Ajuste percentuais (±10-15%) para otimizar ao pedido do usuário.
+  NUNCA copie percentuais exatos — refine tecnicamente.
   "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa refinada."
-  "formula_referencia": null
 
-✅ OBRIGATÓRIO — VARIAÇÕES ALTERNATIVAS (campo "variacoes_alternativas"):
-  Para as 3 variações, USE MATÉRIAS-PRIMAS COMPLETAMENTE DIFERENTES das listadas acima.
-  Cada variação DEVE ter MPs distintas entre si E distintas da fórmula principal.
-  Use seu conhecimento químico para propor alternativas viáveis:
-  • Variação 1 (Econômica): MPs mais baratas com função equivalente
-  • Variação 2 (Alta Performance): MPs de maior desempenho técnico
-  • Variação 3 (Eco-friendly): MPs naturais, biodegradáveis ou de baixa toxicidade
-  NUNCA repita as mesmas MPs entre as 3 variações — isso é CRÍTICO.
+✅ VARIAÇÕES ALTERNATIVAS (campo "variacoes_alternativas"):
+  Variação 1: use as MPs da VARIAÇÃO 1 DO BANCO acima${comp2.length === 0 ? ' (use conhecimento químico — banco sem dados)' : ''}
+  Variação 2: use as MPs da VARIAÇÃO 2 DO BANCO acima${comp3.length === 0 ? ' (use conhecimento químico — banco sem dados)' : ''}
+  Variação 3: crie uma terceira variação com MPs ECO-FRIENDLY diferentes das anteriores
+  NUNCA repita as mesmas MPs entre as variações — cada uma DEVE ser única.
 
-SE A FÓRMULA SELECIONADA NÃO FOR COMPATÍVEL TECNICAMENTE:
+SE NENHUMA FÓRMULA FOR COMPATÍVEL:
   Retorne: "viabilidade": "nao_encontrada"
-  Não gere fórmula genérica — é melhor sinalizar incompatibilidade do que fornecer algo inadequado.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `
