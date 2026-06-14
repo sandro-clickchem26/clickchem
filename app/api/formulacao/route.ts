@@ -29,9 +29,21 @@ export async function POST(req: NextRequest) {
     const composicao = formulacao?.composicao as Array<{ materia_prima: string; percentual: number }> | undefined
 
     console.log('[formulacao/route.ts] Composição extraída?', composicao ? `SIM (${composicao.length} itens)` : 'NÃO')
+    console.log('[formulacao/route.ts] Tipo de composicao:', typeof composicao)
+    console.log('[formulacao/route.ts] É array?', Array.isArray(composicao))
+    console.log('[formulacao/route.ts] Comprimento:', composicao?.length)
 
     if (composicao && Array.isArray(composicao) && composicao.length > 0) {
       console.log('[formulacao] 🔥 ENTRANDO NO BLOCO DE FORÇA VARIAÇÃO')
+    } else {
+      console.error('[formulacao] ❌ NÃO ENTROU NO IF - Condições:')
+      console.error('  - composicao existe?', !!composicao)
+      console.error('  - é array?', Array.isArray(composicao))
+      console.error('  - tem length > 0?', composicao?.length > 0)
+    }
+
+    if (composicao && Array.isArray(composicao) && composicao.length > 0) {
+      console.log('[formulacao] 🔥 ENTRANDO NO BLOCO DE FORÇA VARIAÇÃO (segunda entrada)')
       try {
         // Converter para formato que análise combinatória entende
         const composicaoBase: Record<string, number> = {}

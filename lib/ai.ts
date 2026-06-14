@@ -785,10 +785,11 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   const resultado = extractJSON(text)
 
   // Verifica se a IA sinalizou que não encontrou fórmula compatível
-  const analise = (resultado as Record<string, unknown>)?.analise_critica as Record<string, unknown> | undefined
-  if (analise?.viabilidade === 'nao_encontrada') {
-    throw new Error('FORMULA_NAO_ENCONTRADA')
-  }
+  // COMENTADO: Deixar fórmula ser retornada mesmo se viabilidade !== 'encontrada'
+  // const analise = (resultado as Record<string, unknown>)?.analise_critica as Record<string, unknown> | undefined
+  // if (analise?.viabilidade === 'nao_encontrada') {
+  //   throw new Error('FORMULA_NAO_ENCONTRADA')
+  // }
 
   // ⚠️ VALIDAÇÃO REAL OBRIGATÓRIA COM LÓGICA DE CÓDIGO E LOOP DE AJUSTE
   console.log(`[gerarFormulacao] Iniciando VALIDAÇÃO ESTRUTURAL e AJUSTE OBRIGATÓRIO...`)
