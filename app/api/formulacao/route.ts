@@ -17,11 +17,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Segmento e descrição são obrigatórios.' }, { status: 400 })
     }
 
-    console.log('[formulacao/route.ts] Iniciando gerarFormulacao...')
-    const resultado = await gerarFormulacao(body)
-    console.log('[formulacao/route.ts] gerarFormulacao concluída!')
     const usuarioEmail = body.usuario_email || null
     const segmento = String(body.segmento)
+    const identificador = usuarioEmail || `session-${createHash('sha256').update(req.headers.get('user-agent') || '').digest('hex').slice(0, 16)}`
+
+    // Buscar IDs das últimas 3 fórmulas-base para excluir do pool desta geração
+    const recentes = await prisma.formulacaoGerada.findMany({
+      where: { usuarioEmail: identificador, segmento },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+      select: { formulaBaseId: true }
+    })
+    const idsRecentes = recentes.map(r => r.formulaBaseId).filter((id): id is string => !!id)
+    console.log(`[formulacao/route.ts] idsRecentes para exclusão: ${idsRecentes.length} IDs`)
+
+    console.log('[formulacao/route.ts] Iniciando gerarFormulacao...')
+    const resultado = await gerarFormulacao({ ...body, idsRecentes })
+    console.log('[formulacao/route.ts] gerarFormulacao concluída!')
 
     // SEMPRE aplicar análise combinatória automaticamente
     // Extrair composição da resposta da IA
@@ -66,9 +78,6 @@ export async function POST(req: NextRequest) {
           console.log('[formulacao] Variação gerada?', variacao ? 'SIM' : 'NÃO')
 
           if (variacao) {
-            // Identificador de usuário/sessão para rastreamento
-            const identificador = usuarioEmail || `session-${createHash('sha256').update(req.headers.get('user-agent') || '').digest('hex').slice(0, 16)}`
-
             console.log('[formulacao] ⚡ INICIANDO FORÇA VARIAÇÃO para segmento:', segmento)
 
             try {
@@ -156,7 +165,12 @@ export async function POST(req: NextRequest) {
                 await prisma.formulacaoGerada.create({
                   data: {
                     usuarioEmail: identificador,
-                    formulaBaseId: null,
+                    formulaBaseId: (() => {
+                    const r = resultado as Record<string, unknown>
+                    const idx = typeof r.formula_base_usada_indice === 'number' ? r.formula_base_usada_indice : null
+                    const ids = Array.isArray(r._top10Ids) ? (r._top10Ids as string[]) : []
+                    return idx !== null && idx >= 1 && idx <= ids.length ? ids[idx - 1] : null
+                  })(),
                     segmento,
                     composicaoGerada: JSON.stringify(variacao_forcada),
                     hash: hashForcado,

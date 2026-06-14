@@ -416,6 +416,7 @@ Retorne APENAS JSON válido (sem markdown):
       "por_que_escolher": "Razão técnica para escolher esta variação"
     }
   ],
+  "formula_base_usada_indice": 1,
   "recomendacao_principal": "Qual das 3 variações é a melhor para o caso do usuário e por quê"
 }`
 }

@@ -86,12 +86,13 @@ async function buildMPContext(segmento: string, restricoes: string[] = []): Prom
 interface ProprietaryResult {
   context: string
   hasFormulas: boolean  // true se há fórmulas no banco (independente de compatibilidade)
+  top10Ids: string[]
 }
 
 // Monta o contexto do banco P&D para a IA avaliar compatibilidade
 // A IA — não um algoritmo de score — decide qual fórmula usar e se é compatível
-async function buildProprietaryContext(segmento: string, descricao: string = ''): Promise<ProprietaryResult> {
-  const vazio: ProprietaryResult = { context: '', hasFormulas: false }
+async function buildProprietaryContext(segmento: string, descricao: string = '', idsRecentes: string[] = []): Promise<ProprietaryResult> {
+  const vazio: ProprietaryResult = { context: '', hasFormulas: false, top10Ids: [] }
   try {
     const formulas = await prisma.formulaProprietaria.findMany({
       where: { ativa: true },
@@ -173,7 +174,11 @@ async function buildProprietaryContext(segmento: string, descricao: string = '')
     }
 
     // Pega até 10 fórmulas ranqueadas e passa TODAS para o Claude escolher
-    const top10 = ranqueadas.slice(0, 10)
+    // Exclui fórmulas usadas recentemente se o pool tiver fórmulas suficientes
+    const pool = idsRecentes.length > 0 && ranqueadas.length - idsRecentes.length >= 3
+      ? ranqueadas.filter(e => !idsRecentes.includes(e.f.id))
+      : ranqueadas
+    const top10 = pool.slice(0, 10)
     console.log(`[buildProprietaryContext] 📋 Enviando ${top10.length} fórmulas para Claude escolher`)
     top10.forEach(({ f, score }, i) =>
       console.log(`[buildProprietaryContext]   ${i + 1}. Score ${score}: "${f.nome_interno}"`))
@@ -211,6 +216,7 @@ INSTRUÇÕES OBRIGATÓRIAS:
   Use EXATAMENTE os ingredientes dessa fórmula (ajuste percentuais ±10-15%).
   NUNCA copie percentuais exatos — refine tecnicamente.
   "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa refinada."
+  Informe o número da fórmula escolhida (1, 2, 3...) no campo "formula_base_usada_indice".
 
 ✅ VARIAÇÕES ALTERNATIVAS (campo "variacoes_alternativas") — OBRIGATÓRIO:
   Escolha 3 fórmulas DIFERENTES das listadas acima para as variações.
@@ -225,7 +231,7 @@ SE NENHUMA FÓRMULA FOR COMPATÍVEL:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `
 
-    return { context, hasFormulas: true }
+    return { context, hasFormulas: true, top10Ids: top10.map(e => e.f.id) }
   } catch {
     return vazio
   }
@@ -692,7 +698,9 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const [contexto, proprietaryResult, docsContext, webContext] = await Promise.all([
     buildMPContext(segmento, proibidas),
-    !isBiosolventes ? buildProprietaryContext(segmento, descricao) : Promise.resolve({ context: '', hasFormulas: false }),
+    !isBiosolventes
+      ? buildProprietaryContext(segmento, descricao, Array.isArray(dados.idsRecentes) ? (dados.idsRecentes as string[]) : [])
+      : Promise.resolve({ context: '', hasFormulas: false, top10Ids: [] }),
     shouldCallDocumentos ? buildDocumentosContext(segmento, descricao) : Promise.resolve(''),
     shouldCallTavily
       ? buildWebContext(segmento, descricao, proibidas).catch(() => '')
@@ -1013,6 +1021,11 @@ SE NÃO CONSEGUIR:
     } else if (webContext) {
       r.fonte = 'Fonte técnica: Busca Externa (internet) — sugestão formulativa derivada.'
     }
+  }
+
+  // Injeta top10Ids no resultado para que route.ts possa salvar formulaBaseId
+  if (resultadoFinal && typeof resultadoFinal === 'object' && proprietaryResult.top10Ids.length > 0) {
+    (resultadoFinal as Record<string, unknown>)._top10Ids = proprietaryResult.top10Ids
   }
 
   // MPs obrigatórias definidas pelo usuário têm prioridade máxima
