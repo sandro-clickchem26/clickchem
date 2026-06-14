@@ -30,6 +30,14 @@ PRINCÍPIOS INEGOCIÁVEIS:
 
 FORMATO DE SAÍDA: Retorne SEMPRE JSON válido no schema fornecido, sem texto fora do JSON.
 
+⚠️ ANÁLISE COMPARATIVA DE VARIAÇÕES — REGRA OBRIGATÓRIA:
+Quando há MÚLTIPLAS fórmulas similares no contexto:
+1. IDENTIFIQUE as 3 mais diferentes (custo, desempenho, ingredientes)
+2. ANALISE cada uma: custo total, performance esperada, sustentabilidade
+3. RECOMENDE qual é a MELHOR para o caso específico do usuário
+4. Retorne no campo "variacoes_alternativas" um array com as 3 opções
+5. Destaque na "analise_critica" qual você recomenda e por quê
+
 ANÁLISE TÉCNICA OBRIGATÓRIA — REGRA INVIOLÁVEL:
 Se houver DOCUMENTAÇÃO CIENTÍFICA FORNECIDA:
    - ⚠️ REGRA INVIOLÁVEL: ANALISE 100% DOS ARTIGOS. Não ignore nenhum documento.
