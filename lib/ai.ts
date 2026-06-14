@@ -817,8 +817,8 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
 
   const message = await getClient().messages.create({
     model: getModel(),
-    max_tokens: 5000,
-    temperature: 0,
+    max_tokens: 3000,
+    temperature: 0.3,
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
