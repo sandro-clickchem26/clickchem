@@ -335,6 +335,11 @@ PASSO 5: NUNCA adicione "extras" desnecessários
   - ❌ NÃO adicione "para melhorar" se o usuário não pediu
   - ✅ ADICIONE APENAS se for tecnicamente essencial para funcionar
 
+⚠️ NÚMERO CAS OBRIGATÓRIO:
+Para CADA matéria-prima na composição, preencha o campo "numero_cas" com o número CAS real.
+Exemplos: água = 7732-18-5, NaOH = 1310-73-2, LAS = 68411-30-3, EDTA dissódico = 139-33-3.
+Se não souber o CAS exato, use "N/A". NUNCA omita o campo.
+
 ⚠️ REGRA MATEMÁTICA ABSOLUTA — FECHAMENTO EM 100%:
 A soma de TODOS os valores "percentual_recomendado" da composição DEVE ser EXATAMENTE 100,0%.
 Antes de retornar, some todos os percentual_recomendado e verifique. Se a soma não for 100,0%, redistribua.
@@ -358,7 +363,8 @@ Retorne APENAS JSON válido (sem markdown):
     "descricao_tecnica": "...",
     "composicao": [
       {
-        "materia_prima": "Nome / CAS",
+        "materia_prima": "Nome Comercial",
+        "numero_cas": "XXXXX-XX-X",
         "funcao_tecnica": "...",
         "percentual_minimo": 0.0,
         "percentual_maximo": 0.0,

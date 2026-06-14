@@ -509,11 +509,14 @@ async function enriquecerComCASNumbers(resultado: unknown): Promise<unknown> {
       // Continua sem CAS Numbers em vez de falhar
     }
 
-    // Enriquece composição com CAS Numbers encontrados
+    // Enriquece composição: prioriza CAS já fornecido pelo Claude, banco como fallback
     const composicaoComCAS = composicao.map(comp => {
+      const casDoClaudeRaw = String(comp.numero_cas || '').trim()
+      const casDoClaudeValido = casDoClaudeRaw && casDoClaudeRaw !== 'N/A' && casDoClaudeRaw !== 'XXXXX-XX-X'
+      if (casDoClaudeValido) return comp // Claude já preencheu — mantém
       const nomeMp = String(comp.materia_prima || '').trim().toLowerCase()
-      const casBuscado = mpsMap.get(nomeMp) || 'N/A'
-      return { ...comp, numero_cas: casBuscado }
+      const casBanco = mpsMap.get(nomeMp)
+      return { ...comp, numero_cas: casBanco || 'N/A' }
     })
 
     return {
