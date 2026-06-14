@@ -765,8 +765,11 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
   // BUSCAR MPs já usados para FORÇAR VARIAÇÃO desde o prompt
   let mpsJaUsados: string[] = []
   const usuarioEmail = String(dados.usuario_email || '')
+  console.log(`[gerarFormulacao] 📧 usuarioEmail: "${usuarioEmail}" | segmento: "${segmento}"`)
+
   if (usuarioEmail) {
     try {
+      console.log(`[gerarFormulacao] 🔍 Buscando fórmulas anteriores...`)
       const formulasAnteriores = await prisma.formulacaoGerada.findMany({
         where: {
           usuarioEmail,
@@ -777,26 +780,37 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
         select: { composicaoGerada: true }
       })
 
+      console.log(`[gerarFormulacao] ✅ Fórmulas anteriores encontradas: ${formulasAnteriores.length}`)
+
       // Extrair todos os MPs das fórmulas anteriores
       const mpsSet = new Set<string>()
       for (const formula of formulasAnteriores) {
         try {
           const composicao = JSON.parse(formula.composicaoGerada) as Record<string, number>
           Object.keys(composicao).forEach(mp => mpsSet.add(mp))
-        } catch {
-          // Ignorar parse errors
+        } catch (parseErr) {
+          console.warn('[gerarFormulacao] Erro ao parsear composição:', parseErr)
         }
       }
       mpsJaUsados = Array.from(mpsSet)
-      console.log(`[gerarFormulacao] 🔄 MPs já usados (${mpsJaUsados.length}):`, mpsJaUsados.slice(0, 5))
+      console.log(`[gerarFormulacao] 🔄 MPs já usados (${mpsJaUsados.length}):`, mpsJaUsados)
     } catch (err) {
-      console.warn('[gerarFormulacao] Erro ao buscar fórmulas anteriores:', err)
+      console.warn('[gerarFormulacao] ❌ Erro ao buscar fórmulas anteriores:', err)
     }
+  } else {
+    console.log(`[gerarFormulacao] ⚠️ usuarioEmail vazio — variação por prompt não ativa`)
   }
 
   const prompt = buildFormulacaoPrompt(dadosFinais, contextosParaIA, '', mpsJaUsados)
   const totalContextoSize = contextosParaIA.length
   console.log(`[gerarFormulacao] 📊 CONTEXTO TOTAL: ${totalContextoSize} caracteres (P&D: ${proprietaryResult.context.length} | Web: ${webContext.length} | Docs: ${docsContext.length})`)
+
+  // DEBUG: Mostrar se jaUsadas está no prompt
+  if (mpsJaUsados.length > 0) {
+    const temVariacaoInstruction = prompt.includes('VARIAÇÃO OBRIGATÓRIA') && prompt.includes('NUNCA reutilize')
+    console.log(`[gerarFormulacao] ⚠️ INSTRUÇÃO DE VARIAÇÃO NO PROMPT: ${temVariacaoInstruction ? 'SIM' : 'NÃO'}`)
+    console.log(`[gerarFormulacao] ⚠️ MPs PROIBIDOS NO PROMPT: ${mpsJaUsados.slice(0, 3).join(', ')}...`)
+  }
 
   console.log(`[gerarFormulacao] ⏱️ Iniciando chamada IA (tentativa 1)...`)
   const startIA1 = Date.now()
