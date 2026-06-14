@@ -138,15 +138,15 @@ export function gerarMultiplasVariacoes(
 
   for (let i = 0; i < quantidade * 3; i++) {
     // Tentar 3x a quantidade desejada
-    const variacao = gerarVariacaoFormula(formulaBase, segmento, { variacao })
+    const variacaoGerada = gerarVariacaoFormula(formulaBase, segmento, { variacao })
 
-    if (!variacao) continue
+    if (!variacaoGerada) continue
 
     // Evitar duplicatas
-    if (hashesJaGerados.has(variacao.hash)) continue
+    if (hashesJaGerados.has(variacaoGerada.hash)) continue
 
-    hashesJaGerados.add(variacao.hash)
-    variacoes.push(variacao)
+    hashesJaGerados.add(variacaoGerada.hash)
+    variacoes.push(variacaoGerada)
 
     if (variacoes.length >= quantidade) break
   }

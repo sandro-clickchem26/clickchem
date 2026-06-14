@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       console.error('[formulacao] ❌ NÃO ENTROU NO IF - Condições:')
       console.error('  - composicao existe?', !!composicao)
       console.error('  - é array?', Array.isArray(composicao))
-      console.error('  - tem length > 0?', composicao?.length > 0)
+      console.error('  - tem length > 0?', (composicao?.length ?? 0) > 0)
     }
 
     if (composicao && Array.isArray(composicao) && composicao.length > 0) {
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 
               console.log('[formulacao] Últimas fórmulas encontradas:', ultimasFormulas.length)
 
-              // Converter para formato esperado por forcarVariacaoMPs
+              // Converter para formato esperado por forcarVariacaoMPs (array de arrays)
               const ultimasComposicoes = ultimasFormulas
                 .map(f => {
                   try {
@@ -103,7 +103,6 @@ export async function POST(req: NextRequest) {
                     return []
                   }
                 })
-                .flat()
 
               console.log('[formulacao] Total de MPs das últimas fórmulas:', ultimasComposicoes.length)
 
