@@ -241,7 +241,7 @@ Use APENAS os componentes listados na composição acima.
   4. Otimize propriedades mencionadas (desempenho, custo, aplicação)
   5. Garanta que o total fecha em 100%
 
-⛔ RESTRIÇÃO CRÍTICA — LISTA FECHADA ABSOLUTA:
+⛔ RESTRIÇÃO CRÍTICA — FÓRMULA PRINCIPAL (campo "formulacao"):
   VOCÊ SÓ PODE USAR os ${composicao.length} componentes listados na composição acima.
   NUNCA adicione MPs que não apareçam aqui — nem mesmo de "conhecimento geral".
   NUNCA reproduza os percentuais originais exatamente — isso é cópia.
@@ -249,6 +249,15 @@ Use APENAS os componentes listados na composição acima.
 
   "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa refinada."
   "formula_referencia": null
+
+✅ OBRIGATÓRIO — VARIAÇÕES ALTERNATIVAS (campo "variacoes_alternativas"):
+  Para as 3 variações, USE MATÉRIAS-PRIMAS COMPLETAMENTE DIFERENTES das listadas acima.
+  Cada variação DEVE ter MPs distintas entre si E distintas da fórmula principal.
+  Use seu conhecimento químico para propor alternativas viáveis:
+  • Variação 1 (Econômica): MPs mais baratas com função equivalente
+  • Variação 2 (Alta Performance): MPs de maior desempenho técnico
+  • Variação 3 (Eco-friendly): MPs naturais, biodegradáveis ou de baixa toxicidade
+  NUNCA repita as mesmas MPs entre as 3 variações — isso é CRÍTICO.
 
 SE A FÓRMULA SELECIONADA NÃO FOR COMPATÍVEL TECNICAMENTE:
   Retorne: "viabilidade": "nao_encontrada"
