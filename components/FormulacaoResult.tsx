@@ -265,6 +265,9 @@ export function FormulacaoResult({ data, onSalvar, onRelatorio, onRefinar }: For
                   <tr key={i} className="group">
                     <td className="py-2.5 pr-3">
                       <div className="font-medium text-white text-sm">{String(comp.materia_prima)}</div>
+                      {!!comp.numero_cas && String(comp.numero_cas) !== 'N/A' && (
+                        <div className="text-xs text-gray-400 mt-0.5">CAS {String(comp.numero_cas)}</div>
+                      )}
                       {!!comp.justificativa && (
                         <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{String(comp.justificativa)}</div>
                       )}
