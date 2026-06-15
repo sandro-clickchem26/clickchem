@@ -13,7 +13,7 @@ const navItems = [
   { href: '/formulacoes', icon: Archive, label: 'Minhas Fórmulas' },
   { href: '/analisar', icon: Microscope, label: 'Analisar Fórmula' },
   { href: '/banco-tecnico', icon: BookOpen, label: 'Matérias-Primas' },
-  { href: '/banco-tecnico#fornecedores', icon: Truck, label: 'Fornecedores' },
+  { href: '/fornecedores', icon: Truck, label: 'Fornecedores' },
   { href: '/tendencias', icon: TrendingUp, label: 'Modo Tendências' },
   { href: '/relatorio', icon: FileText, label: 'Relatório Técnico' },
 ]
