@@ -46,7 +46,7 @@ export default async function Dashboard() {
     {
       href: '/banco-tecnico',
       icon: BookOpen,
-      title: 'Banco Técnico',
+      title: 'Banco Matérias-Primas',
       desc: `${stats.totalMPs} matérias-primas com fichas completas, compatibilidades e custos`,
       color: 'border-green-500/40 hover:border-green-500/70',
       iconColor: 'text-green-400 bg-green-500/15',
