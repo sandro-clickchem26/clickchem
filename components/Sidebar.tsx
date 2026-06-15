@@ -12,7 +12,7 @@ const navItems = [
   { href: '/nova-formulacao', icon: FlaskConical, label: 'Nova Formulação' },
   { href: '/formulacoes', icon: Archive, label: 'Minhas Fórmulas' },
   { href: '/analisar', icon: Microscope, label: 'Analisar Fórmula' },
-  { href: '/banco-tecnico', icon: BookOpen, label: 'Banco Matérias-Primas' },
+  { href: '/banco-tecnico', icon: BookOpen, label: 'Matérias-Primas' },
   { href: '/tendencias', icon: TrendingUp, label: 'Modo Tendências' },
   { href: '/relatorio', icon: FileText, label: 'Relatório Técnico' },
 ]
