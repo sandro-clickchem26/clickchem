@@ -104,6 +104,17 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
               </div>
             ))}
           </div>
+          {/* Segunda linha — slots reservados para futuros fornecedores */}
+          <div className="flex items-center gap-4 mt-3">
+            {[1, 2, 3, 4].map(n => (
+              <div
+                key={n}
+                className="w-60 h-[120px] rounded-lg border border-[#1B3A6B]/60 bg-[#0A1628] flex items-center justify-center"
+              >
+                <span className="text-xs text-gray-600">Logo {n + 4}</span>
+              </div>
+            ))}
+          </div>
         </div>
         <Button variant="gold" size="sm" onClick={() => setShowNovaMP(true)}>
           <Plus size={14} /> Nova Matéria-Prima
