@@ -104,14 +104,19 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
               </div>
             ))}
           </div>
-          {/* Segunda linha — slots reservados para futuros fornecedores */}
+          {/* Segunda linha de fornecedores */}
           <div className="flex items-center gap-4 mt-3">
-            {[1, 2, 3, 4].map(n => (
+            {[
+              { src: '/brenntag-1024x620.webp', alt: 'Brenntag' },
+              { src: '/Bandeirante Brazmo.png', alt: 'Bandeirante Brazmo' },
+              { src: '/IMCD.png', alt: 'IMCD' },
+              { src: '/Cosmoquímica.png', alt: 'Cosmoquímica' },
+            ].map(({ src, alt }) => (
               <div
-                key={n}
-                className="w-60 h-[120px] rounded-lg border border-[#1B3A6B]/60 bg-[#0A1628] flex items-center justify-center"
+                key={alt}
+                className="w-60 h-[120px] rounded-lg border border-[#1B3A6B]/60 bg-white flex items-center justify-center p-3"
               >
-                <span className="text-xs text-gray-600">Logo {n + 4}</span>
+                <img src={src} alt={alt} className="max-w-full max-h-full object-contain" />
               </div>
             ))}
           </div>
