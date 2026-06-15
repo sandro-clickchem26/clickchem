@@ -88,6 +88,17 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
           <p className="text-gray-400 mt-1 text-sm">
             {mpsList.length} matérias-primas · <span className="text-green-400">{mpsList.filter(m => (m as unknown as { adicionada_usuario?: boolean }).adicionada_usuario).length} adicionadas por usuários</span>
           </p>
+          {/* Logos de fornecedores — substitua os src pelos arquivos em /public/fornecedores/ */}
+          <div className="flex items-center gap-4 mt-3">
+            {[1, 2, 3, 4].map(n => (
+              <div
+                key={n}
+                className="w-20 h-10 rounded-lg border border-[#1B3A6B]/60 bg-[#0A1628] flex items-center justify-center"
+              >
+                <span className="text-xs text-gray-600">Logo {n}</span>
+              </div>
+            ))}
+          </div>
         </div>
         <Button variant="gold" size="sm" onClick={() => setShowNovaMP(true)}>
           <Plus size={14} /> Nova Matéria-Prima
