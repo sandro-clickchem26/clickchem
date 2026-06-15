@@ -88,14 +88,19 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
           <p className="text-gray-400 mt-1 text-sm">
             {mpsList.length} matérias-primas · <span className="text-green-400">{mpsList.filter(m => (m as unknown as { adicionada_usuario?: boolean }).adicionada_usuario).length} adicionadas por usuários</span>
           </p>
-          {/* Logos de fornecedores — substitua os src pelos arquivos em /public/fornecedores/ */}
+          {/* Logos de fornecedores */}
           <div className="flex items-center gap-4 mt-3">
-            {[1, 2, 3, 4].map(n => (
+            {[
+              { src: '/Novo-logo-Sinproquim-vertical.webp', alt: 'Sinproquim' },
+              { src: '/araguaya_g.webp', alt: 'Química Araguaya' },
+              { src: '/cropped-Marca-Saber-Quimica-945x945px-cor-1.png', alt: 'Saber Química' },
+              { src: '/Logo-Carbono-Quimica-sem-Slogan-1024x848.png', alt: 'Carbono Química' },
+            ].map(({ src, alt }) => (
               <div
-                key={n}
-                className="w-60 h-[120px] rounded-lg border border-[#1B3A6B]/60 bg-[#0A1628] flex items-center justify-center"
+                key={alt}
+                className="w-60 h-[120px] rounded-lg border border-[#1B3A6B]/60 bg-white flex items-center justify-center p-3"
               >
-                <span className="text-xs text-gray-600">Logo {n}</span>
+                <img src={src} alt={alt} className="max-w-full max-h-full object-contain" />
               </div>
             ))}
           </div>
