@@ -93,7 +93,7 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
             {[1, 2, 3, 4].map(n => (
               <div
                 key={n}
-                className="w-20 h-10 rounded-lg border border-[#1B3A6B]/60 bg-[#0A1628] flex items-center justify-center"
+                className="w-60 h-[120px] rounded-lg border border-[#1B3A6B]/60 bg-[#0A1628] flex items-center justify-center"
               >
                 <span className="text-xs text-gray-600">Logo {n}</span>
               </div>
