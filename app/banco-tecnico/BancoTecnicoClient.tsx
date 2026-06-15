@@ -107,7 +107,7 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
           {/* Segunda linha de fornecedores */}
           <div className="flex items-center gap-4 mt-3">
             {[
-              { src: '/brenntag-1024x620.webp', alt: 'Brenntag' },
+              { src: '/Brenntag_Logo_2022.svg.png', alt: 'Brenntag' },
               { src: '/Bandeirante Brazmo.png', alt: 'Bandeirante Brazmo' },
               { src: '/IMCD.png', alt: 'IMCD' },
               { src: '/Cosmoquímica.png', alt: 'Cosmoquímica' },
