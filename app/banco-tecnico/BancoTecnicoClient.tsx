@@ -83,7 +83,7 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <BookOpen className="text-green-400" size={24} />
-            Banco Técnico de Matérias-Primas
+            Banco Matérias-Primas
           </h1>
           <p className="text-gray-400 mt-1 text-sm">
             {mpsList.length} matérias-primas · <span className="text-green-400">{mpsList.filter(m => (m as unknown as { adicionada_usuario?: boolean }).adicionada_usuario).length} adicionadas por usuários</span>
