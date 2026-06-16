@@ -16,6 +16,13 @@ export default function FornecedoresPage() {
     { src: '/agroquimica-maringa-logo.webp', alt: 'AQM', url: 'https://aqm.com.br/', scale: 'max-w-full' },
     { src: '/rudnik_g.webp', alt: 'Rudnik', url: 'https://rudnik.com.br/', scale: 'max-w-full' },
     { src: '/iqbcprodutosquimicos_cover.png', alt: 'IQBC', url: 'https://iqbc.com.br/', scale: 'w-full h-full', large: true },
+    { src: '/Macler.svg', alt: 'Macler', url: 'https://www.macler.com.br/', scale: 'max-w-full' },
+    { src: '/Qualisol images.png', alt: 'Qualisol', url: 'http://qualisol.ind.br/', scale: 'max-w-full' },
+    { src: '/Multi Chemie logo-01.webp', alt: 'Multi Chemie', url: 'https://www.multichemie.com.br/', scale: 'max-w-full' },
+    { src: '/midland_v8-1 (1).png', alt: 'Midland Química', url: 'https://midland-quimica.com.br/', scale: 'max-w-full' },
+    { src: '/logo_quimicaanastacio_g.png', alt: 'Anastácio', url: 'https://anastacio.com/', scale: 'max-w-full' },
+    { src: '/Royal marck images.png', alt: 'Quiminvest', url: 'http://www.quiminvest.com/', scale: 'max-w-full' },
+    { src: '/Univar Solutions images.png', alt: 'Univar Solutions', url: 'https://discover.univarsolutions.com/pt-br/', scale: 'max-w-full' },
   ]
 
   return (
