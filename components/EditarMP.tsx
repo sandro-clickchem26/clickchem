@@ -105,7 +105,37 @@ function mpToForm(mp: MP): MPForm {
 
 export function EditarMP({ mp, onFechar }: { mp: MP; onFechar: () => void }) {
   const router = useRouter()
-  const [form, setForm] = useState<MPForm>(mpToForm(mp))
+  const [form, setForm] = useState<MPForm>(() => {
+    try {
+      return mpToForm(mp)
+    } catch (e) {
+      console.error('Erro ao converter MP para form:', e)
+      return {
+        nome_comercial: mp.nome_comercial || '',
+        nome_quimico: mp.nome_quimico || '',
+        numero_cas: mp.numero_cas ? String(mp.numero_cas) : '',
+        categoria: mp.categoria || 'Outros',
+        subcategoria: mp.subcategoria || '',
+        funcao_principal: mp.funcao_principal || '',
+        faixa_uso_tipica: mp.faixa_uso_tipica ? String(mp.faixa_uso_tipica) : '',
+        nivel_toxicidade: mp.nivel_toxicidade || 'medio',
+        biodegradabilidade: mp.biodegradabilidade ? String(mp.biodegradabilidade) : '',
+        origem: mp.origem || 'petroleo',
+        aparencia: mp.aparencia ? String(mp.aparencia) : '',
+        solubilidade_agua: mp.solubilidade_agua ? String(mp.solubilidade_agua) : '',
+        ph_estabilidade: mp.ph_estabilidade ? String(mp.ph_estabilidade) : '',
+        custo_min: mp.custo_min ? String(mp.custo_min) : '',
+        custo_max: mp.custo_max ? String(mp.custo_max) : '',
+        disponibilidade: mp.disponibilidade || 'media',
+        sinergias: Array.isArray(mp.sinergias) ? mp.sinergias.join(', ') : String(mp.sinergias || ''),
+        incompatibilidades: Array.isArray(mp.incompatibilidades) ? mp.incompatibilidades.join(', ') : String(mp.incompatibilidades || ''),
+        aplicacoes_tipicas: Array.isArray(mp.aplicacoes_tipicas) ? mp.aplicacoes_tipicas.join(', ') : String(mp.aplicacoes_tipicas || ''),
+        restricoes_anvisa: mp.restricoes_anvisa ? String(mp.restricoes_anvisa) : '',
+        restricoes_reach: mp.restricoes_reach ? String(mp.restricoes_reach) : '',
+        notas_tecnicas: mp.notas_tecnicas ? String(mp.notas_tecnicas) : '',
+      }
+    }
+  })
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [sucesso, setSucesso] = useState(false)
