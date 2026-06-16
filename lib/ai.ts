@@ -1159,12 +1159,20 @@ SE O SOLVENTE PRINCIPAL TEM KB >100 (FORTE):
 PROCEDIMENTO OBRIGATÓRIO:
 1. IDENTIFIQUE EXATAMENTE o solvente PRINCIPAL da fórmula e seu KB (Cloreto de Metileno KB=136, Tolueno KB=105, etc)
 2. SE KB DO PRINCIPAL > 100 (FORTE):
-   - ⚠️ REGRA CRÍTICA: PRIORIZE SOLVENTES COM KB > 300 PRIMEIRO
-   - ORDEM DE SUGESTÃO POR KB (DECRESCENTE - maior força primeiro):
+   - ⚠️ REGRA CRÍTICA: ANALISE USANDO 3 CRITÉRIOS (nesta ordem):
+     1️⃣ COMPATIBILIDADE QUÍMICA: O solvente é compatível com componentes já presentes?
+     2️⃣ SEGURANÇA OPERACIONAL: Ponto de ebulição, toxicidade, manuseio são apropriados?
+     3️⃣ DISPONIBILIDADE NO BRASIL: É comercialmente disponível no mercado brasileiro?
+
+   - ⚠️ HIERARQUIA DE SOLVENTES (use como guideline, mas respeite os 3 critérios acima):
      🥇 PRIMEIRA ESCOLHA (KB >500): Lactato de Etila (KB 1000), Elsol NMPR (KB 600), Tetrahidrofurano (KB 579)
      🥈 SEGUNDA ESCOLHA (KB 300-500): DOWANOL DPM (KB 500), DOWANOL PM (KB 500), NMP (KB 350), Metanol (KB 380)
      🥉 TERCEIRA ESCOLHA (KB 200-300): Propanol (KB 250), Isopropanol (KB 230), Butanol (KB 225), Álcool Benzílico (KB 200)
-     ❌ NÃO SUGIRA (KB <200): Todos abaixo disso são FRACOS demais
+
+   - 📋 PARA CADA SUGESTÃO, JUSTIFIQUE:
+     • Compatibilidade: Por que é compatível com a fórmula atual?
+     • Segurança: Qual a temperatura de ebulição? Toxicidade?
+     • Disponibilidade: É disponível no Brasil? Qual fornecedor?
 
    - LISTA DE SOLVENTES PROIBIDOS (NUNCA):
      ❌ Butilglicol (KB ~30) — ABSOLUTAMENTE PROIBIDO
