@@ -54,6 +54,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       solubilidade_agua,
     } = body
 
+    console.log(`[PUT /api/materias-primas/${id}] Atualizando MP:`, { nivel_toxicidade, custo_min, custo_max })
+
     const mp = await prisma.materiaPrima.findUnique({ where: { id } })
 
     if (!mp) {
