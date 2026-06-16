@@ -539,17 +539,20 @@ ${contextoMPs ? `\n${contextoMPs}` : ''}
 }
 
 IMPORTANTE: Campo "sugestoes_mps_complementares" deve ter 3-4 MPs COMPLEMENTARES (NÃO na fórmula):
+REGRA CRÍTICA: Analise a APLICAÇÃO e o TIPO DE SOLVENTE necessário:
+  - DESCARBONIZANTE: solventes FORTES aromáticos/clorados (Tolueno, Xileno, TCE, Percloroetileno)
+    NUNCA sugerir solventes fracos (álcoois, glicóis, butoxietanóis)
+  - LIMPADOR GERAL: tensoativos aniônicos/não-iônicos + solventes moderados
+  - DESENGRAXANTE: solventes aromáticos + tensoativos específicos
 • Gere a fórmula principal normalmente (sem as sugestões)
-• Analise a APLICAÇÃO específica (ex: descarbonizante, limpador, etc)
-• Analise os COMPONENTES atuais e suas funções
-• Sugira APENAS MPs que fazem SENTIDO QUÍMICO para potencializar:
-  - Para descarbonizante: solventes fortes compatíveis, antievaporantes, promotores de penetração
-  - Para limpador: tensoativos COMPATÍVEIS, aditivos que aumentem poder de limpeza
-  - Para cada aplicação: pense na sinergia química, não em genéricos
+• Analise os COMPONENTES atuais e identifique lacunas:
+  - Se tem DCM: adicione solventes fortes compatíveis ou antievaporantes
+  - Se tem tensoativo fraco: adicione tensoativo mais forte OU complementar
+  - Se falta proteção anticorrosão: adicione sequestrador/inibidor
 • NUNCA sugira MPs que já estão na fórmula
-• NUNCA sugira MPs fracas quando fortes são necessárias
+• NUNCA sugira componentes MAIS FRACOS que os existentes
 • Use APENAS MPs do banco técnico — cite pelo nome exato
-• Cada sugestão deve ter RAZÃO TÉCNICA clara no benefício
+• Cada sugestão deve ter RAZÃO TÉCNICA específica (não genérica) no benefício
 `
 }
 
