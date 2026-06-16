@@ -1159,17 +1159,19 @@ SE O SOLVENTE PRINCIPAL TEM KB >100 (FORTE):
 PROCEDIMENTO OBRIGATÓRIO:
 1. IDENTIFIQUE EXATAMENTE o solvente PRINCIPAL da fórmula e seu KB (Cloreto de Metileno KB=136, Tolueno KB=105, etc)
 2. SE KB DO PRINCIPAL > 100 (FORTE):
-   - LISTA DE SOLVENTES PROIBIDOS PARA SUGERIR (nunca adicione estes):
-     ❌ Butilglicol (KB 30-40) — PROIBIDO
-     ❌ Álcoois: Etanol (KB 84), Isopropanol (KB 230 EXCEPTIONALLY), Metanol, Propanol (se KB <100) — PROIBIDO
-     ❌ Glicóis fracos: Etilenoglicol, Propilenoglicol — PROIBIDO
+   - ⚠️ REGRA CRÍTICA: PRIORIZE SOLVENTES COM KB > 300 PRIMEIRO
+   - ORDEM DE SUGESTÃO POR KB (DECRESCENTE - maior força primeiro):
+     🥇 PRIMEIRA ESCOLHA (KB >500): Lactato de Etila (KB 1000), Elsol NMPR (KB 600), Tetrahidrofurano (KB 579)
+     🥈 SEGUNDA ESCOLHA (KB 300-500): DOWANOL DPM (KB 500), DOWANOL PM (KB 500), NMP (KB 350), Metanol (KB 380)
+     🥉 TERCEIRA ESCOLHA (KB 200-300): Propanol (KB 250), Isopropanol (KB 230), Butanol (KB 225), Álcool Benzílico (KB 200)
+     ❌ NÃO SUGIRA (KB <200): Todos abaixo disso são FRACOS demais
+
+   - LISTA DE SOLVENTES PROIBIDOS (NUNCA):
+     ❌ Butilglicol (KB ~30) — ABSOLUTAMENTE PROIBIDO
      ❌ Nafta (KB 34-38) — PROIBIDO
      ❌ Mineral Spirits (KB 32-37) — PROIBIDO
-   - LISTA DE SOLVENTES PERMITIDOS PARA SUGERIR (use apenas estes se KB >100):
-     ✅ Tolueno (KB 105), Xileno (KB 98-100), Benzeno (KB 107)
-     ✅ DCM (KB 136), TCE (KB 129), Percloroetileno (KB 90)
-     ✅ Acetona (KB 106), Butanol (KB 225), Isopropanol (KB 230)
-     ✅ Metanol (KB 380), NMP (KB 350), Tetrahidrofurano (KB 579)
+     ❌ Etanol (KB 84.2) — PROIBIDO (muito fraco)
+     ❌ Glicóis fracos: Etilenoglicol, Propilenoglicol — PROIBIDO
 3. SE QUER SUGERIR ALGO QUE NÃO SOLVENTE: use penetradores, antievaporantes, estabilizadores (não solventes)
 4. PRIORIZAÇÃO OBRIGATÓRIA DE SUGESTÕES:
    - SE há múltiplos solventes: ORDENE por KB DESCENDENTE (maior KB primeiro)
