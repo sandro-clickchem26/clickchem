@@ -15,7 +15,7 @@ export default function FornecedoresPage() {
     { src: '/Caldic.png', alt: 'Caldic', url: 'https://www.caldic.com/pt-br/' },
     { src: '/agroquimica-maringa-logo.webp', alt: 'AQM', url: 'https://aqm.com.br/' },
     { src: '/rudnik_g.webp', alt: 'Rudnik', url: 'https://rudnik.com.br/' },
-    { src: '/logo_iqbc_negativo.svg', alt: 'IQBC', url: 'https://iqbc.com.br/' },
+    { src: '/iqbcprodutosquimicos_cover.png', alt: 'IQBC', url: 'https://iqbc.com.br/' },
   ]
 
   return (
