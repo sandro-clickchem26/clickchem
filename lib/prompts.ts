@@ -1,3 +1,5 @@
+import { SOLVENTS_KB_REFERENCE, type SolventKBData } from './solvents-kb-reference'
+
 export const SYSTEM_PROMPT = `Você é o motor de inteligência do Click Chem, plataforma de P&D químico da Astana Química.
 
 Sua expertise abrange:
@@ -274,11 +276,12 @@ Se não conseguir extrair o protocolo completo: retorne "viabilidade": "nao_enco
 
 IMPORTANTE: Não há Artigos Científicos neste contexto. Use APENAS P&D e internet.\n`
 
+  const tabelaKB = buildKBReferenceTable()
+
   return `SOLICITAÇÃO: ${JSON.stringify(dados)}
 
 PRODUTO: "${tipoProduto}" — formule EXATAMENTE este tipo. NUNCA use "Astana" no nome_sugerido.
-${obrigatorias}${proibidas}${jaUsadas}${secaoMPs}${variacoesMPs}${ordemBusca}${analiseObrigatoria}
-
+${obrigatorias}${proibidas}${jaUsadas}${secaoMPs}${variacoesMPs}${ordemBusca}${analiseObrigatoria}${tabelaKB}
 ⚠️ ESTRUTURA DA COMPOSIÇÃO — COMPONENTES SOLICITADOS + NECESSÁRIOS:
 
 PASSO 1: IDENTIFIQUE os componentes EXPLICITAMENTE SOLICITADOS pelo usuário
@@ -647,4 +650,47 @@ Retorne APENAS JSON válido:
   "regulatorios_relevantes": ["..."],
   "insights": "..."
 }`
+}
+
+/**
+ * Gera tabela de referência Kauri-Butanol (KB) para incluir no contexto da IA
+ * Mostra força de cada solvente para análise de complementaridade
+ */
+export function buildKBReferenceTable(): string {
+  const categories = {
+    'muito-forte': 'MUITO FORTE (KB >150)',
+    'forte': 'FORTE (KB 100-150)',
+    'moderado': 'MODERADO (KB 50-100)',
+    'fraco': 'FRACO (KB 20-50)',
+    'muito-fraco': 'MUITO FRACO (KB <20)',
+  }
+
+  let table = '\n📊 TABELA DE REFERÊNCIA — KAURI-BUTANOL (KB) — FORÇA DE SOLVENTES\n'
+  table += '═══════════════════════════════════════════════════════════════════════════════════\n\n'
+
+  for (const [categoryKey, categoryLabel] of Object.entries(categories)) {
+    const solvents = Object.values(SOLVENTS_KB_REFERENCE)
+      .filter(s => s.category === categoryKey)
+      .sort((a, b) => (b.kb ?? 0) - (a.kb ?? 0))
+
+    if (solvents.length === 0) continue
+
+    table += `\n${categoryLabel}:\n`
+    table += '─' .repeat(80) + '\n'
+
+    for (const solvent of solvents) {
+      const kb = solvent.kb !== null ? `KB ${solvent.kb}` : 'KB —'
+      const type = `[${solvent.type.toUpperCase()}]`
+      table += `  • ${solvent.name.padEnd(30)} ${kb.padEnd(10)} ${type}\n`
+      if (solvent.notes) {
+        table += `    ℹ️  ${solvent.notes}\n`
+      }
+    }
+  }
+
+  table += '\n═══════════════════════════════════════════════════════════════════════════════════\n'
+  table += 'REGRA CRÍTICA: Nunca sugira solvente mais FRACO para complementar um FORTE.\n'
+  table += 'Sempre compare KB antes de recomendar complementos de solventes.\n'
+
+  return table
 }
