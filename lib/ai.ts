@@ -1127,7 +1127,6 @@ export async function analisarFormula(formula: Record<string, unknown>) {
     model: getModel(),
     max_tokens: 4096,
     temperature: 0,
-    cache_control: { type: "ephemeral" },
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
