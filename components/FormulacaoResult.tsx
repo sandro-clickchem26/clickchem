@@ -213,7 +213,6 @@ export function FormulacaoResult({ data, onSalvar, onRelatorio, onRefinar }: For
             <p className="text-xs text-gray-400 mb-3">Estas MPs podem potencializar a formulação. Para solventes, confira a análise de Kauri-Butanol (KB) para garantir compatibilidade de força.</p>
             <div className="space-y-3">
               {(analise.sugestoes_mps_complementares as Array<Record<string, unknown>>).map((sug, i) => {
-                const composicao = analise.formulacao?.composicao as Array<Record<string, unknown>> | undefined
                 const solventesPrincipais = composicao
                   ?.filter(c => {
                     const funcao = String(c.funcao_tecnica || '').toLowerCase()
