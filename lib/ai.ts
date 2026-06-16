@@ -1122,6 +1122,69 @@ async function buildMPContextParaAnalise(formula: Record<string, unknown>): Prom
   }
 }
 
+export async function gerarSugestoesComplementares(formulacao: Record<string, unknown>, segmento: string) {
+  try {
+    // Extrai MPs já na fórmula
+    const mpsNaFormula = new Set<string>()
+    const composicao = formulacao.composicao as Array<Record<string, unknown>> | undefined
+    if (Array.isArray(composicao)) {
+      composicao.forEach(c => {
+        const nome = String(c.materia_prima || '').toLowerCase()
+        if (nome) mpsNaFormula.add(nome)
+      })
+    }
+
+    const descricao = String(formulacao.descricao_tecnica || '')
+    const aplicacao = String(formulacao.nome_sugerido || '')
+
+    const prompt = `Você é um especialista em química formulada. Analisando esta fórmula, sugira 3-4 MPs DIFERENTES que potencializam o desempenho.
+
+FÓRMULA ATUAL:
+${JSON.stringify(formulacao, null, 2)}
+
+MPs JÁ NA FÓRMULA (nunca sugerir estas):
+${Array.from(mpsNaFormula).join(', ')}
+
+APLICAÇÃO: ${aplicacao}
+SEGMENTO: ${segmento}
+
+REGRAS CRÍTICAS:
+• As sugestões devem ser DIFERENTES das MPs atuais
+• Analisar a função dos componentes atuais
+• Sugerir MPs que façam SINERGIA QUÍMICA real
+• Para descarbonizante: solventes fortes (Tolueno, Xileno, TCE, Percloroetileno)
+• Cada sugestão com razão técnica clara
+
+RETORNAR JSON com campo:
+{
+  "sugestoes_mps_complementares": [
+    {
+      "materia_prima": "Nome exato",
+      "funcao": "Função técnica",
+      "beneficio": "Como potencializa",
+      "compatibilidade": "alta|media",
+      "percentual_sugerido": "X-Y%"
+    }
+  ]
+}`
+
+    const message = await getClient().messages.create({
+      model: getModel(),
+      max_tokens: 2048,
+      temperature: 0,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    const text = message.content[0].type === 'text' ? message.content[0].text : ''
+    const resultado = extractJSON(text)
+    return resultado.sugestoes_mps_complementares || []
+  } catch (err) {
+    console.warn('[gerarSugestoesComplementares] Erro:', err)
+    return []
+  }
+}
+
 export async function analisarFormula(formula: Record<string, unknown>) {
   const segmento = String(formula.segmento || '')
 
@@ -1142,7 +1205,21 @@ export async function analisarFormula(formula: Record<string, unknown>) {
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return extractJSON(text)
+  const resultado = extractJSON(text)
+
+  // Gera sugestões em paralelo (FASE 2)
+  const sugestoesPromise = gerarSugestoesComplementares(formula.formulacao as Record<string, unknown> || {}, segmento)
+
+  // Adiciona sugestões ao resultado
+  const sugestoes = await sugestoesPromise
+  if (sugestoes && sugestoes.length > 0) {
+    const analise = resultado.analise_critica as Record<string, unknown>
+    if (analise) {
+      analise.sugestoes_mps_complementares = sugestoes
+    }
+  }
+
+  return resultado
 }
 
 // Variantes plurais/acentuadas em português para cada atributo negativo
