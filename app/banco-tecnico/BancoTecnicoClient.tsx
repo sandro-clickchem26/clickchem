@@ -377,14 +377,12 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
                 {mpSelecionada.numero_cas && <p className="text-xs text-gray-500">CAS: {mpSelecionada.numero_cas}</p>}
               </div>
               <div className="flex gap-2">
-                {(mpSelecionada as unknown as { adicionada_usuario?: boolean }).adicionada_usuario && (
-                  <button
-                    onClick={() => excluirMP(mpSelecionada.id)}
-                    className="text-red-500 hover:text-red-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-red-500/10"
-                  >
-                    🗑️ Excluir
-                  </button>
-                )}
+                <button
+                  onClick={() => excluirMP(mpSelecionada.id)}
+                  className="text-red-500 hover:text-red-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-red-500/10"
+                >
+                  🗑️ Excluir
+                </button>
                 <button
                   onClick={() => setMpSelecionada(null)}
                   className="text-gray-500 hover:text-white transition-colors mt-1"

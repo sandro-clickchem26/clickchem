@@ -22,13 +22,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       )
     }
 
-    if (!mp.adicionada_usuario) {
-      return NextResponse.json(
-        { error: 'Apenas matérias-primas adicionadas pelo usuário podem ser excluídas.' },
-        { status: 403 }
-      )
-    }
-
     await prisma.materiaPrima.delete({ where: { id } })
 
     return NextResponse.json({ message: 'Matéria-prima excluída com sucesso.' })
