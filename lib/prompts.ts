@@ -538,8 +538,12 @@ ${contextoMPs ? `\n${contextoMPs}` : ''}
   ]
 }
 
-IMPORTANTE: Campo "sugestoes_mps_complementares" deve ter 2-4 MPs compatíveis que potencializam a fórmula.
-Use APENAS MPs do banco técnico acima. Não altere a fórmula original — apenas sugira como opções.
+IMPORTANTE: Campo "sugestoes_mps_complementares" deve ter 3-4 MPs ADICIONAIS (NÃO na fórmula):
+• Gere a fórmula principal normalmente (sem as sugestões)
+• As sugestões são MPs QUE NÃO estão na fórmula atual
+• Essas MPs podem ser ADICIONADAS opcionalmente pelo usuário
+• Use APENAS MPs do banco técnico — cite pelo nome exato
+• Nunca inclua as sugestões na composição final da fórmula
 `
 }
 
