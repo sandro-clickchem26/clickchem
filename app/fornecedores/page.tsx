@@ -12,6 +12,10 @@ export default function FornecedoresPage() {
     { src: '/Bandeirante Brazmo.png', alt: 'Bandeirante Brazmo', url: 'https://www.bandeirantebrazmo.com.br/' },
     { src: '/IMCD.png', alt: 'IMCD', url: 'https://www.imcdgroup.com/worldwide/brasil-br-MCHS76PAMXYBCR7I5MBYVUJ7QGLY' },
     { src: '/Cosmoquímica.png', alt: 'Cosmoquímica', url: 'https://cosmoquimica.com.br/' },
+    { src: '/Caldic.png', alt: 'Caldic', url: 'https://www.caldic.com/pt-br/' },
+    { src: '/agroquimica-maringa-logo.webp', alt: 'AQM', url: 'https://aqm.com.br/' },
+    { src: '/rudnik_g.webp', alt: 'Rudnik', url: 'https://rudnik.com.br/' },
+    { src: '/logo_iqbc_negativo.svg', alt: 'IQBC', url: 'https://iqbc.com.br/' },
   ]
 
   return (
