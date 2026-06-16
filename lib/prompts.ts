@@ -126,18 +126,20 @@ SE NÃO houver base técnica compatível (nem no P&D nem em referências externa
 
 export function buildFormulacaoPrompt(dados: Record<string, unknown>, contextoMPs: string, variacoesMPs: string = '', mpsJaUsados: string[] = []): string {
   const temObrigatorias = Array.isArray(dados.materias_obrigatorias) && (dados.materias_obrigatorias as string[]).length > 0
-  const nMPs = temObrigatorias ? (dados.materias_obrigatorias as string[]).length : 0
   const obrigatorias = temObrigatorias
-    ? `\n🔒 LISTA FECHADA — COMPOSIÇÃO DEFINIDA PELO CLIENTE:
-A composição tem EXATAMENTE ${nMPs} matéria(s)-prima(s). Nem uma a mais, nem uma a menos.
+    ? `\n⭐ MATÉRIAS-PRIMAS OBRIGATÓRIAS/PRIORITÁRIAS:
+Estas MPs DEVEM estar presentes na fórmula, mas NÃO são os únicos componentes.
+Inclua-as e COMPLEMENTE a fórmula com outros ingredientes necessários para garantir funcionalidade.
 
 ${(dados.materias_obrigatorias as string[]).map((mp, i) => `  ${i + 1}. ${mp}`).join('\n')}
 
-REGRAS ABSOLUTAS:
-• Use APENAS estas ${nMPs} MPs. O array "composicao" deve ter EXATAMENTE ${nMPs} itens.
-• NÃO adicione água, solvente, conservante ou qualquer outro ingrediente não listado.
-• NÃO substitua nenhuma MP por sinônimo ou alternativa — use o nome exato acima.
-• Distribua os percentuais entre estas ${nMPs} MPs somando 100%.\n`
+REGRAS:
+✓ INCLUA obrigatoriamente todas estas MPs na composição
+✓ USE-AS em percentuais apropriados (não necesariamente 100%)
+✓ COMPLETE a fórmula com outros componentes técnicos (solventes, aditivos, etc.)
+✓ O array "composicao" pode ter 3+ itens (as obrigatórias + complementares)
+✓ A soma de todos os percentuais deve ser 100%
+✓ NÃO substitua nenhuma MP obrigatória — use o nome exato acima\n`
     : ''
 
   const proibidas = Array.isArray(dados.materias_proibidas) && dados.materias_proibidas.length > 0
