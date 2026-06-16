@@ -443,6 +443,12 @@ export function buildAnalisePrompt(formula: Record<string, unknown>, contextoMPs
   return `Você é um especialista em formulação química com acesso ao banco técnico da Astana Química.
 Analise a formulação abaixo e retorne APENAS JSON válido (sem markdown, sem texto fora do JSON).
 
+⭐ OBRIGATÓRIO: Incluir "sugestoes_mps_complementares" com 2-4 MPs que potencializam a fórmula:
+• Considere o objetivo do produto e compatibilidade química
+• Use MPs do BANCO TÉCNICO — cite pelo nome exato
+• Sugira percentuais específicos (X-Y%)
+• Essas são sugestões opcionais — não alteram a fórmula automaticamente
+
 FORMULAÇÃO PARA ANÁLISE:
 ${JSON.stringify(formula, null, 2)}
 ${contextoMPs ? `\n${contextoMPs}` : ''}
