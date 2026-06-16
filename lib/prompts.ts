@@ -443,12 +443,6 @@ export function buildAnalisePrompt(formula: Record<string, unknown>, contextoMPs
   return `Você é um especialista em formulação química com acesso ao banco técnico da Astana Química.
 Analise a formulação abaixo e retorne APENAS JSON válido (sem markdown, sem texto fora do JSON).
 
-⭐ OBRIGATÓRIO: Incluir "sugestoes_mps_complementares" com 2-4 MPs que potencializam a fórmula:
-• Considere o objetivo do produto e compatibilidade química
-• Use MPs do BANCO TÉCNICO — cite pelo nome exato
-• Sugira percentuais específicos (X-Y%)
-• Essas são sugestões opcionais — não alteram a fórmula automaticamente
-
 FORMULAÇÃO PARA ANÁLISE:
 ${JSON.stringify(formula, null, 2)}
 ${contextoMPs ? `\n${contextoMPs}` : ''}
@@ -532,18 +526,20 @@ ${contextoMPs ? `\n${contextoMPs}` : ''}
     "custo": 0,
     "sustentabilidade": 0,
     "regulatorio": 0
-  }
+  },
+  "sugestoes_mps_complementares": [
+    {
+      "materia_prima": "Nome exato do banco técnico",
+      "funcao": "Função técnica (tensoativo, antievaporante, etc)",
+      "beneficio": "Como potencializa (ex: melhora penetração, reduz evaporação)",
+      "compatibilidade": "alta|media",
+      "percentual_sugerido": "X-Y%"
+    }
+  ]
 }
 
-⭐ SEÇÃO: SUGESTÕES DE MATÉRIAS-PRIMAS COMPLEMENTARES
-Após analisar a formulação, identifique 2–4 MPs complementares que possam potencializar o desempenho:
-• Considere o objetivo do produto e a função dos componentes atuais
-• Use as MPs do BANCO TÉCNICO acima como fontes — cite pelo nome exato
-• Avalie compatibilidade química com os componentes presentes
-• Sugira percentuais específicos (não genéricos)
-• Essas são SUGESTÕES OPCIONAIS — o usuário decide se adiciona ou não
-• NÃO altere automaticamente a fórmula — apenas recomende
-• Para um descarbonizante sem fenol com cloreto de metileno: sugira tensoativos que melhorem penetração, antievaporantes que reduzam perda do solvente, ou aditivos que aumentem eficácia.
+IMPORTANTE: Campo "sugestoes_mps_complementares" deve ter 2-4 MPs compatíveis que potencializam a fórmula.
+Use APENAS MPs do banco técnico acima. Não altere a fórmula original — apenas sugira como opções.
 `
 }
 
