@@ -391,10 +391,9 @@ async function buildDocumentosContext(segmento: string, descricao = ''): Promise
   }
 }
 
-// Garante que a composição final contenha EXATAMENTE as MPs obrigatórias.
-// Estratégia: faz matching de cada MP obrigatória com o componente mais parecido da IA,
-// preservando os dados técnicos (%, justificativa, etc.) da IA quando encontra match.
-// Componentes não associados a nenhuma MP obrigatória são descartados.
+// Garante que a composição final contenha as MPs obrigatórias.
+// Estratégia: substitui componentes similares pelo nome exato, adiciona MPs faltantes,
+// e MANTÉM os outros componentes da IA para completar a fórmula.
 function enforcarMPsObrigatorias(resultado: unknown, obrigatorias: string[]): unknown {
   if (!obrigatorias || obrigatorias.length === 0) return resultado
   try {
@@ -422,33 +421,44 @@ function enforcarMPsObrigatorias(resultado: unknown, obrigatorias: string[]): un
       return Math.round((matches / bWords.length) * 60)
     }
 
-    const usedIdx = new Set<number>()
+    const mpObrigFound = new Set<string>()
     const composicaoFinal: Array<Record<string, unknown>> = []
 
-    for (const mp of obrigatorias) {
-      // Encontra o componente com maior score para esta MP obrigatória
-      let bestIdx = -1
-      let bestScore = -1
-      for (let i = 0; i < composicao.length; i++) {
-        if (usedIdx.has(i)) continue
-        const s = score(String(composicao[i].materia_prima || ''), mp)
-        if (s > bestScore) { bestScore = s; bestIdx = i }
+    // PASSO 1: Percorre a composição da IA e substitui por MPs obrigatórias quando houver match
+    for (let i = 0; i < composicao.length; i++) {
+      const comp = composicao[i]
+      const nomeComp = String(comp.materia_prima || '')
+
+      let foundMatch = false
+      for (const mpObrig of obrigatorias) {
+        if (mpObrigFound.has(mpObrig)) continue // já foi usada
+        const s = score(nomeComp, mpObrig)
+        if (s >= 40) {
+          // Match encontrado: usa dados técnicos da IA mas com nome exato
+          composicaoFinal.push({ ...comp, materia_prima: mpObrig })
+          mpObrigFound.add(mpObrig)
+          foundMatch = true
+          break
+        }
       }
 
-      if (bestIdx >= 0 && bestScore >= 40) {
-        // Match encontrado: usa dados técnicos da IA mas com nome exato da lista
-        usedIdx.add(bestIdx)
-        composicaoFinal.push({ ...composicao[bestIdx], materia_prima: mp })
-      } else {
-        // MP obrigatória ausente ou substituída: adiciona com % proporcional como base
-        const percBase = parseFloat((100 / obrigatorias.length).toFixed(2))
+      // Se não encontrou match: mantém o componente original (importante!)
+      if (!foundMatch) {
+        composicaoFinal.push(comp)
+      }
+    }
+
+    // PASSO 2: Adiciona MPs obrigatórias que não foram encontradas
+    for (const mpObrig of obrigatorias) {
+      if (!mpObrigFound.has(mpObrig)) {
+        console.log(`[enforcarMPsObrigatorias] Adicionando MP obrigatória não encontrada: ${mpObrig}`)
         composicaoFinal.push({
-          materia_prima: mp,
-          funcao_tecnica: 'Componente obrigatório — percentual redistribuído',
+          materia_prima: mpObrig,
+          funcao_tecnica: 'Componente obrigatório',
           percentual_minimo: 1.0,
-          percentual_maximo: 99.0,
-          percentual_recomendado: percBase,
-          justificativa: 'Especificado pelo formulador. Ajuste o percentual conforme necessidade técnica.',
+          percentual_maximo: 15.0,
+          percentual_recomendado: 5.0,
+          justificativa: 'Especificado pelo formulador como obrigatório.',
           alternativas: [],
           nivel_toxicidade: 'medio',
           custo_estimado_kg: 0,
