@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { viabilidadeBadge, toxicidadeBadge, formatCurrency } from '@/lib/utils'
+import { SolventKBWidget } from '@/components/SolventKBWidget'
 import {
   ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Info,
   FlaskConical, Beaker, Shield, Leaf, ClipboardList, FileText
@@ -205,23 +206,34 @@ export function FormulacaoResult({ data, onSalvar, onRelatorio, onRefinar }: For
           </div>
         )}
 
-        {/* Sugestões de MPs Complementares */}
+        {/* Sugestões de MPs Complementares com Análise de KB */}
         {Array.isArray(analise?.sugestoes_mps_complementares) && analise.sugestoes_mps_complementares.length > 0 && (
           <div className="mt-6 pt-6 border-t border-[#1B3A6B]/50">
             <p className="text-xs font-medium text-green-400 uppercase tracking-wide mb-3">⭐ Sugestões de Matérias-Primas Complementares</p>
-            <p className="text-xs text-gray-400 mb-3">Estas MPs podem potencializar a formulação. Você decide se adiciona ou não.</p>
+            <p className="text-xs text-gray-400 mb-3">Estas MPs podem potencializar a formulação. Para solventes, confira a análise de Kauri-Butanol (KB) para garantir compatibilidade de força.</p>
             <div className="space-y-3">
-              {(analise.sugestoes_mps_complementares as Array<Record<string, unknown>>).map((sug, i) => (
-                <div key={i} className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
-                  <p className="font-medium text-green-300 text-sm">{String(sug.materia_prima || '')}</p>
-                  <p className="text-xs text-gray-300 mt-1"><strong>Função:</strong> {String(sug.funcao || '')}</p>
-                  <p className="text-xs text-gray-400 mt-1"><strong>Benefício:</strong> {String(sug.beneficio || '')}</p>
-                  <div className="flex justify-between mt-2 text-xs">
-                    <span className="text-gray-400"><strong>Compatibilidade:</strong> <span className={sug.compatibilidade === 'alta' ? 'text-green-400' : 'text-yellow-400'}>{String(sug.compatibilidade || '')}</span></span>
-                    <span className="text-gray-400"><strong>Sugestão:</strong> {String(sug.percentual_sugerido || '')}</span>
-                  </div>
-                </div>
-              ))}
+              {(analise.sugestoes_mps_complementares as Array<Record<string, unknown>>).map((sug, i) => {
+                const composicao = analise.formulacao?.composicao as Array<Record<string, unknown>> | undefined
+                const solventesPrincipais = composicao
+                  ?.filter(c => {
+                    const funcao = String(c.funcao_tecnica || '').toLowerCase()
+                    return funcao.includes('solvente') || funcao.includes('solvência')
+                  })
+                  .map(c => ({
+                    nome: String(c.materia_prima || ''),
+                    percentual: Number(c.percentual_recomendado || 0)
+                  }))
+                  .sort((a, b) => b.percentual - a.percentual)
+                  .slice(0, 1) || []
+
+                return (
+                  <SolventKBWidget
+                    key={i}
+                    sugestao={sug as any}
+                    solventesPrincipais={solventesPrincipais}
+                  />
+                )
+              })}
             </div>
           </div>
         )}
