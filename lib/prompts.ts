@@ -538,21 +538,28 @@ ${contextoMPs ? `\n${contextoMPs}` : ''}
   ]
 }
 
-IMPORTANTE: Campo "sugestoes_mps_complementares" deve ter 3-4 MPs COMPLEMENTARES (NÃO na fórmula):
-REGRA CRÍTICA: Analise a APLICAÇÃO e o TIPO DE SOLVENTE necessário:
-  - DESCARBONIZANTE: solventes FORTES aromáticos/clorados (Tolueno, Xileno, TCE, Percloroetileno)
-    NUNCA sugerir solventes fracos (álcoois, glicóis, butoxietanóis)
-  - LIMPADOR GERAL: tensoativos aniônicos/não-iônicos + solventes moderados
-  - DESENGRAXANTE: solventes aromáticos + tensoativos específicos
-• Gere a fórmula principal normalmente (sem as sugestões)
-• Analise os COMPONENTES atuais e identifique lacunas:
-  - Se tem DCM: adicione solventes fortes compatíveis ou antievaporantes
-  - Se tem tensoativo fraco: adicione tensoativo mais forte OU complementar
-  - Se falta proteção anticorrosão: adicione sequestrador/inibidor
-• NUNCA sugira MPs que já estão na fórmula
-• NUNCA sugira componentes MAIS FRACOS que os existentes
+IMPORTANTE: Campo "sugestoes_mps_complementares" — REGRA ABSOLUTA:
+
+PASSO 1 — ANALISE A FÓRMULA GERADA:
+• Liste TODOS os componentes atuais (nome, função, percentual)
+• Identifique o solvente principal (DCM = forte clorado, etc)
+• Identifique co-solventes/aditivos já presentes
+
+PASSO 2 — GERE SUGESTÕES DIFERENTES:
+• NUNCA sugira algo que já está na fórmula atual
+• Se tem Butilglicol: NÃO sugira Butilglicol
+• Se tem NaOH: NÃO sugira outros alcalinizantes fracos
+• SEMPRE sugira componentes DIFERENTES que fazem sinergia
+
+PASSO 3 — REGRA DE SOLVENTE POR APLICAÇÃO:
+  - DESCARBONIZANTE com DCM: sugira solventes FORTES adicionais (Tolueno, Xileno, TCE, Percloroetileno)
+    NUNCA sugerir solventes fracos já presentes (álcoois, glicóis, butoxietanóis)
+  - LIMPADOR GERAL: tensoativos específicos + solventes complementares
+  - DESENGRAXANTE: solventes aromnáticos + tensoativos sinergia
+
+• Cada sugestão deve fazer SINERGIA QUÍMICA real com o solvente principal
+• Raciocine: "Esta MP adiciona o quê que falta?"
 • Use APENAS MPs do banco técnico — cite pelo nome exato
-• Cada sugestão deve ter RAZÃO TÉCNICA específica (não genérica) no benefício
 `
 }
 
