@@ -358,7 +358,17 @@ Retorne APENAS JSON válido (sem markdown):
     "pontos_de_atencao": ["..."],
     "hipoteses_a_validar": ["..."],
     "informacoes_faltantes": ["..."],
-    "abordagem_quimica": "..."
+    "abordagem_quimica": "...",
+    "sugestoes_mps_complementares": [
+      {
+        "materia_prima": "Nome Comercial",
+        "funcao": "Função técnica (ex: tensoativo, aditivo antievaporante)",
+        "beneficio": "Como potencializa a formulação (ex: melhora penetração, reduz evaporação)",
+        "compatibilidade": "alta|media|baixa",
+        "percentual_sugerido": "X-Y%",
+        "justificativa_tecnica": "Por que é compatível e recomendado"
+      }
+    ]
   },
   "formulacao": {
     "nome_sugerido": "...",
@@ -501,13 +511,34 @@ ${contextoMPs ? `\n${contextoMPs}` : ''}
   "sugestoes_melhoria": [
     {"sugestao": "...", "justificativa": "...", "impacto": "alto|medio|baixo"}
   ],
+  "sugestoes_mps_complementares": [
+    {
+      "materia_prima": "Nome Comercial (usar banco técnico acima)",
+      "funcao": "Função técnica da MP (ex: tensoativo, antievaporante, espessante)",
+      "beneficio": "Como esta MP potencializa a formulação (ex: melhora penetração, aumenta poder de limpeza, reduz evaporação)",
+      "compatibilidade": "alta|media|baixa (com base no perfil técnico das MPs)",
+      "percentual_sugerido": "X-Y% (faixa recomendada)",
+      "justificativa_tecnica": "Por que é compatível com os componentes atuais e qual é o benefício específico"
+    }
+  ],
   "scores": {
     "tecnico": 0,
     "custo": 0,
     "sustentabilidade": 0,
     "regulatorio": 0
   }
-}`
+}
+
+⭐ SEÇÃO: SUGESTÕES DE MATÉRIAS-PRIMAS COMPLEMENTARES
+Após analisar a formulação, identifique 2–4 MPs complementares que possam potencializar o desempenho:
+• Considere o objetivo do produto e a função dos componentes atuais
+• Use as MPs do BANCO TÉCNICO acima como fontes — cite pelo nome exato
+• Avalie compatibilidade química com os componentes presentes
+• Sugira percentuais específicos (não genéricos)
+• Essas são SUGESTÕES OPCIONAIS — o usuário decide se adiciona ou não
+• NÃO altere automaticamente a fórmula — apenas recomende
+• Para um descarbonizante sem fenol com cloreto de metileno: sugira tensoativos que melhorem penetração, antievaporantes que reduzam perda do solvente, ou aditivos que aumentem eficácia.
+`
 }
 
 export function buildTendenciasPrompt(segmento: string, tipo: string, descricao: string, contextoWeb = ''): string {
