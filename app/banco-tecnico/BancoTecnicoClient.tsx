@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { toxicidadeBadge } from '@/lib/utils'
 import { BookOpen, Search, X, Plus, UserCircle } from 'lucide-react'
 import { NovaMP } from '@/components/NovaMP'
-import { EditarMP } from '@/components/EditarMP'
+import { useRouter } from 'next/navigation'
 
 interface MP {
   id: string
@@ -51,13 +51,16 @@ const ORIGENS: Record<string, string> = {
 }
 
 export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: BancoTecnicoClientProps) {
+  const router = useRouter()
   const [busca, setBusca] = useState('')
   const [toxicidadeFiltro, setToxicidadeFiltro] = useState('')
   const [origemFiltro, setOrigemFiltro] = useState('')
   const [mpSelecionada, setMpSelecionada] = useState<MP | null>(null)
   const [comparar, setComparar] = useState<string[]>([])
   const [showNovaMP, setShowNovaMP] = useState(false)
-  const [showEditarMP, setShowEditarMP] = useState(false)
+  const [editMode, setEditMode] = useState(false)
+  const [editForm, setEditForm] = useState({ custo_min: '', custo_max: '', nivel_toxicidade: '' })
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false)
 
   const mpsList = mps as unknown as MP[]
 
@@ -75,6 +78,31 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
     setComparar(prev =>
       prev.includes(id) ? prev.filter(c => c !== id) : prev.length < 4 ? [...prev, id] : prev
     )
+  }
+
+  async function salvarEdicao() {
+    if (!mpSelecionada) return
+    setSalvandoEdicao(true)
+    try {
+      const payload: Record<string, unknown> = {}
+      if (editForm.custo_min) payload.custo_min = parseFloat(editForm.custo_min)
+      if (editForm.custo_max) payload.custo_max = parseFloat(editForm.custo_max)
+      if (editForm.nivel_toxicidade) payload.nivel_toxicidade = editForm.nivel_toxicidade
+
+      const res = await fetch(`/api/materias-primas/${mpSelecionada.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) throw new Error('Erro ao salvar')
+      setEditMode(false)
+      setMpSelecionada(null)
+      router.refresh()
+    } catch (e) {
+      alert('Erro ao salvar: ' + (e instanceof Error ? e.message : 'Desconhecido'))
+    } finally {
+      setSalvandoEdicao(false)
+    }
   }
 
   async function excluirMP(id: string) {
@@ -150,15 +178,6 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
         </div>
       )}
 
-      {/* Drawer Editar MP */}
-      {showEditarMP && mpSelecionada && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black/50" onClick={() => setShowEditarMP(false)} />
-          <div className="w-full max-w-xl bg-[#0d1f3c] border-l border-[#1B3A6B]/60 flex flex-col overflow-hidden">
-            <EditarMP mp={mpSelecionada} onFechar={() => { setShowEditarMP(false); setMpSelecionada(null) }} />
-          </div>
-        </div>
-      )}
 
       {mpsList.length === 0 && (
         <div className="p-6 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
@@ -389,20 +408,51 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
                 {mpSelecionada.numero_cas && <p className="text-xs text-gray-500">CAS: {mpSelecionada.numero_cas}</p>}
               </div>
               <div className="flex gap-2">
+                {!editMode && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setEditMode(true)
+                        setEditForm({
+                          custo_min: mpSelecionada.custo_min ? String(mpSelecionada.custo_min) : '',
+                          custo_max: mpSelecionada.custo_max ? String(mpSelecionada.custo_max) : '',
+                          nivel_toxicidade: mpSelecionada.nivel_toxicidade || '',
+                        })
+                      }}
+                      className="text-blue-500 hover:text-blue-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-blue-500/10"
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      onClick={() => excluirMP(mpSelecionada.id)}
+                      className="text-red-500 hover:text-red-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-red-500/10"
+                    >
+                      🗑️ Excluir
+                    </button>
+                  </>
+                )}
+                {editMode && (
+                  <>
+                    <button
+                      onClick={() => setEditMode(false)}
+                      className="text-gray-500 hover:text-white transition-colors px-2 py-1 rounded text-xs font-medium"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={salvarEdicao}
+                      disabled={salvandoEdicao}
+                      className="text-green-500 hover:text-green-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-green-500/10 disabled:opacity-50"
+                    >
+                      {salvandoEdicao ? 'Salvando...' : '✓ Salvar'}
+                    </button>
+                  </>
+                )}
                 <button
-                  onClick={() => setShowEditarMP(true)}
-                  className="text-blue-500 hover:text-blue-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-blue-500/10"
-                >
-                  ✏️ Editar
-                </button>
-                <button
-                  onClick={() => excluirMP(mpSelecionada.id)}
-                  className="text-red-500 hover:text-red-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-red-500/10"
-                >
-                  🗑️ Excluir
-                </button>
-                <button
-                  onClick={() => setMpSelecionada(null)}
+                  onClick={() => {
+                    setMpSelecionada(null)
+                    setEditMode(false)
+                  }}
                   className="text-gray-500 hover:text-white transition-colors mt-1"
                 >
                   <X size={20} />
@@ -411,6 +461,49 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
             </div>
 
             <div className="px-6 py-5 space-y-5">
+              {/* Modo de edição */}
+              {editMode && (
+                <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                  <p className="text-xs font-bold text-blue-400 uppercase tracking-wide mb-3">Editar Matéria-Prima</p>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Toxicidade</label>
+                      <select
+                        value={editForm.nivel_toxicidade}
+                        onChange={e => setEditForm({ ...editForm, nivel_toxicidade: e.target.value })}
+                        className="w-full bg-[#0A1628] border border-[#1B3A6B]/50 rounded px-3 py-2 text-sm text-white"
+                      >
+                        <option value="baixo">🟢 Baixa</option>
+                        <option value="medio">🟡 Média</option>
+                        <option value="alto">🔴 Alta</option>
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Custo mín. (R$/kg)</label>
+                        <input
+                          type="number"
+                          value={editForm.custo_min}
+                          onChange={e => setEditForm({ ...editForm, custo_min: e.target.value })}
+                          className="w-full bg-[#0A1628] border border-[#1B3A6B]/50 rounded px-3 py-2 text-sm text-white"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-400 mb-1 block">Custo máx. (R$/kg)</label>
+                        <input
+                          type="number"
+                          value={editForm.custo_max}
+                          onChange={e => setEditForm({ ...editForm, custo_max: e.target.value })}
+                          className="w-full bg-[#0A1628] border border-[#1B3A6B]/50 rounded px-3 py-2 text-sm text-white"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Classificação */}
               <div className="flex flex-wrap gap-2">
                 <Badge variant="blue">{mpSelecionada.categoria}</Badge>
