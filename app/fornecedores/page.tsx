@@ -21,7 +21,7 @@ export default function FornecedoresPage() {
     { src: '/Multi Chemie logo-01.webp', alt: 'Multi Chemie', url: 'https://www.multichemie.com.br/', scale: 'max-w-full' },
     { src: '/midland_v8-1 (1).png', alt: 'Midland Química', url: 'https://midland-quimica.com.br/', scale: 'max-w-full' },
     { src: '/logo_quimicaanastacio_g.png', alt: 'Anastácio', url: 'https://anastacio.com/', scale: 'max-w-full' },
-    { src: '/Royal marck images.png', alt: 'Quiminvest', url: 'http://www.quiminvest.com/', scale: 'max-w-full' },
+    { src: '/Royal marck images.png', alt: 'Royal Mark', url: 'https://www.royalmarck.com.br/', scale: 'max-w-full' },
     { src: '/Univar Solutions images.png', alt: 'Univar Solutions', url: 'https://discover.univarsolutions.com/pt-br/', scale: 'max-w-full' },
   ]
 
