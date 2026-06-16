@@ -1137,33 +1137,53 @@ export async function gerarSugestoesComplementares(formulacao: Record<string, un
     const descricao = String(formulacao.descricao_tecnica || '')
     const aplicacao = String(formulacao.nome_sugerido || '')
 
-    const prompt = `Você é um especialista em química formulada. Analisando esta fórmula, sugira 3-4 MPs DIFERENTES que potencializam o desempenho.
+    const prompt = `Você é um especialista em química formulada com profundo conhecimento de compatibilidade química.
 
-FÓRMULA ATUAL:
+FÓRMULA ATUAL PARA ANÁLISE MINUCIOSA:
 ${JSON.stringify(formulacao, null, 2)}
 
-MPs JÁ NA FÓRMULA (nunca sugerir estas):
+MPs JÁ NA FÓRMULA (NUNCA SUGERIR ESTAS):
 ${Array.from(mpsNaFormula).join(', ')}
 
 APLICAÇÃO: ${aplicacao}
 SEGMENTO: ${segmento}
 
-REGRAS CRÍTICAS:
-• As sugestões devem ser DIFERENTES das MPs atuais
-• Analisar a função dos componentes atuais
-• Sugerir MPs que façam SINERGIA QUÍMICA real
-• Para descarbonizante: solventes fortes (Tolueno, Xileno, TCE, Percloroetileno)
-• Cada sugestão com razão técnica clara
+ANÁLISE OBRIGATÓRIA (faça esta análise ANTES de sugerir):
+1. Identifique CADA componente da fórmula atual:
+   - Nome comercial
+   - Função técnica específica
+   - Percentual e faixa
+   - Propriedades químicas (polaridade, viscosidade, pKa, etc)
 
-RETORNAR JSON com campo:
+2. Identifique LACUNAS na fórmula:
+   - O que falta para melhorar penetração?
+   - O que falta para reduzir evaporação?
+   - O que falta para aumentar poder de limpeza/remoção?
+   - Há proteção anticorrosão/antideposição?
+   - Há estabilizadores de emulsão?
+
+3. Para CADA sugestão, justifique TECNICAMENTE:
+   - Por que ESPECIFICAMENTE esta MP?
+   - Como ela se comporta quimicamente com os solventes presentes?
+   - Qual propriedade específica ela adiciona?
+   - Como ela complementa (não duplica) o que já existe?
+
+SUGESTÕES DEVEM SER MINUCIOSAS:
+• Nome EXATO do banco técnico
+• Função ESPECÍFICA (não genérica)
+• BENEFÍCIO DETALHADO — como exatamente melhora a fórmula
+• COMPATIBILIDADE com análise de pH, polaridade, densidade
+• PERCENTUAL com justificativa (não chute)
+
+RETORNAR JSON:
 {
   "sugestoes_mps_complementares": [
     {
-      "materia_prima": "Nome exato",
-      "funcao": "Função técnica",
-      "beneficio": "Como potencializa",
-      "compatibilidade": "alta|media",
-      "percentual_sugerido": "X-Y%"
+      "materia_prima": "Nome exato do banco técnico",
+      "funcao": "Função específica (ex: solvente aromático forte, antievaporante, estabilizador de pH)",
+      "beneficio": "Análise minuciosa: por que potencializa (ex: aumenta poder solvente em carbonos pesados, reduz 18% de evaporação, melhora penetração em poros compactos)",
+      "compatibilidade": "alta|media (justifique: pH, polaridade, densidade, sinergias conhecidas)",
+      "percentual_sugerido": "X-Y% (justifique: baseado em relação com solventes presentes)"
     }
   ]
 }`
