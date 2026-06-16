@@ -1167,19 +1167,34 @@ SE O SOLVENTE PRINCIPAL TEM KB >100 (FORTE):
    - ORDENADOS por KB DESCENDENTE (maior primeiro)
    - NENHUM deles pode ser inferior a KB 200
 
-3️⃣ SELEÇÃO OBRIGATÓRIA - EXATAMENTE 1 DE CADA BLOCO:
+3️⃣ SELEÇÃO OBRIGATÓRIA - HIERARQUIA ADAPTATIVA POR SEGMENTO (EXATAMENTE 1 DE CADA BLOCO):
 
-   🥇 BLOCO 1 (Super Forte - KB >500):
-      Prioridade: Lactato de Etila (KB 1000) → Elsol NMPR (KB 600) → Tetrahidrofurano (KB 579)
-      ➜ Escolha o PRIMEIRO disponível no Brasil
+   ⚙️ IDENTIFIQUE O SEGMENTO (do tipo de produto ou descrição):
 
-   🥈 BLOCO 2 (Muito Forte - KB 300-500):
-      Prioridade: Metanol (KB 380) → DOWANOL DPM (KB 500) → DOWANOL PM (KB 500) → NMP (KB 350)
-      ➜ Escolha o PRIMEIRO disponível no Brasil
+   🏭 AUTOMOTIVO (Descarbonizantes, Desengraxantes, Limpeza Motor):
+      🥇 BLOCO 1 (Super Forte - KB >500): Lactato de Etila (1000) → Elsol NMPR (600) → Tetrahidrofurano (579)
+      🥈 BLOCO 2 (Muito Forte - KB 300-500): Metanol (380) → DOWANOL DPM (500) → DOWANOL PM (500) → NMP (350)
+      🥉 BLOCO 3 (Forte - KB 200-300): Propanol (250) → Isopropanol (230) → Butanol (225)
 
-   🥉 BLOCO 3 (Forte - KB 200-300):
-      Prioridade: Propanol (KB 250) → Isopropanol (KB 230) → Butanol (KB 225)
-      ➜ Escolha o PRIMEIRO disponível no Brasil
+   🧹 LIMPEZA GERAL (Multiusos, Limpadores Gerais, Desengraxantes leves):
+      🥇 BLOCO 1 (Forte - KB 200-300): Propanol (250) → Isopropanol (230) → Butanol (225) → Álcool Benzílico (200)
+      🥈 BLOCO 2 (Forte-Moderado - KB 100-200): Xileno (98) → Tolueno (105) → Acetona (106)
+      🥉 BLOCO 3 (Moderado - KB 50-100): d-Limoneno (67) → Acetato Etila (88) → TS28 (77)
+
+   🏥 SANEANTES (Sanitizantes, Desinfetantes):
+      🥇 BLOCO 1 (Forte - KB 200-300): Isopropanol (230) → Etanol (84) → Propanol (250)
+      🥈 BLOCO 2 (Moderado - KB 100-200): Xileno (98) → Acetato Etila (88)
+      🥉 BLOCO 3 (Moderado - KB 50-100): d-Limoneno (67) → TS28 (77)
+
+   🎨 TINTAS/VERNIZES (Redutores, Diluentes de Tinta):
+      🥇 BLOCO 1 (Forte - KB 200-300): Xileno (98) → Tolueno (105) → Propanol (250)
+      🥈 BLOCO 2 (Forte-Moderado - KB 100-200): Acetona (106) → Benzeno (107) → Acetato Etila (88)
+      🥉 BLOCO 3 (Moderado - KB 50-100): d-Limoneno (67) → Percloroetileno (90)
+
+   🌱 BIOSSOLVENTES/BIOLUBRIFICANTES:
+      🥇 BLOCO 1 (Moderado-Forte - KB 100-200): Tolueno (105) → Xileno (98) → d-Limoneno (67)
+      🥈 BLOCO 2 (Moderado - KB 50-100): Acetato Etila (88) → Rhodiasolv Iris (84.5) → TS28 (77)
+      🥉 BLOCO 3 (Moderado - KB >50): Aguarrás (37) → Nafta (34)
 
 4️⃣ CRITÉRIOS DE VALIDAÇÃO (aplicar em ordem):
    ✅ Compatibilidade química com solvente principal
