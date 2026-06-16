@@ -15,7 +15,7 @@ export default function FornecedoresPage() {
     { src: '/Caldic.png', alt: 'Caldic', url: 'https://www.caldic.com/pt-br/', scale: 'max-w-full' },
     { src: '/agroquimica-maringa-logo.webp', alt: 'AQM', url: 'https://aqm.com.br/', scale: 'max-w-full' },
     { src: '/rudnik_g.webp', alt: 'Rudnik', url: 'https://rudnik.com.br/', scale: 'max-w-full' },
-    { src: '/iqbcprodutosquimicos_cover.png', alt: 'IQBC', url: 'https://iqbc.com.br/', scale: 'w-full h-full' },
+    { src: '/iqbcprodutosquimicos_cover.png', alt: 'IQBC', url: 'https://iqbc.com.br/', scale: 'w-full h-full', large: true },
   ]
 
   return (
@@ -30,7 +30,7 @@ export default function FornecedoresPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {fornecedores.map(({ src, alt, url, scale }) => (
+          {fornecedores.map(({ src, alt, url, scale, large }) => (
             <a
               key={alt}
               href={url}
@@ -38,7 +38,7 @@ export default function FornecedoresPage() {
               rel="noopener noreferrer"
               className="group"
             >
-              <div className="w-full h-[180px] rounded-xl border border-[#1B3A6B]/60 bg-white flex items-center justify-center p-4 transition-all duration-300 hover:border-green-500/70 hover:shadow-lg hover:shadow-green-500/20 cursor-pointer"
+              <div className={`w-full ${large ? 'h-[240px]' : 'h-[180px]'} rounded-xl border border-[#1B3A6B]/60 bg-white flex items-center justify-center p-2 transition-all duration-300 hover:border-green-500/70 hover:shadow-lg hover:shadow-green-500/20 cursor-pointer`}
               >
                 <img src={src} alt={alt} className={`${scale} h-full object-contain`} />
               </div>
