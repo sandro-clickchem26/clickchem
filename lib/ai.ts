@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { jsonrepair } from 'jsonrepair'
-import { SYSTEM_PROMPT, buildFormulacaoPrompt, buildAnalisePrompt, buildTendenciasPrompt } from './prompts'
+import { SYSTEM_PROMPT, buildFormulacaoPrompt, buildAnalisePrompt, buildTendenciasPrompt, buildKBReferenceTable } from './prompts'
 import { prisma } from './db'
 import { buscarVariacoesMPs } from './buscar-variacoes'
 import fs from 'fs'
@@ -1136,6 +1136,7 @@ export async function gerarSugestoesComplementares(formulacao: Record<string, un
 
     const descricao = String(formulacao.descricao_tecnica || '')
     const aplicacao = String(formulacao.nome_sugerido || '')
+    const tabelaKB = buildKBReferenceTable()
 
     const prompt = `Você é um especialista em química formulada com profundo conhecimento de compatibilidade química.
 
@@ -1147,15 +1148,16 @@ ${Array.from(mpsNaFormula).join(', ')}
 
 APLICAÇÃO: ${aplicacao}
 SEGMENTO: ${segmento}
-
+${tabelaKB}
 ANÁLISE OBRIGATÓRIA USANDO KAURI-BUTANOL (faça esta análise ANTES de sugerir):
 
-REFERÊNCIA KAURI-BUTANOL:
-- Muito Forte (KB >150): DCM (160-200), Clorofórmio
-- Forte (KB 100-120): Tolueno (105-110), Xileno (100-105), Acetona (106-108)
-- Moderado (KB 50-100): Ésteres, alguns cetonas
-- Fraco (KB 20-50): Butilglicol (30-40), Álcoois (20-30), Etilenoglicol
-- Muito Fraco (KB <20): Água
+PROCEDIMENTO CRÍTICO:
+1. IDENTIFIQUE o solvente PRINCIPAL da fórmula e seu KB (use a tabela acima)
+2. ANALISE a FORÇA RELATIVA:
+   - Se solvente principal é FRACO (KB <50): ADICIONE solvente FORTE (KB >100)
+   - Se é FORTE (KB >100): complemente com solventes de FORÇA IGUAL/MAIOR ou agentes especializados
+   - NUNCA sugira solvente mais fraco para complementar um forte
+3. Para CADA sugestão, cite o KB e justifique a compatibilidade
 
 1. Identifique CADA componente da fórmula atual:
    - Nome comercial
