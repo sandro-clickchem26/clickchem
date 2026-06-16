@@ -67,11 +67,13 @@ export function SolventKBWidget({ sugestao, solventesPrincipais }: SolventKBWidg
   }
 
   // Se não é solvente, retorna componente simples
-  if (!solventData || solventData.type !== 'aromático' && solventData.type !== 'clorado' && solventData.type !== 'álcool' && solventData.type !== 'cetona' && solventData.type !== 'éster' && solventData.type !== 'glicol' && solventData.type !== 'outro' || solventData.kb === null) {
+  // Se não encontrou na base de dados OU não tem KB → renderiza versão simples (aditivos químicos)
+  if (!solventData || solventData.kb === null) {
     return (
       <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-3">
         <div className="text-green-400 font-semibold">{sugestao.materia_prima}</div>
         <div className="text-slate-400 text-sm mt-1">Função: {sugestao.funcao}</div>
+        <div className="text-slate-400 text-sm mt-1">{sugestao.beneficio}</div>
         <div className="text-slate-400 text-sm mt-1">Compatibilidade: <span className={`font-semibold ${sugestao.compatibilidade === 'alta' ? 'text-green-400' : sugestao.compatibilidade === 'media' ? 'text-yellow-400' : 'text-red-400'}`}>{sugestao.compatibilidade}</span></div>
       </div>
     )
