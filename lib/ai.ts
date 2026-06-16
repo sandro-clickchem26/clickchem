@@ -798,6 +798,7 @@ export async function gerarFormulacao(dados: Record<string, unknown>) {
     model: getModel(),
     max_tokens: 3000,
     temperature: 0.3,
+    cache_control: { type: "ephemeral" },
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
@@ -985,6 +986,7 @@ SE NÃO CONSEGUIR:
       model: getModel(),
       max_tokens: 6000,
       temperature: 0,
+      cache_control: { type: "ephemeral" },
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: ajustePrompt }],
     })
@@ -1127,6 +1129,7 @@ export async function analisarFormula(formula: Record<string, unknown>) {
     model: getModel(),
     max_tokens: 4096,
     temperature: 0,
+    cache_control: { type: "ephemeral" },
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
@@ -1481,6 +1484,7 @@ export async function analisarTendencias(segmento: string, tipo: string, descric
     model: getModel(),
     max_tokens: 4096,
     temperature: 0,
+    cache_control: { type: "ephemeral" },
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }],
   })
@@ -1523,6 +1527,7 @@ ${contexto}`
   const message = await getClient().messages.create({
     model: getModel(),
     max_tokens: 2048,
+    cache_control: { type: "ephemeral" },
     system: systemWithContext,
     messages: mensagens,
   })

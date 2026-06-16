@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { toxicidadeBadge } from '@/lib/utils'
 import { BookOpen, Search, X, Plus, UserCircle } from 'lucide-react'
 import { NovaMP } from '@/components/NovaMP'
+import { EditarMP } from '@/components/EditarMP'
 
 interface MP {
   id: string
@@ -56,6 +57,7 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
   const [mpSelecionada, setMpSelecionada] = useState<MP | null>(null)
   const [comparar, setComparar] = useState<string[]>([])
   const [showNovaMP, setShowNovaMP] = useState(false)
+  const [showEditarMP, setShowEditarMP] = useState(false)
 
   const mpsList = mps as unknown as MP[]
 
@@ -144,6 +146,16 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
           <div className="flex-1 bg-black/50" onClick={() => setShowNovaMP(false)} />
           <div className="w-full max-w-xl bg-[#0d1f3c] border-l border-[#1B3A6B]/60 flex flex-col overflow-hidden">
             <NovaMP onFechar={() => setShowNovaMP(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Drawer Editar MP */}
+      {showEditarMP && mpSelecionada && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="flex-1 bg-black/50" onClick={() => setShowEditarMP(false)} />
+          <div className="w-full max-w-xl bg-[#0d1f3c] border-l border-[#1B3A6B]/60 flex flex-col overflow-hidden">
+            <EditarMP mp={mpSelecionada} onFechar={() => { setShowEditarMP(false); setMpSelecionada(null) }} />
           </div>
         </div>
       )}
@@ -377,6 +389,12 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
                 {mpSelecionada.numero_cas && <p className="text-xs text-gray-500">CAS: {mpSelecionada.numero_cas}</p>}
               </div>
               <div className="flex gap-2">
+                <button
+                  onClick={() => setShowEditarMP(true)}
+                  className="text-blue-500 hover:text-blue-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-blue-500/10"
+                >
+                  ✏️ Editar
+                </button>
                 <button
                   onClick={() => excluirMP(mpSelecionada.id)}
                   className="text-red-500 hover:text-red-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-red-500/10"
