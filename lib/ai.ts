@@ -1125,7 +1125,7 @@ async function buildMPContextParaAnalise(formula: Record<string, unknown>): Prom
 export async function gerarSugestoesComplementares(formulacao: Record<string, unknown>, segmento: string) {
   try {
     // Segmentos que NÃO devem receber sugestões de MPs
-    const segmentosProibidos = ['Resinas', 'Polímeros', 'Resinas e Polímeros']
+    const segmentosProibidos = ['Resinas', 'Polímeros', 'Resinas e Polímeros', 'Cosmético']
     const segmentoBuscado = segmentosProibidos.find(s => segmento.includes(s))
     if (segmentoBuscado) {
       console.log(`[gerarSugestoesComplementares] ${segmento} não recebe sugestões de MPs`)
