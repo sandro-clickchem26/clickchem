@@ -1186,16 +1186,6 @@ SE O SOLVENTE PRINCIPAL TEM KB >100 (FORTE):
       🥈 BLOCO 2 (Moderado - KB 100-200): Xileno (98) → Acetato Etila (88)
       🥉 BLOCO 3 (Moderado - KB 50-100): d-Limoneno (67) → TS28 (77)
 
-   🎨 TINTAS/VERNIZES (Redutores, Diluentes de Tinta):
-      🥇 BLOCO 1 (Forte - KB 200-300): Xileno (98) → Tolueno (105) → Propanol (250)
-      🥈 BLOCO 2 (Forte-Moderado - KB 100-200): Acetona (106) → Benzeno (107) → Acetato Etila (88)
-      🥉 BLOCO 3 (Moderado - KB 50-100): d-Limoneno (67) → Percloroetileno (90)
-
-   🌱 BIOSSOLVENTES/BIOLUBRIFICANTES:
-      🥇 BLOCO 1 (Moderado-Forte - KB 100-200): Tolueno (105) → Xileno (98) → d-Limoneno (67)
-      🥈 BLOCO 2 (Moderado - KB 50-100): Acetato Etila (88) → Rhodiasolv Iris (84.5) → TS28 (77)
-      🥉 BLOCO 3 (Moderado - KB >50): Aguarrás (37) → Nafta (34)
-
 4️⃣ CRITÉRIOS DE VALIDAÇÃO (aplicar em ordem):
    ✅ Compatibilidade química com solvente principal
    ✅ Segurança operacional (ponto de ebulição, toxicidade)
