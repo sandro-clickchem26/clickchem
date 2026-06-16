@@ -1,351 +1,150 @@
 /**
- * Referência de Kauri-Butanol (KB) para solventes
- * Fonte: Base técnica de propriedades de solventes + Cloverdale Paint
+ * REFERÊNCIA OFICIAL DE KAURI-BUTANOL (KB)
+ * FONTE: Propriedades dos Solventes - Astana Química
+ * Atualizado: 2026-06-16
  *
- * KB classifica a força do solvente (capacidade de dissolução):
- * - KB >150: Muito Forte (DCM, Álcool Benzílico, DMSO)
- * - KB 100-150: Forte (Tolueno, Xileno, Acetona, TCE)
- * - KB 50-100: Moderado (Butilglicol, Ésteres)
- * - KB 20-50: Fraco (Álcoois, Glicóis)
- * - KB <20: Muito Fraco (Água)
+ * ⚠️ CRÍTICO: Esta é a ÚNICA fonte de verdade para sugestões de solventes.
+ * A IA DEVE usar APENAS solventes listados aqui com KB > 100 quando
+ * há solvente forte (KB > 100) já na fórmula.
  */
 
 export interface SolventKBData {
-  name: string;
-  commonNames?: string[];
-  kb: number | null;
-  category: "muito-forte" | "forte" | "moderado" | "fraco" | "muito-fraco";
-  type: "aromático" | "clorado" | "álcool" | "glicol" | "cetona" | "éster" | "outro";
-  notes?: string;
+  name: string
+  commonNames?: string[]
+  kb: number | null
+  category: "muito-forte" | "forte" | "moderado" | "fraco" | "muito-fraco"
+  type: "aromático" | "clorado" | "álcool" | "glicol" | "cetona" | "éster" | "outro"
+  notes?: string
 }
 
 export const SOLVENTS_KB_REFERENCE: Record<string, SolventKBData> = {
-  // ========== MUITO FORTE (KB >150) ==========
-  "alcohol-benzilic": {
-    name: "Álcool Benzílico",
-    kb: 200,
-    category: "muito-forte",
-    type: "outro",
-    notes: "Excelente poder de solvência, aplicação em vernizes e lacas"
-  },
-  "dcm": {
-    name: "Cloreto de Metileno (DCM)",
-    commonNames: ["Methylene Chloride"],
-    kb: 136,
-    category: "forte",
-    type: "clorado",
-    notes: "Solvente clorado muito agressivo, para limpeza e remoção"
-  },
-  "dmso": {
-    name: "DMSO (Dimetilsulfóxido)",
-    kb: 164,
-    category: "muito-forte",
-    type: "outro",
-    notes: "Excelente poder de dissolução, penetração profunda"
-  },
-  "dowanol-dpm": {
-    name: "DOWANOL DPM",
-    kb: 500,
-    category: "muito-forte",
-    type: "glicol",
-    notes: "Solvente extremamente forte, para aplicações especiais"
-  },
-  "dowanol-pm": {
-    name: "DOWANOL PM",
-    kb: 500,
-    category: "muito-forte",
-    type: "glicol",
-    notes: "Solvente extremamente forte, compatível com lacas"
-  },
-  "elsol-nmpr": {
-    name: "Elsol NMPR",
-    kb: 600,
-    category: "muito-forte",
-    type: "outro",
-    notes: "Solvente propriedade de alta solvência"
-  },
-  "nmp": {
-    name: "NMP (N-Metil Pirrolidona)",
-    kb: 350,
-    category: "muito-forte",
-    type: "outro",
-    notes: "Excelente para borrachas e polímeros"
-  },
-  "metanol": {
-    name: "Metanol",
-    kb: 380,
-    category: "muito-forte",
-    type: "álcool",
-    notes: "Álcool com excelente solvência, evaporação rápida"
-  },
-  "tetrahidrofurano": {
-    name: "Tetrahidrofurano (THF)",
-    kb: 579,
-    category: "muito-forte",
-    type: "outro",
-    notes: "Solvente EXTREMAMENTE forte, para lacas especiais"
-  },
+  // ========== SOLVENTES SUPER FORTES (KB >500) ==========
+  "elsol-nmpr": { name: "Elsol NMPR", kb: 600, category: "muito-forte", type: "outro", notes: "SOLVENTE EXTREMAMENTE FORTE" },
+  "tetrahidrofurano": { name: "Tetrahidrofurano", kb: 579, category: "muito-forte", type: "outro", notes: "SOLVENTE ULTRA FORTE KB >579" },
+  "lactato-etila": { name: "Lactato de Etila", kb: 1000, category: "muito-forte", type: "éster", notes: "SOLVENTE SUPER FORTE KB >1000" },
 
-  // ========== FORTE (KB 100-150) ==========
-  "tolueno": {
-    name: "Tolueno",
-    commonNames: ["Toluol"],
-    kb: 105,
-    category: "forte",
-    type: "aromático",
-    notes: "Solvente aromático, excelente para enamels e primers"
-  },
-  "xileno": {
-    name: "Xileno",
-    commonNames: ["Xilol"],
-    kb: 98,
-    category: "forte",
-    type: "aromático",
-    notes: "Solvente aromático similar ao tolueno, uso industrial"
-  },
-  "acetona": {
-    name: "Acetona",
-    kb: 106,
-    category: "forte",
-    type: "cetona",
-    notes: "Cetona com alto poder de dissolução, evaporação muito rápida"
-  },
-  "tce": {
-    name: "Tricloroetileno (TCE)",
-    commonNames: ["Tricloroethylene"],
-    kb: 129,
-    category: "forte",
-    type: "clorado",
-    notes: "Solvente clorado forte, para limpeza profunda"
-  },
-  "mibk": {
-    name: "MIBK (Metil Isobutil Cetona)",
-    kb: 146,
-    category: "forte",
-    type: "cetona",
-    notes: "Cetona para aplicações de alto desempenho"
-  },
-  "butanol": {
-    name: "Butanol",
-    commonNames: ["n-Butanol"],
-    kb: 225,
-    category: "muito-forte",
-    type: "álcool",
-    notes: "Álcool com poder de solvência elevado"
-  },
-  "isopropanol": {
-    name: "Isopropanol (IPA)",
-    commonNames: ["2-Propanol"],
-    kb: 230,
-    category: "muito-forte",
-    type: "álcool",
-    notes: "Álcool com boa solvência, evaporação moderada"
-  },
-  "propanol": {
-    name: "Propanol",
-    commonNames: ["n-Propanol"],
-    kb: 250,
-    category: "muito-forte",
-    type: "álcool",
-    notes: "Álcool com poder de solvência bom"
-  },
-  "benzeno": {
-    name: "Benzeno",
-    kb: 107,
-    category: "forte",
-    type: "aromático",
-    notes: "Solvente aromático (uso histórico, restrito)"
-  },
-  "brometo-n-propila": {
-    name: "Brometo de n-Propila",
-    kb: 125,
-    category: "forte",
-    type: "outro",
-    notes: "Solvente halogenado para lacas"
-  },
+  // ========== SOLVENTES MUITO FORTES (KB 300-500) ==========
+  "dowanol-dpm": { name: "DOWANOL DPM", kb: 500, category: "muito-forte", type: "glicol", notes: "Extremamente forte" },
+  "dowanol-pm": { name: "DOWANOL PM", kb: 500, category: "muito-forte", type: "glicol", notes: "Extremamente forte" },
+  "nmp": { name: "NMP (N-Metil Pirrolidona)", kb: 350, category: "muito-forte", type: "outro", notes: "Muito forte - excelente para polímeros" },
+  "metanol": { name: "Metanol", kb: 380, category: "muito-forte", type: "álcool", notes: "Muito forte" },
 
-  // ========== MODERADO (KB 50-100) ==========
-  "dbe": {
-    name: "DBE (Dibasic Ester)",
-    kb: null,
-    category: "moderado",
-    type: "éster",
-    notes: "Éster com poder moderado, para lacas"
-  },
-  "eep": {
-    name: "EEP (2-Etoxietil Acetato)",
-    kb: null,
-    category: "moderado",
-    type: "éster",
-    notes: "Éster com evaporação lenta"
-  },
-  "percloroetileno": {
-    name: "Percloroetileno (PERC)",
-    kb: 90,
-    category: "moderado",
-    type: "clorado",
-    notes: "Solvente clorado, limpeza a seco"
-  },
-  "d-limoneno": {
-    name: "d-Limoneno",
-    kb: 67,
-    category: "moderado",
-    type: "outro",
-    notes: "Solvente natural, para desengordurante"
-  },
-  "ts28": {
-    name: "TS28 (Thinner)",
-    kb: 77,
-    category: "moderado",
-    type: "outro",
-    notes: "Solvente industrial moderado"
-  },
-  "xylene-naphtha": {
-    name: "Xileno/Nafta (mistura)",
-    kb: 68,
-    category: "moderado",
-    type: "aromático",
-    notes: "Mistura aromática/alifática"
-  },
+  // ========== SOLVENTES FORTES (KB 200-300) ==========
+  "butanol": { name: "Butanol", kb: 225, category: "muito-forte", type: "álcool", notes: "Forte" },
+  "isopropanol": { name: "Isopropanol (IPA)", kb: 230, category: "muito-forte", type: "álcool", notes: "Forte" },
+  "propanol": { name: "Propanol", kb: 250, category: "muito-forte", type: "álcool", notes: "Forte" },
+  "alcohol-benzilic": { name: "Álcool Benzílico", kb: 200, category: "muito-forte", type: "outro", notes: "Muito forte" },
+  "butanol-sec": { name: "2-Butanol (sec-Butanol)", kb: 195, category: "forte", type: "álcool", notes: "Forte" },
 
-  // ========== FRACO (KB 20-50) ==========
-  "butilglicol": {
-    name: "Butilglicol",
-    commonNames: ["Butil Glicol", "2-Butoxietanol"],
-    kb: null,
-    category: "fraco",
-    type: "glicol",
-    notes: "Glicol fraco, agente de penetração e emulsificante"
-  },
-  "etanol": {
-    name: "Etanol",
-    commonNames: ["Álcool Etílico"],
-    kb: 84.2,
-    category: "fraco",
-    type: "álcool",
-    notes: "Álcool com solvência moderada"
-  },
-  "nafta": {
-    name: "Nafta",
-    kb: 34,
-    category: "fraco",
-    type: "aromático",
-    notes: "Hidrocarboneto alifático, evaporação muito rápida"
-  },
-  "querosene": {
-    name: "Querosene",
-    kb: 34,
-    category: "fraco",
-    type: "aromático",
-    notes: "Solvente alifático leve"
-  },
-  "mineral-spirits": {
-    name: "Mineral Spirits",
-    kb: 37,
-    category: "fraco",
-    type: "aromático",
-    notes: "Solvente destilado, para tintas arquitetônicas"
-  },
-  "mineral-spirits-low-odor": {
-    name: "Low Odour Mineral Spirits",
-    kb: 32.5,
-    category: "fraco",
-    type: "aromático",
-    notes: "Mineral spirits com odor reduzido"
-  },
-  "petroleum-naphtha": {
-    name: "Petroleum Naphtha",
-    kb: 38,
-    category: "fraco",
-    type: "aromático",
-    notes: "Nafta de petróleo, evaporação muito rápida"
-  },
-  "solvente-borracha": {
-    name: "Solvente para Borracha",
-    kb: 28,
-    category: "fraco",
-    type: "aromático",
-    notes: "Solvente específico para borrachas"
-  },
-  "aguarras": {
-    name: "Aguarrás (Turpentine)",
-    kb: 37,
-    category: "fraco",
-    type: "aromático",
-    notes: "Solvente natural de resinas"
-  },
-  "propilenoglicol": {
-    name: "Propilenoglicol",
-    kb: null,
-    category: "fraco",
-    type: "glicol",
-    notes: "Glicol com solvência baixa, agente penetrador"
-  },
-  "etilenoglicol": {
-    name: "Etilenoglicol",
-    kb: null,
-    category: "fraco",
-    type: "glicol",
-    notes: "Glicol com solvência muito baixa"
-  },
+  // ========== SOLVENTES FORTE-MODERADOS (KB 100-200) ==========
+  "dcm": { name: "Cloreto de Metileno (DCM)", commonNames: ["Dichloromethane"], kb: 136, category: "forte", type: "clorado", notes: "Forte" },
+  "dmso": { name: "DMSO", kb: 164, category: "muito-forte", type: "outro", notes: "Forte" },
+  "tce": { name: "Tricloroetileno (TCE)", kb: 129, category: "forte", type: "clorado", notes: "Forte" },
+  "brometo-n-propila": { name: "Brometo de n-Propila", kb: 125, category: "forte", type: "outro", notes: "Forte" },
+  "mibk": { name: "MIBK", kb: 146, category: "forte", type: "cetona", notes: "Forte" },
+  "tolueno": { name: "Tolueno", commonNames: ["Toluol"], kb: 105, category: "forte", type: "aromático", notes: "Forte classico" },
+  "benzeno": { name: "Benzeno", kb: 107, category: "forte", type: "aromático", notes: "Forte" },
+  "acetona": { name: "Acetona", kb: 106, category: "forte", type: "cetona", notes: "Forte" },
+  "xileno": { name: "Xileno", commonNames: ["Xilol"], kb: 98, category: "forte", type: "aromático", notes: "Moderado-forte" },
 
-  // ========== MUITO FRACO (KB <20) ==========
-  "agua": {
-    name: "Água",
-    kb: 0,
-    category: "muito-fraco",
-    type: "outro",
-    notes: "Não é solvente para a maioria das aplicações químicas"
-  }
-};
+  // ========== SOLVENTES MODERADOS (KB 50-100) ==========
+  "ab-10": { name: "AB-10", kb: 90, category: "moderado", type: "outro", notes: "Moderado" },
+  "ab-9": { name: "AB-9", kb: 92, category: "moderado", type: "outro", notes: "Moderado" },
+  "percloroetileno": { name: "Percloroetileno (PERC)", kb: 90, category: "moderado", type: "clorado", notes: "Moderado" },
+  "acetato-etila": { name: "Acetato de Etila", kb: 88, category: "forte", type: "éster", notes: "Moderado-forte" },
+  "etanol": { name: "Etanol", kb: 84.2, category: "fraco", type: "álcool", notes: "Fraco-moderado" },
+  "rhodiasolv-iris": { name: "Rhodiasolv Iris", kb: 84.5, category: "moderado", type: "outro", notes: "Moderado" },
+  "d-limoneno": { name: "d-Limoneno", kb: 67, category: "moderado", type: "outro", notes: "Moderado natural" },
+  "ts28": { name: "TS28", kb: 77, category: "moderado", type: "outro", notes: "Moderado industrial" },
+  "xylene-naphtha": { name: "Xileno/Nafta", kb: 68, category: "moderado", type: "aromático", notes: "Moderado mistura" },
 
-/**
- * Classifica a força do solvente baseado no KB
- */
-export function getSolventStrengthCategory(kb: number | null): string {
-  if (kb === null) return "desconhecido";
-  if (kb > 150) return "muito-forte";
-  if (kb >= 100) return "forte";
-  if (kb >= 50) return "moderado";
-  if (kb >= 20) return "fraco";
-  return "muito-fraco";
+  // ========== SOLVENTES FRACOS (KB 20-50) - PROIBIDOS COM SOLVENTES FORTES
+  "aguarras": { name: "Aguarrás", kb: 37, category: "fraco", type: "aromático", notes: "❌ FRACO - PROIBIDO COM FORTE" },
+  "nafta": { name: "Nafta", kb: 34, category: "fraco", type: "aromático", notes: "❌ FRACO - PROIBIDO COM FORTE" },
+  "petroleum-naphtha": { name: "Petroleum Naphtha", kb: 38, category: "fraco", type: "aromático", notes: "❌ FRACO - PROIBIDO COM FORTE" },
+  "mineral-spirits": { name: "Mineral Spirits", kb: 37, category: "fraco", type: "aromático", notes: "❌ FRACO - PROIBIDO COM FORTE" },
+  "querosene": { name: "Querosene", kb: 34, category: "fraco", type: "aromático", notes: "❌ FRACO - PROIBIDO" },
+  "solvente-borracha": { name: "Solvente para Borracha", kb: 28, category: "fraco", type: "aromático", notes: "❌ FRACO - PROIBIDO" },
+
+  // ========== SOLVENTES MUY FRACOS (KB <20) - SEMPRE PROIBIDOS
+  "butilglicol": { name: "Butilglicol", kb: null, category: "fraco", type: "glicol", notes: "❌ FRACO - ABSOLUTAMENTE PROIBIDO" },
+  "propilenoglicol": { name: "Propilenoglicol", kb: null, category: "fraco", type: "glicol", notes: "❌ FRACO - PROIBIDO" },
+  "etilenoglicol": { name: "Etilenoglicol", kb: null, category: "fraco", type: "glicol", notes: "❌ FRACO - PROIBIDO" },
+  "agua": { name: "Água", kb: 0, category: "muito-fraco", type: "outro", notes: "Não é solvente" }
 }
 
 /**
- * Retorna solventes fortes (KB > 100) que podem complementar um solvente fraco
+ * VALIDAÇÃO CRÍTICA: Se há solvente forte (KB >100), APENAS estes são permitidos
  */
-export function getStrongSolvents(): SolventKBData[] {
-  return Object.values(SOLVENTS_KB_REFERENCE)
-    .filter(s => s.kb !== null && s.kb > 100)
-    .sort((a, b) => (b.kb as number) - (a.kb as number));
+export const APPROVED_SOLVENTS_FOR_STRONG = [
+  "elsol-nmpr", "tetrahidrofurano", "lactato-etila",
+  "dowanol-dpm", "dowanol-pm", "nmp", "metanol",
+  "butanol", "isopropanol", "propanol", "alcohol-benzilic", "butanol-sec",
+  "dcm", "dmso", "tce", "brometo-n-propila", "mibk",
+  "tolueno", "benzeno", "acetona"
+]
+
+/**
+ * SOLVENTES ABSOLUTAMENTE PROIBIDOS quando há solvente forte
+ */
+export const BANNED_SOLVENTS_WITH_STRONG = [
+  "butilglicol", "nafta", "petroleum-naphtha", "mineral-spirits",
+  "aguarras", "querosene", "solvente-borracha",
+  "propilenoglicol", "etilenoglicol"
+]
+
+/**
+ * VALIDAÇÃO OBRIGATÓRIA: Verifica se solvente pode ser sugerido com solvente forte
+ */
+export function isSolventApprovedForStrong(solventName: string, mainSolventKB: number | null): boolean {
+  if (!mainSolventKB || mainSolventKB <= 100) return true // Sem restrição se não há solvente forte
+
+  const lowerName = solventName.toLowerCase()
+  const isBanned = BANNED_SOLVENTS_WITH_STRONG.some(s =>
+    lowerName.includes(s) ||
+    Object.values(SOLVENTS_KB_REFERENCE).some(sv =>
+      sv.name.toLowerCase() === lowerName && BANNED_SOLVENTS_WITH_STRONG.includes(s)
+    )
+  )
+
+  return !isBanned // Retorna true se NÃO está na lista de banidos
 }
 
 /**
- * Retorna solventes fracos (KB < 50) que podem ser agentes penetradores
+ * LISTA para IA consultar: Solventes recomendados quando há solvente forte
  */
-export function getWeakSolvents(): SolventKBData[] {
-  return Object.values(SOLVENTS_KB_REFERENCE)
-    .filter(s => s.kb !== null && s.kb < 50)
-    .sort((a, b) => (b.kb as number) - (a.kb as number));
-}
+export function getApprovedSolventsTable(): string {
+  return `
+TABELA OFICIAL DE SOLVENTES APROVADOS (KB > 100 - Uso obrigatório com solvente forte existente):
+- Elsol NMPR (KB 600) ✅
+- Tetrahidrofurano (KB 579) ✅
+- Lactato de Etila (KB 1000) ✅
+- DOWANOL DPM (KB 500) ✅
+- DOWANOL PM (KB 500) ✅
+- NMP (KB 350) ✅
+- Metanol (KB 380) ✅
+- Butanol (KB 225) ✅
+- Isopropanol (KB 230) ✅
+- Propanol (KB 250) ✅
+- Álcool Benzílico (KB 200) ✅
+- 2-Butanol (KB 195) ✅
+- Cloreto de Metileno DCM (KB 136) ✅
+- DMSO (KB 164) ✅
+- Tricloroetileno TCE (KB 129) ✅
+- Brometo de n-Propila (KB 125) ✅
+- MIBK (KB 146) ✅
+- Tolueno (KB 105) ✅
+- Benzeno (KB 107) ✅
+- Acetona (KB 106) ✅
 
-/**
- * Procura um solvente pela base de dados
- */
-export function findSolvent(query: string): SolventKBData | null {
-  const lower = query.toLowerCase();
-
-  // Procura por nome exato
-  const found = Object.values(SOLVENTS_KB_REFERENCE).find(
-    s => s.name.toLowerCase() === lower ||
-         s.commonNames?.some(cn => cn.toLowerCase() === lower)
-  );
-
-  if (found) return found;
-
-  // Procura por nome parcial
-  return Object.values(SOLVENTS_KB_REFERENCE).find(
-    s => s.name.toLowerCase().includes(lower) ||
-         s.commonNames?.some(cn => cn.toLowerCase().includes(lower))
-  ) || null;
+SOLVENTES ABSOLUTAMENTE PROIBIDOS com solvente forte (KB >100):
+❌ Butilglicol (KB ~30) - NÃO USE
+❌ Nafta (KB 34) - NÃO USE
+❌ Mineral Spirits (KB 37) - NÃO USE
+❌ Aguarrás (KB 37) - NÃO USE
+❌ Petroleum Naphtha (KB 38) - NÃO USE
+❌ Querosene (KB 34) - NÃO USE
+❌ Propilenoglicol - NÃO USE
+❌ Etilenoglicol - NÃO USE
+`
 }
