@@ -1149,15 +1149,29 @@ ${Array.from(mpsNaFormula).join(', ')}
 APLICAÇÃO: ${aplicacao}
 SEGMENTO: ${segmento}
 ${tabelaKB}
-ANÁLISE OBRIGATÓRIA USANDO KAURI-BUTANOL (faça esta análise ANTES de sugerir):
+⚠️ ANÁLISE OBRIGATÓRIA USANDO KAURI-BUTANOL (CRÍTICO - FAÇA ANTES DE SUGERIR):
 
-PROCEDIMENTO CRÍTICO:
-1. IDENTIFIQUE o solvente PRINCIPAL da fórmula e seu KB (use a tabela acima)
-2. ANALISE a FORÇA RELATIVA:
-   - Se solvente principal é FRACO (KB <50): ADICIONE solvente FORTE (KB >100)
-   - Se é FORTE (KB >100): complemente com solventes de FORÇA IGUAL/MAIOR ou agentes especializados
-   - NUNCA sugira solvente mais fraco para complementar um forte
-3. Para CADA sugestão, cite o KB e justifique a compatibilidade
+REGRA ABSOLUTA - NÃO PODE SER VIOLADA:
+SE O SOLVENTE PRINCIPAL TEM KB >100 (FORTE):
+  🚫 PROIBIDO SUGERIR SOLVENTES COM KB <50 (FRACOS)
+  ✅ PERMITIDO SUGERIR: Solventes com KB >100 (fortes) OU agentes não-solventes (antievaporantes, penetradores)
+
+PROCEDIMENTO OBRIGATÓRIO:
+1. IDENTIFIQUE EXATAMENTE o solvente PRINCIPAL da fórmula e seu KB (Cloreto de Metileno KB=136, Tolueno KB=105, etc)
+2. SE KB DO PRINCIPAL > 100 (FORTE):
+   - LISTA DE SOLVENTES PROIBIDOS PARA SUGERIR (nunca adicione estes):
+     ❌ Butilglicol (KB 30-40) — PROIBIDO
+     ❌ Álcoois: Etanol (KB 84), Isopropanol (KB 230 EXCEPTIONALLY), Metanol, Propanol (se KB <100) — PROIBIDO
+     ❌ Glicóis fracos: Etilenoglicol, Propilenoglicol — PROIBIDO
+     ❌ Nafta (KB 34-38) — PROIBIDO
+     ❌ Mineral Spirits (KB 32-37) — PROIBIDO
+   - LISTA DE SOLVENTES PERMITIDOS PARA SUGERIR (use apenas estes se KB >100):
+     ✅ Tolueno (KB 105), Xileno (KB 98-100), Benzeno (KB 107)
+     ✅ DCM (KB 136), TCE (KB 129), Percloroetileno (KB 90)
+     ✅ Acetona (KB 106), Butanol (KB 225), Isopropanol (KB 230)
+     ✅ Metanol (KB 380), NMP (KB 350), Tetrahidrofurano (KB 579)
+3. SE QUER SUGERIR ALGO QUE NÃO SOLVENTE: use penetradores, antievaporantes, estabilizadores (não solventes)
+4. Para CADA sugestão, JUSTIFIQUE COM KB: "Nome (KB XX) — Força forte complementa solvente principal (KB YY)"
 
 1. Identifique CADA componente da fórmula atual:
    - Nome comercial
