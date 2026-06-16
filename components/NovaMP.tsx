@@ -175,6 +175,13 @@ export function NovaMP({ onFechar }: { onFechar: () => void }) {
       setErro('Nome comercial é obrigatório.')
       return
     }
+
+    // Verificar duplicidade antes de salvar
+    if (jaDuplicada) {
+      setErro('Esta matéria-prima já existe no banco. Não é possível adicionar duplicatas.')
+      return
+    }
+
     setSalvando(true)
     setErro(null)
 
