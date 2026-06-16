@@ -1167,11 +1167,19 @@ SE O SOLVENTE PRINCIPAL TEM KB >100 (FORTE):
    - ORDENADOS por KB DESCENDENTE (maior primeiro)
    - NENHUM deles pode ser inferior a KB 200
 
-3️⃣ LISTA OBRIGATÓRIA - USE APENAS ESTES 3:
+3️⃣ SELEÇÃO OBRIGATÓRIA - EXATAMENTE 1 DE CADA BLOCO:
 
-   🥇 PRIMEIRA (se disponível): Lactato de Etila (KB 1000), Elsol NMPR (KB 600), ou Tetrahidrofurano (KB 579)
-   🥈 SEGUNDA (se disponível): Metanol (KB 380), DOWANOL DPM/PM (KB 500), ou NMP (KB 350)
-   🥉 TERCEIRA (se disponível): Propanol (KB 250), Isopropanol (KB 230), Butanol (KB 225), ou Álcool Benzílico (KB 200)
+   🥇 BLOCO 1 (Super Forte - KB >500):
+      Prioridade: Lactato de Etila (KB 1000) → Elsol NMPR (KB 600) → Tetrahidrofurano (KB 579)
+      ➜ Escolha o PRIMEIRO disponível no Brasil
+
+   🥈 BLOCO 2 (Muito Forte - KB 300-500):
+      Prioridade: Metanol (KB 380) → DOWANOL DPM (KB 500) → DOWANOL PM (KB 500) → NMP (KB 350)
+      ➜ Escolha o PRIMEIRO disponível no Brasil
+
+   🥉 BLOCO 3 (Forte - KB 200-300):
+      Prioridade: Propanol (KB 250) → Isopropanol (KB 230) → Butanol (KB 225)
+      ➜ Escolha o PRIMEIRO disponível no Brasil
 
 4️⃣ CRITÉRIOS DE VALIDAÇÃO (aplicar em ordem):
    ✅ Compatibilidade química com solvente principal
