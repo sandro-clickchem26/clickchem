@@ -176,14 +176,22 @@ export function NovaMP({ onFechar }: { onFechar: () => void }) {
       return
     }
 
-    // Verificar duplicidade antes de salvar
-    if (jaDuplicada) {
-      setErro('Esta matéria-prima já existe no banco. Não é possível adicionar duplicatas.')
-      return
-    }
-
     setSalvando(true)
     setErro(null)
+
+    // Verificar duplicidade diretamente na API antes de salvar
+    try {
+      const checkRes = await fetch(`/api/materias-primas?nome=${encodeURIComponent(form.nome_comercial.trim())}`)
+      const checkData = await checkRes.json()
+      if (checkData.exists) {
+        setErro('⚠️ Esta matéria-prima já existe no banco. Não é possível adicionar duplicatas.')
+        setSalvando(false)
+        return
+      }
+    } catch (e) {
+      console.warn('Erro ao verificar duplicidade:', e)
+      // Continua mesmo com erro na verificação
+    }
 
     const payload = {
       ...form,
