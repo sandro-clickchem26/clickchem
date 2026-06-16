@@ -1171,7 +1171,11 @@ PROCEDIMENTO OBRIGATÓRIO:
      ✅ Acetona (KB 106), Butanol (KB 225), Isopropanol (KB 230)
      ✅ Metanol (KB 380), NMP (KB 350), Tetrahidrofurano (KB 579)
 3. SE QUER SUGERIR ALGO QUE NÃO SOLVENTE: use penetradores, antievaporantes, estabilizadores (não solventes)
-4. Para CADA sugestão, JUSTIFIQUE COM KB: "Nome (KB XX) — Força forte complementa solvente principal (KB YY)"
+4. PRIORIZAÇÃO OBRIGATÓRIA DE SUGESTÕES:
+   - SE há múltiplos solventes: ORDENE por KB DESCENDENTE (maior KB primeiro)
+   - Exemplo: NMP (KB 350) ANTES de Álcool Benzílico (KB 200)
+   - JUSTIFIQUE a ordem: "Prioridade: NMP é mais forte (KB 350) para melhor descarbonização"
+5. Para CADA sugestão, JUSTIFIQUE COM KB: "Nome (KB XX) — Força forte complementa solvente principal (KB YY)"
 
 1. Identifique CADA componente da fórmula atual:
    - Nome comercial
