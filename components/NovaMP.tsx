@@ -118,10 +118,26 @@ export function NovaMP({ onFechar }: { onFechar: () => void }) {
       return
     }
     try {
-      const res = await fetch(`/api/materias-primas?nome=${encodeURIComponent(nome)}`, { method: 'GET' })
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000)
+
+      const res = await fetch(`/api/materias-primas?nome=${encodeURIComponent(nome)}`, {
+        method: 'GET',
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+
+      if (!res.ok) {
+        console.warn('Erro na verificação de duplicidade:', res.status)
+        setJaDuplicada(false)
+        return
+      }
+
       const data = await res.json()
+      console.log('Duplicidade check:', { nome, exists: data.exists })
       setJaDuplicada(!!data.exists)
-    } catch {
+    } catch (err) {
+      console.warn('Erro ao verificar duplicidade:', err)
       setJaDuplicada(false)
     }
   }
