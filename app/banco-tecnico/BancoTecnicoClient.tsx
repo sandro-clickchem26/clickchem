@@ -75,6 +75,18 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
     )
   }
 
+  async function excluirMP(id: string) {
+    if (!confirm('Tem certeza que deseja excluir esta matéria-prima?')) return
+    try {
+      const res = await fetch(`/api/materias-primas/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Erro ao excluir')
+      setMpSelecionada(null)
+      location.reload()
+    } catch (e) {
+      alert('Erro ao excluir: ' + (e instanceof Error ? e.message : 'Desconhecido'))
+    }
+  }
+
   const mpParaComparar = mpsList.filter(mp => comparar.includes(mp.id))
 
   return (
@@ -364,12 +376,22 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
                 <p className="text-sm text-gray-400">{mpSelecionada.nome_quimico}</p>
                 {mpSelecionada.numero_cas && <p className="text-xs text-gray-500">CAS: {mpSelecionada.numero_cas}</p>}
               </div>
-              <button
-                onClick={() => setMpSelecionada(null)}
-                className="text-gray-500 hover:text-white transition-colors mt-1"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex gap-2">
+                {(mpSelecionada as unknown as { adicionada_usuario?: boolean }).adicionada_usuario && (
+                  <button
+                    onClick={() => excluirMP(mpSelecionada.id)}
+                    className="text-red-500 hover:text-red-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-red-500/10"
+                  >
+                    🗑️ Excluir
+                  </button>
+                )}
+                <button
+                  onClick={() => setMpSelecionada(null)}
+                  className="text-gray-500 hover:text-white transition-colors mt-1"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             <div className="px-6 py-5 space-y-5">
