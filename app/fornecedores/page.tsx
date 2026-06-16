@@ -40,7 +40,7 @@ export default function FornecedoresPage() {
             >
               <div className="w-full h-[180px] rounded-xl border border-[#1B3A6B]/60 bg-white flex items-center justify-center p-4 transition-all duration-300 hover:border-green-500/70 hover:shadow-lg hover:shadow-green-500/20 cursor-pointer"
               >
-                <img src={src} alt={alt} className={`${large ? 'scale-125' : scale} h-full object-contain`} />
+                <img src={src} alt={alt} className={`${large ? 'scale-110' : scale} h-full object-contain`} />
               </div>
               <p className="text-center text-gray-400 text-sm mt-2 group-hover:text-green-400 transition-colors">
                 {alt}
