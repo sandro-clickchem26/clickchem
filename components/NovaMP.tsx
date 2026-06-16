@@ -102,10 +102,28 @@ export function NovaMP({ onFechar }: { onFechar: () => void }) {
   const [arquivoNome, setArquivoNome] = useState('')
   const [extraido, setExtraido] = useState(false)
   const [dragging, setDragging] = useState(false)
+  const [jaDuplicada, setJaDuplicada] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   function set(field: keyof MPForm, value: string) {
     setForm(prev => ({ ...prev, [field]: value }))
+    if (field === 'nome_comercial') {
+      verificarDuplicidade(value)
+    }
+  }
+
+  async function verificarDuplicidade(nome: string) {
+    if (!nome.trim()) {
+      setJaDuplicada(false)
+      return
+    }
+    try {
+      const res = await fetch(`/api/materias-primas?nome=${encodeURIComponent(nome)}`, { method: 'GET' })
+      const data = await res.json()
+      setJaDuplicada(!!data.exists)
+    } catch {
+      setJaDuplicada(false)
+    }
   }
 
   async function processarBoletim(file: File) {
@@ -236,11 +254,19 @@ export function NovaMP({ onFechar }: { onFechar: () => void }) {
           </div>
           <button
             onClick={salvar}
-            disabled={salvando}
+            disabled={salvando || jaDuplicada}
             className="w-full py-2.5 rounded-xl bg-[#D4A017] hover:bg-[#b88a14] disabled:opacity-50 text-[#0A1628] font-bold text-sm flex items-center justify-center gap-2 transition-colors"
           >
-            {salvando ? 'Salvando...' : '✓ Confirmar e Adicionar ao Banco Técnico'}
+            {salvando ? 'Salvando...' : jaDuplicada ? '⚠️ Duplicada — não é possível salvar' : '✓ Confirmar e Adicionar ao Banco Técnico'}
           </button>
+        </div>
+      )}
+
+      {/* Alerta de duplicidade */}
+      {jaDuplicada && (
+        <div className="mx-6 mt-3 p-3 bg-yellow-500/15 border border-yellow-500/30 rounded-xl flex gap-2 shrink-0">
+          <AlertCircle size={14} className="text-yellow-400 shrink-0 mt-0.5" />
+          <p className="text-yellow-400 text-sm font-medium">⚠️ Esta matéria-prima já existe no banco. Verifique antes de salvar.</p>
         </div>
       )}
 

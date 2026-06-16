@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
+export async function GET(req: NextRequest) {
+  try {
+    const nome = req.nextUrl.searchParams.get('nome')
+    if (!nome) {
+      return NextResponse.json({ exists: false })
+    }
+
+    const mp = await prisma.materiaPrima.findFirst({
+      where: {
+        nome_comercial: {
+          equals: nome,
+          mode: 'insensitive'
+        }
+      }
+    })
+
+    return NextResponse.json({ exists: !!mp })
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Erro interno' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
