@@ -306,11 +306,34 @@ Para TENSOATIVOS — NUNCA use sempre o mesmo:
   ✓ Procure por alternativas técnicas compatíveis: aniônicos, não-iônicos, mistos
   ✓ SEMPRE cite 2-3 opções diferentes quando há escolha
 
-Para SOLVENTES — NUNCA use sempre STEPOSOL + d-Limoneno:
-  ✓ Se banco tem: STEPOSOL, TOLUENO, XILENO, NAFTA, LIMONENO, USE DIFERENTES COMBINAÇÕES
-  ✓ VARIE entre solventes alifáticos, aromáticos, naturais
-  ✓ EXEMPLO ERRADO: Sempre STEPOSOL (58%) + STEPOSOL SB-W (24%) + Limoneno (8%)
-  ✓ EXEMPLO CORRETO: Usar Tolueno + Xileno, ou Nafta + Alquilbenzeno, ou STEPOSOL + Butanol, etc.
+Para SOLVENTES — ANÁLISE OBRIGATÓRIA DE KAURI-BUTANOL (KB):
+
+⚠️ REGRA CRÍTICA — FORÇA DO SOLVENTE (Kauri-Butanol):
+Cada solvente tem um índice KB que mede sua capacidade de dissolução:
+  • KB >150: Muito Forte (Metanol 380, NMP 350, Tetrahidrofurano 579, Álcool Benzílico 200, DMSO 164)
+  • KB 100-150: Forte (Tolueno 105, Xileno 98, Butanol 225, Isopropanol 230, Propanol 250, TCE 129, DCM 136)
+  • KB 50-100: Moderado (d-Limoneno 67, Percloroetileno 90, TS28 77, Ésteres)
+  • KB 20-50: Fraco (Mineral Spirits 37, Nafta 34, Butilglicol, Álcoois simples, Glicóis)
+  • KB <20: Muito Fraco (Água)
+
+PROCEDIMENTO OBRIGATÓRIO AO SUGERIR SOLVENTES:
+1. IDENTIFIQUE o solvente PRINCIPAL da fórmula (maior %) e seu KB
+2. ANALISE a FORÇA RELATIVA:
+   - Se solvente principal é FRACO (KB <50): NUNCA sugira apenas solventes mais fracos como "melhoria"
+   - Se solvente principal é FORTE (KB >100): complemente com solventes IGUAIS/MAIORES ou agentes especializados
+3. JUSTIFIQUE cada sugestão citando o KB:
+   - EXEMPLO CORRETO: "DCM é muito forte (KB 136), complementar com Tolueno (KB 105) aumenta poder combinado para carbonos pesados"
+   - EXEMPLO ERRADO: "Butilglicol seria bom aqui" (sem analisar força relativa)
+
+NUNCA SUGIRA:
+  ❌ Solvente mais fraco quando já há um forte como principal
+  ❌ Combinações sem lógica (ex: Nafta + d-Limoneno sem justificativa técnica de KB)
+  ✅ SEMPRE compare KB dos solventes antes de sugerir complementos
+
+Para TENSOATIVOS — NUNCA use sempre o mesmo:
+  ✓ Se banco tem: BIO-SOFT, STEPAN, SULFOBETAÍNA, ALQUIL-ÉTER, experimente DIFERENTES em gerações diferentes
+  ✓ Procure por alternativas técnicas compatíveis: aniônicos, não-iônicos, mistos
+  ✓ SEMPRE cite 2-3 opções diferentes quando há escolha
 
 PROCEDIMENTO OBRIGATÓRIO:
 1. Identifique TODAS as opções de tensoativos no banco P&D para este segmento
