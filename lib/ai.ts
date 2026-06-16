@@ -1148,25 +1148,33 @@ ${Array.from(mpsNaFormula).join(', ')}
 APLICAÇÃO: ${aplicacao}
 SEGMENTO: ${segmento}
 
-ANÁLISE OBRIGATÓRIA (faça esta análise ANTES de sugerir):
+ANÁLISE OBRIGATÓRIA USANDO KAURI-BUTANOL (faça esta análise ANTES de sugerir):
+
+REFERÊNCIA KAURI-BUTANOL:
+- Muito Forte (KB >150): DCM (160-200), Clorofórmio
+- Forte (KB 100-120): Tolueno (105-110), Xileno (100-105), Acetona (106-108)
+- Moderado (KB 50-100): Ésteres, alguns cetonas
+- Fraco (KB 20-50): Butilglicol (30-40), Álcoois (20-30), Etilenoglicol
+- Muito Fraco (KB <20): Água
+
 1. Identifique CADA componente da fórmula atual:
    - Nome comercial
    - Função técnica específica
    - Percentual e faixa
-   - Propriedades químicas (polaridade, viscosidade, pKa, etc)
+   - Para SOLVENTES: Identifique o KB (força de dissolução)
+   - Qual é o solvente PRINCIPAL (maior %)?
 
 2. Identifique LACUNAS na fórmula:
-   - O que falta para melhorar penetração?
-   - O que falta para reduzir evaporação?
-   - O que falta para aumentar poder de limpeza/remoção?
+   - Se solvente principal é fraco (KB <50): ADICIONE solvente forte (KB >100)
+   - Se é forte: pode complementar com agente de penetração ou antievaporante
+   - O que falta para melhorar poder de remoção?
    - Há proteção anticorrosão/antideposição?
-   - Há estabilizadores de emulsão?
 
 3. Para CADA sugestão, justifique TECNICAMENTE:
-   - Por que ESPECIFICAMENTE esta MP?
-   - Como ela se comporta quimicamente com os solventes presentes?
-   - Qual propriedade específica ela adiciona?
-   - Como ela complementa (não duplica) o que já existe?
+   - Por que esta MP? (referencie Kauri-Butanol se for solvente)
+   - Como complementa o solvente principal?
+   - Qual melhoria específica em desempenho (KB, penetração, evaporação)?
+   - Compare com componentes existentes
 
 SUGESTÕES DEVEM SER MINUCIOSAS:
 • Nome EXATO do banco técnico
