@@ -1156,23 +1156,38 @@ SE O SOLVENTE PRINCIPAL TEM KB >100 (FORTE):
   🚫 PROIBIDO SUGERIR SOLVENTES COM KB <50 (FRACOS)
   ✅ PERMITIDO SUGERIR: Solventes com KB >100 (fortes) OU agentes não-solventes (antievaporantes, penetradores)
 
-PROCEDIMENTO OBRIGATÓRIO:
-1. IDENTIFIQUE EXATAMENTE o solvente PRINCIPAL da fórmula e seu KB (Cloreto de Metileno KB=136, Tolueno KB=105, etc)
-2. SE KB DO PRINCIPAL > 100 (FORTE):
-   - ⚠️ REGRA CRÍTICA: ANALISE USANDO 3 CRITÉRIOS (nesta ordem):
-     1️⃣ COMPATIBILIDADE QUÍMICA: O solvente é compatível com componentes já presentes?
-     2️⃣ SEGURANÇA OPERACIONAL: Ponto de ebulição, toxicidade, manuseio são apropriados?
-     3️⃣ DISPONIBILIDADE NO BRASIL: É comercialmente disponível no mercado brasileiro?
+⚠️ PROCEDIMENTO OBRIGATÓRIO - NÃO PODE SER VIOLADO:
 
-   - ⚠️ HIERARQUIA DE SOLVENTES (use como guideline, mas respeite os 3 critérios acima):
-     🥇 PRIMEIRA ESCOLHA (KB >500): Lactato de Etila (KB 1000), Elsol NMPR (KB 600), Tetrahidrofurano (KB 579)
-     🥈 SEGUNDA ESCOLHA (KB 300-500): DOWANOL DPM (KB 500), DOWANOL PM (KB 500), NMP (KB 350), Metanol (KB 380)
-     🥉 TERCEIRA ESCOLHA (KB 200-300): Propanol (KB 250), Isopropanol (KB 230), Butanol (KB 225), Álcool Benzílico (KB 200)
+1️⃣ IDENTIFIQUE o solvente PRINCIPAL e seu KB
+   Exemplo: Cloreto de Metileno = KB 136
 
-   - 📋 PARA CADA SUGESTÃO, JUSTIFIQUE:
-     • Compatibilidade: Por que é compatível com a fórmula atual?
-     • Segurança: Qual a temperatura de ebulição? Toxicidade?
-     • Disponibilidade: É disponível no Brasil? Qual fornecedor?
+2️⃣ SE KB PRINCIPAL > 100:
+   🔴 REGRA ABSOLUTA: GERE EXATAMENTE 3 SUGESTÕES DE SOLVENTES FORTES
+   - Cada um DEVE ter KB > 200
+   - ORDENADOS por KB DESCENDENTE (maior primeiro)
+   - NENHUM deles pode ser inferior a KB 200
+
+3️⃣ LISTA OBRIGATÓRIA - USE APENAS ESTES 3:
+
+   🥇 PRIMEIRA (se disponível): Lactato de Etila (KB 1000), Elsol NMPR (KB 600), ou Tetrahidrofurano (KB 579)
+   🥈 SEGUNDA (se disponível): Metanol (KB 380), DOWANOL DPM/PM (KB 500), ou NMP (KB 350)
+   🥉 TERCEIRA (se disponível): Propanol (KB 250), Isopropanol (KB 230), Butanol (KB 225), ou Álcool Benzílico (KB 200)
+
+4️⃣ CRITÉRIOS DE VALIDAÇÃO (aplicar em ordem):
+   ✅ Compatibilidade química com solvente principal
+   ✅ Segurança operacional (ponto de ebulição, toxicidade)
+   ✅ Disponibilidade no Brasil
+
+5️⃣ RESTRIÇÕES ABSOLUTAS:
+   ❌ NÃO SUGIRA: Butilglicol, Nafta, Mineral Spirits, Aguarrás, STPP, ou qualquer aditivo químico
+   ❌ NÃO INCLUA: Aditivos, sequastradores, antievaporantes (SOMENTE solventes fortes KB > 200)
+   ❌ QUANTIDADE: SEMPRE 3 solventes, NUNCA menos
+
+6️⃣ PARA CADA SUGESTÃO, JUSTIFIQUE:
+   • Nome: X (KB XXX)
+   • Compatibilidade: Por que é compatível com DCM (ou solvente principal)?
+   • Segurança: Ponto de ebulição? Toxicidade? Manuseio?
+   • Disponibilidade: Disponível no Brasil? Fornecedor?
 
    - LISTA DE SOLVENTES PROIBIDOS (NUNCA):
      ❌ Butilglicol (KB ~30) — ABSOLUTAMENTE PROIBIDO
