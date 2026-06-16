@@ -538,12 +538,18 @@ ${contextoMPs ? `\n${contextoMPs}` : ''}
   ]
 }
 
-IMPORTANTE: Campo "sugestoes_mps_complementares" deve ter 3-4 MPs ADICIONAIS (NÃO na fórmula):
+IMPORTANTE: Campo "sugestoes_mps_complementares" deve ter 3-4 MPs COMPLEMENTARES (NÃO na fórmula):
 • Gere a fórmula principal normalmente (sem as sugestões)
-• As sugestões são MPs QUE NÃO estão na fórmula atual
-• Essas MPs podem ser ADICIONADAS opcionalmente pelo usuário
+• Analise a APLICAÇÃO específica (ex: descarbonizante, limpador, etc)
+• Analise os COMPONENTES atuais e suas funções
+• Sugira APENAS MPs que fazem SENTIDO QUÍMICO para potencializar:
+  - Para descarbonizante: solventes fortes compatíveis, antievaporantes, promotores de penetração
+  - Para limpador: tensoativos COMPATÍVEIS, aditivos que aumentem poder de limpeza
+  - Para cada aplicação: pense na sinergia química, não em genéricos
+• NUNCA sugira MPs que já estão na fórmula
+• NUNCA sugira MPs fracas quando fortes são necessárias
 • Use APENAS MPs do banco técnico — cite pelo nome exato
-• Nunca inclua as sugestões na composição final da fórmula
+• Cada sugestão deve ter RAZÃO TÉCNICA clara no benefício
 `
 }
 
