@@ -1207,8 +1207,8 @@ RETORNAR JSON:
     })
 
     const text = message.content[0].type === 'text' ? message.content[0].text : ''
-    const resultado = extractJSON(text)
-    return resultado.sugestoes_mps_complementares || []
+    const resultado = extractJSON(text) as Record<string, unknown>
+    return (resultado.sugestoes_mps_complementares as Array<Record<string, unknown>>) || []
   } catch (err) {
     console.warn('[gerarSugestoesComplementares] Erro:', err)
     return []
@@ -1235,7 +1235,7 @@ export async function analisarFormula(formula: Record<string, unknown>) {
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  const resultado = extractJSON(text)
+  const resultado = extractJSON(text) as Record<string, unknown>
 
   // Gera sugestões em paralelo (FASE 2)
   const sugestoesPromise = gerarSugestoesComplementares(formula.formulacao as Record<string, unknown> || {}, segmento)
