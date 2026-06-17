@@ -5,7 +5,7 @@ import { BookOpen } from 'lucide-react'
 export default function FornecedoresPage() {
   const fornecedores = [
     { src: '/aboissa-squareLogo-1694197826320.webp', alt: 'Aboissa', url: 'https://www.aboissa.com.br/', scale: 'max-w-full' },
-    { src: '/Additiva.png', alt: 'Additiva', url: 'https://www.additiva.com.br/', scale: 'max-w-full' },
+    { src: '/logo Additiva.png', alt: 'Additiva', url: 'https://www.additiva.com.br/', scale: 'max-w-full' },
     { src: '/almad_logo.jpg', alt: 'Almad', url: 'https://www.almad.com.br/home', scale: 'max-w-full' },
     { src: '/logo_boraquimica_g.webp', alt: 'Boraquímica', url: 'https://boraquimica.com.br/', scale: 'max-w-full' },
     { src: '/Logo_Chemix_mv2_d_1650_1650_s_2.jpg', alt: 'Chemix', url: 'https://www.chemix.com.br/', scale: 'max-w-full' },
