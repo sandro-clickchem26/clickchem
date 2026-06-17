@@ -37,6 +37,8 @@ export default function FornecedoresPage() {
     { src: '/daffer_quimica_ltda_05134913.webp', alt: 'Daffer', url: 'https://www.daffer.com.br/index.html', scale: 'max-w-full' },
     { src: '/logo_dierberger_v1-1024x262.png', alt: 'Dierberger', url: 'https://www.dierberger.com.br/', scale: 'max-w-full' },
     { src: '/Logo_Dinaco_Vertical-01-692024_3508-2481-0-0.png', alt: 'Dinaco', url: 'https://dinaco.com.br/', scale: 'max-w-full' },
+    { src: '/Logo_itupeva-industrial-ltda-og.jpg', alt: 'Itupeva Industrial', url: 'https://itupevaindustrial.com.br/', scale: 'max-w-full' },
+    { src: '/Logo-Norquima-Update.svg', alt: 'Norquima', url: 'https://norquima.com.br/', scale: 'max-w-full' },
   ]
 
   return (
