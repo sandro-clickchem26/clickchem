@@ -97,7 +97,7 @@ export function Sidebar({ mobileOpen = false, onClose }: Props) {
             )}
           >
             <Lock size={14} />
-            P&D Proprietário
+            Banco P&D
           </Link>
           <Link
             href="/configuracoes"

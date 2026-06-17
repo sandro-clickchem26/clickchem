@@ -72,7 +72,7 @@ Se houver DOCUMENTAÇÃO CIENTÍFICA FORNECIDA:
 Se houver BASE TÉCNICA P&D:
    - Verifique compatibilidade técnica das referências internas fornecidas no contexto
    - SE compatível: gere uma SUGESTÃO FORMULATIVA DERIVADA — NUNCA copie a original
-   - Preencha: "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa derivada." e "formula_referencia": null
+   - Preencha: "fonte": "Fonte técnica: Banco PP&D ProprietárioD — sugestão formulativa derivada." e "formula_referencia": null
 
 Se houver REFERÊNCIAS EXTERNAS (internet):
    - Use apenas se "pesquisa_internet_ativa: true"
@@ -377,7 +377,7 @@ NUNCA retorne uma composição que some mais ou menos que 100,0%.
 Retorne APENAS JSON válido (sem markdown):
 
 {
-  "fonte": "USE EXATAMENTE UM DESTES VALORES: 'Fonte técnica: P&D Proprietário — sugestão formulativa derivada.' ou 'Busca Externa Técnica'",
+  "fonte": "USE EXATAMENTE UM DESTES VALORES: 'Fonte técnica: Banco PP&D ProprietárioD — sugestão formulativa derivada.' ou 'Busca Externa Técnica'",
   "formula_referencia": null,
   "analise_critica": {
     "viabilidade": "alta|media|baixa|nao_encontrada",

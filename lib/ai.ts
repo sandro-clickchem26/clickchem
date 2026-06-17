@@ -215,7 +215,7 @@ INSTRUÇÕES OBRIGATÓRIAS:
   Escolha a fórmula acima que MELHOR atende o pedido do usuário.
   Use EXATAMENTE os ingredientes dessa fórmula (ajuste percentuais ±10-15%).
   NUNCA copie percentuais exatos — refine tecnicamente.
-  "fonte": "Fonte técnica: P&D Proprietário — sugestão formulativa refinada."
+  "fonte": "Fonte técnica: Banco PP&D ProprietárioD — sugestão formulativa refinada."
   Informe o número da fórmula escolhida (1, 2, 3...) no campo "formula_base_usada_indice".
 
 ✅ VARIAÇÕES ALTERNATIVAS (campo "variacoes_alternativas") — OBRIGATÓRIO:
@@ -1030,7 +1030,7 @@ SE NÃO CONSEGUIR:
     if (isBiosolventes) {
       r.fonte = 'Fonte técnica: Artigos Científicos (banco interno) — sugestão formulativa derivada.'
     } else if (proprietaryResult.hasFormulas) {
-      r.fonte = 'Fonte técnica: P&D Proprietário — sugestão formulativa derivada.'
+      r.fonte = 'Fonte técnica: Banco PP&D ProprietárioD — sugestão formulativa derivada.'
     } else if (webContext) {
       r.fonte = 'Fonte técnica: Busca Externa (internet) — sugestão formulativa derivada.'
     }

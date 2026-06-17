@@ -95,13 +95,13 @@ export function FormulacaoResult({ data, onSalvar, onRelatorio, onRefinar }: For
           {fonte && (
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${
-                fonte.includes('P&D Proprietário')
+                fonte.includes('Banco PP&D ProprietárioD')
                   ? 'bg-blue-500/15 border-blue-500/40 text-blue-300'
                   : fonte.includes('Busca Externa')
                   ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
                   : 'bg-gray-500/15 border-gray-500/40 text-gray-400'
               }`}>
-                {fonte.includes('P&D Proprietário') ? '🏭' : fonte.includes('Busca Externa') ? '🌐' : '📋'}
+                {fonte.includes('Banco PP&D ProprietárioD') ? '🏭' : fonte.includes('Busca Externa') ? '🌐' : '📋'}
                 {' '}{fonte}
               </span>
               {formulaReferencia && formulaReferencia !== 'null' && (
