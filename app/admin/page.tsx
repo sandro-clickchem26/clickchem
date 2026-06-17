@@ -56,7 +56,7 @@ function Login({ onLogin }: { onLogin: (pin: string) => void }) {
           <div className="w-16 h-16 bg-[#D4A017]/15 border border-[#D4A017]/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Lock size={28} className="text-[#D4A017]" />
           </div>
-          <h1 className="text-xl font-bold text-white">P&D Proprietário</h1>
+          <h1 className="text-xl font-bold text-white">Banco P&D</h1>
           <p className="text-gray-500 text-sm mt-1">Banco de Fórmulas Confidenciais</p>
         </div>
         <Card>
@@ -1321,7 +1321,7 @@ export default function AdminPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white flex items-center gap-3">
           <Lock className="text-[#D4A017]" size={22} />
-          P&D Proprietário — Banco de Fórmulas
+          Banco P&D — Banco de Fórmulas
         </h1>
         <p className="text-gray-500 text-sm mt-1">
           Área confidencial · A IA usa estas fórmulas como referência interna · Nunca serão reveladas aos usuários
