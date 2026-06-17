@@ -4,16 +4,7 @@ import { BookOpen } from 'lucide-react'
 
 export default function FornecedoresPage() {
   const fornecedores = [
-    { src: '/aboissa-squareLogo-1694197826320.webp', alt: 'Aboissa', url: 'https://www.aboissa.com.br/', scale: 'max-w-full' },
-    { src: '/logo Additiva.png', alt: 'Additiva', url: 'https://www.additiva.com.br/', scale: 'max-w-full' },
-    { src: '/almad_logo.jpg', alt: 'Almad', url: 'https://www.almad.com.br/home', scale: 'max-w-full' },
-    { src: '/logo_boraquimica_g.webp', alt: 'Boraquímica', url: 'https://boraquimica.com.br/', scale: 'max-w-full' },
-    { src: '/Logo_Chemix_mv2_d_1650_1650_s_2.jpg', alt: 'Chemix', url: 'https://www.chemix.com.br/', scale: 'max-w-full' },
-    { src: '/logo-cisol.png', alt: 'Cisol', url: 'https://www.cisol.com/', scale: 'max-w-full' },
-    { src: '/LOGO_CITOL20250529112958.png', alt: 'Citol', url: 'https://citol.com.br/', scale: 'max-w-full' },
-    { src: '/daffer_quimica_ltda_05134913.webp', alt: 'Daffer', url: 'https://www.daffer.com.br/index.html', scale: 'max-w-full' },
-    { src: '/logo_dierberger_v1-1024x262.png', alt: 'Dierberger', url: 'https://www.dierberger.com.br/', scale: 'max-w-full' },
-    { src: '/Logo_Dinaco_Vertical-01-692024_3508-2481-0-0.png', alt: 'Dinaco', url: 'https://dinaco.com.br/', scale: 'max-w-full' },
+    // Fornecedores originais — sempre por primeiro
     { src: '/Novo-logo-Sinproquim-vertical.webp', alt: 'Sinproquim', url: 'https://sinproquim.org.br/', scale: 'max-w-full' },
     { src: '/araguaya_g.webp', alt: 'Química Araguaya', url: 'https://araguaya.com.br/', scale: 'max-w-full' },
     { src: '/cropped-Marca-Saber-Quimica-945x945px-cor-1.png', alt: 'Saber Química', url: 'https://www.saberquimica.com.br/', scale: 'max-w-full' },
@@ -34,6 +25,18 @@ export default function FornecedoresPage() {
     { src: '/Quiminvest unnamed.jpg', alt: 'Quiminvest', url: 'http://www.quiminvest.com/', scale: 'max-w-full' },
     { src: '/Royal marck images.png', alt: 'Royal Mark', url: 'https://www.royalmarck.com.br/', scale: 'max-w-full' },
     { src: '/Univar Solutions images.png', alt: 'Univar Solutions', url: 'https://discover.univarsolutions.com/pt-br/', scale: 'max-w-full' },
+
+    // Fornecedores novos — sempre por último
+    { src: '/aboissa-squareLogo-1694197826320.webp', alt: 'Aboissa', url: 'https://www.aboissa.com.br/', scale: 'max-w-full' },
+    { src: '/logo Additiva.png', alt: 'Additiva', url: 'https://www.additiva.com.br/', scale: 'max-w-full' },
+    { src: '/almad_logo.jpg', alt: 'Almad', url: 'https://www.almad.com.br/home', scale: 'max-w-full' },
+    { src: '/logo_boraquimica_g.webp', alt: 'Boraquímica', url: 'https://boraquimica.com.br/', scale: 'max-w-full' },
+    { src: '/Logo_Chemix_mv2_d_1650_1650_s_2.jpg', alt: 'Chemix', url: 'https://www.chemix.com.br/', scale: 'max-w-full' },
+    { src: '/logo-cisol.png', alt: 'Cisol', url: 'https://www.cisol.com/', scale: 'max-w-full' },
+    { src: '/LOGO_CITOL20250529112958.png', alt: 'Citol', url: 'https://citol.com.br/', scale: 'max-w-full' },
+    { src: '/daffer_quimica_ltda_05134913.webp', alt: 'Daffer', url: 'https://www.daffer.com.br/index.html', scale: 'max-w-full' },
+    { src: '/logo_dierberger_v1-1024x262.png', alt: 'Dierberger', url: 'https://www.dierberger.com.br/', scale: 'max-w-full' },
+    { src: '/Logo_Dinaco_Vertical-01-692024_3508-2481-0-0.png', alt: 'Dinaco', url: 'https://dinaco.com.br/', scale: 'max-w-full' },
   ]
 
   return (
