@@ -40,6 +40,9 @@ export default function FornecedoresPage() {
     { src: '/Logo_Dinaco_Vertical-01-692024_3508-2481-0-0.png', alt: 'Dinaco', url: 'https://dinaco.com.br/', scale: 'max-w-full' },
     { src: '/Logo_itupeva-industrial-ltda-og.jpg', alt: 'Itupeva Industrial', url: 'https://itupevaindustrial.com.br/', scale: 'max-w-full' },
     { src: '/Logo-Norquima-Update.svg', alt: 'Norquima', url: 'https://norquima.com.br/', scale: 'max-w-full' },
+    { src: '/Logo_Ouro Branco Minérios_images.png', alt: 'Ouro Branco', url: 'https://www.ourobranco.com.br/', scale: 'max-w-full' },
+    { src: '/Quimesp-logo-955x720-1.webp', alt: 'Quimesp', url: 'https://www.quimesp.com.br/', scale: 'max-w-full' },
+    { src: '/logo_quinari.png', alt: 'Quinari', url: 'https://www.quinari.com.br/', scale: 'max-w-full' },
   ]
 
   return (
