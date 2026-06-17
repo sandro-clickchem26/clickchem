@@ -6,7 +6,14 @@ import { prisma } from '@/lib/db'
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    const userId = (session?.user as { id?: string })?.id ?? null
+    if (!session) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+    }
+
+    const userId = (session?.user as { id?: string })?.id
+    if (!userId) {
+      return NextResponse.json({ error: 'Usuário inválido' }, { status: 401 })
+    }
 
     const formulacoes = await prisma.formulacao.findMany({
       where: { userId },
