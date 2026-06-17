@@ -6,9 +6,9 @@ export default function FornecedoresPage() {
   const fornecedores = [
     // Fornecedores originais — sempre por primeiro
     { src: '/Novo-logo-Sinproquim-vertical.webp', alt: 'Sinproquim', url: 'https://sinproquim.org.br/', scale: 'max-w-full' },
-    { src: '/araguaya_g.webp', alt: 'Química Araguaya', url: 'https://araguaya.com.br/', scale: 'max-w-full' },
     { src: '/cropped-Marca-Saber-Quimica-945x945px-cor-1.png', alt: 'Saber Química', url: 'https://www.saberquimica.com.br/', scale: 'max-w-full' },
     { src: '/logo-carbon_chemicals-google.png', alt: 'Carbon&Chemicals', url: 'https://www.carbonchemicals.com.br/', scale: 'max-w-full' },
+    { src: '/araguaya_g.webp', alt: 'Química Araguaya', url: 'https://araguaya.com.br/', scale: 'max-w-full' },
     { src: '/Logo-Carbono-Quimica-sem-Slogan-1024x848.png', alt: 'Carbono Química', url: 'https://carbono.com.br/', scale: 'max-w-full' },
     { src: '/Brenntag_Logo_2022.svg.png', alt: 'Brenntag', url: 'https://www.brenntag.com/pt-br/', scale: 'max-w-full' },
     { src: '/Bandeirante Brazmo.png', alt: 'Bandeirante Brazmo', url: 'https://www.bandeirantebrazmo.com.br/', scale: 'max-w-full' },
