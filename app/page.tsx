@@ -1,13 +1,20 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { FlaskConical, Microscope, BookOpen, TrendingUp, FileText, ArrowRight, Archive } from 'lucide-react'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 async function getStats() {
   try {
     const { prisma } = await import('@/lib/db')
+    const session = await getServerSession(authOptions)
+    const userId = (session?.user as { id?: string })?.id
+
     const [totalMPs, totalFormulacoes] = await Promise.all([
       prisma.materiaPrima.count(),
-      prisma.formulacao.count(),
+      prisma.formulacao.count({
+        where: userId ? { userId } : undefined,
+      }),
     ])
     return { totalMPs, totalFormulacoes }
   } catch {
