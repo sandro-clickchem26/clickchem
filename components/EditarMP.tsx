@@ -11,7 +11,7 @@ const CATEGORIAS = [
   'Solventes', 'Tensoativos Aniônicos', 'Tensoativos Não-iônicos',
   'Tensoativos Catiônicos', 'Tensoativos Anfóteros', 'Espessantes',
   'Sequestrantes', 'Neutralizantes', 'Conservantes', 'Inibidores de Corrosão',
-  'Resinas', 'Biossolventes', 'Antiespumantes', 'Emulsificantes', 'Outros',
+  'Resinas', 'Biossolventes', 'Antiespumantes', 'Emulsificantes', 'Dispersante', 'Umectante', 'Outros',
 ].map(c => ({ value: c, label: c }))
 
 const TOXICIDADES = [
