@@ -82,7 +82,7 @@ Retorne APENAS este JSON (sem texto fora do JSON):
   "nome_comercial": "nome comercial exato do produto",
   "nome_quimico": "nome IUPAC ou químico",
   "numero_cas": "número CAS (apenas números e hífens, sem texto extra)",
-  "categoria": "categoria principal: Solventes | Tensoativos Aniônicos | Tensoativos Não-iônicos | Tensoativos Catiônicos | Tensoativos Anfóteros | Espessantes | Sequestrantes | Neutralizantes | Conservantes | Inibidores de Corrosão | Resinas | Biossolventes | Antiespumantes | Emulsificantes | Umectante | Dispersante | Outros",
+  "categoria": "categoria principal: Solventes | Tensoativos Aniônicos | Tensoativos Não-iônicos | Tensoativos Catiônicos | Tensoativos Anfóteros | Espessantes | Sequestrantes | Neutralizantes | Conservantes | Dispersante | Umectante | Inibidores de Corrosão | Resinas | Biossolventes | Antiespumantes | Emulsificantes | Outros",
   "subcategoria": "subcategoria mais específica",
   "funcao_principal": "função principal em formulações",
   "faixa_uso_tipica": "faixa de uso típica em % (ex: 1-5%)",
