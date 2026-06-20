@@ -71,7 +71,7 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
       const matchTox = !toxicidadeFiltro || mp.nivel_toxicidade === toxicidadeFiltro
       const matchOrigem = !origemFiltro || mp.origem === origemFiltro
       return matchBusca && matchTox && matchOrigem
-    })
+    }).sort((a, b) => a.nome_comercial.localeCompare(b.nome_comercial))
   }, [mpsList, busca, toxicidadeFiltro, origemFiltro])
 
   function toggleComparar(id: string) {
