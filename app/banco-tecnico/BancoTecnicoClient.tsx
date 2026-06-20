@@ -59,7 +59,7 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
   const [comparar, setComparar] = useState<string[]>([])
   const [showNovaMP, setShowNovaMP] = useState(false)
   const [editMode, setEditMode] = useState(false)
-  const [editForm, setEditForm] = useState({ custo_min: '', custo_max: '', nivel_toxicidade: '' })
+  const [editForm, setEditForm] = useState({ custo_min: '', custo_max: '', nivel_toxicidade: '', categoria: '' })
   const [salvandoEdicao, setSalvandoEdicao] = useState(false)
 
   const mpsList = mps as unknown as MP[]
@@ -88,6 +88,7 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
       if (editForm.custo_min) payload.custo_min = parseFloat(editForm.custo_min)
       if (editForm.custo_max) payload.custo_max = parseFloat(editForm.custo_max)
       if (editForm.nivel_toxicidade) payload.nivel_toxicidade = editForm.nivel_toxicidade
+      if (editForm.categoria) payload.categoria = editForm.categoria
 
       const res = await fetch(`/api/materias-primas/${mpSelecionada.id}`, {
         method: 'PUT',
@@ -417,6 +418,7 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
                           custo_min: mpSelecionada.custo_min ? String(mpSelecionada.custo_min) : '',
                           custo_max: mpSelecionada.custo_max ? String(mpSelecionada.custo_max) : '',
                           nivel_toxicidade: mpSelecionada.nivel_toxicidade || '',
+                          categoria: mpSelecionada.categoria || '',
                         })
                       }}
                       className="text-blue-500 hover:text-blue-400 transition-colors px-2 py-1 rounded text-xs font-medium hover:bg-blue-500/10"
@@ -466,6 +468,19 @@ export default function BancoTecnicoClient({ mps, categorias, categoriaAtiva }: 
                 <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
                   <p className="text-xs font-bold text-blue-400 uppercase tracking-wide mb-3">Editar Matéria-Prima</p>
                   <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Categoria</label>
+                      <select
+                        value={editForm.categoria}
+                        onChange={e => setEditForm({ ...editForm, categoria: e.target.value })}
+                        className="w-full bg-[#0A1628] border border-[#1B3A6B]/50 rounded px-3 py-2 text-sm text-white"
+                      >
+                        <option value="">Selecione uma categoria</option>
+                        {categorias.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </div>
                     <div>
                       <label className="text-xs text-gray-400 mb-1 block">Toxicidade</label>
                       <select
